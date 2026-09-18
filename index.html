@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deep Boring Works — Estimate</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font:13px/1.45 Arial,"Helvetica Neue",Helvetica,sans-serif;background:#f4f4f4;color:#000}
+h1,h2,h3,h4{margin:0 0 .35em;line-height:1.25;font-weight:700}
+h1{font-size:15px}h2{font-size:14px}h3{font-size:13px}h4{font-size:12px}p{margin:.25em 0}
+.top-bar{border-bottom:1px solid #000;padding:10px 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:#fff}
+.top-bar .title-wrap h1{font-size:15px;margin:0}.top-bar .title-wrap p{font-size:11px;color:#444;margin:0}
+.top-actions{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;padding:5px 11px;border:1px solid #000;background:#fff;color:#000;cursor:pointer}
+button:hover{background:#f2f2f2}button.primary{font-weight:700}
+button.mini{padding:3px 8px;font-size:11px}
+.tabs{display:flex;flex-wrap:wrap;background:#fff;padding:0 18px;border-bottom:1px solid #000}
+.tabs button{border:none;border-bottom:2px solid transparent;background:transparent;padding:9px 14px;font-weight:600;color:#444;cursor:pointer;border-radius:0}
+.tabs button.active{color:#000;border-bottom-color:#000}
+main{padding:18px;max-width:1300px;margin:0 auto}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.card{border:1px solid #bbb;padding:14px 16px;margin-bottom:14px;background:#fff}
+.card > h2{border-bottom:1px solid #ccc;padding-bottom:6px;margin-bottom:10px;font-size:13px}
+.hint{font-size:11px;color:#555;margin-bottom:10px}
+.grid{display:grid;gap:10px}
+.grid.c2{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.grid.c3{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.grid.c4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:11px;font-weight:700;color:#333}
+label.f input,label.f select{font:inherit;font-weight:400;padding:5px 7px;border:1px solid #999;background:#fff;width:100%;font-size:12px;color:#000}
+label.f input:focus,label.f select:focus{outline:1px solid #000}
+label.f input[readonly]{background:#f4f4f4}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:4px 7px;border:1px solid #999;text-align:left;vertical-align:middle}
+thead th{background:#fff;font-weight:700;font-size:11px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+input.c{width:100%;padding:3px 6px;border:1px solid #999;font:inherit;font-size:12px;text-align:right;background:#fff}
+input.c:focus{outline:1px solid #000}
+select.c{width:100%;padding:3px 6px;border:1px solid #999;font:inherit;font-size:12px;background:#fff}
+select.c:focus{outline:1px solid #000}
+.table-wrap{overflow-x:auto}
+details.machine{border:1px solid #bbb;margin-bottom:8px;background:#fff}
+details.machine > summary{cursor:pointer;padding:8px 12px;font-weight:700;font-size:12px;list-style:none;display:flex;align-items:center;gap:8px}
+details.machine > summary::-webkit-details-marker{display:none}
+details.machine > summary::before{content:"\25B6";font-size:9px;transition:transform .15s}
+details.machine[open] > summary::before{transform:rotate(90deg)}
+details.machine .rate-tag{margin-left:auto;font-size:11.5px;font-weight:700}
+details.machine .body{padding:10px 12px;border-top:1px solid #ddd}
+details.machine .body h4{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:#333;margin:10px 0 5px}
+details.machine .body h4:first-child{margin-top:0}
+.doc{font-family:"Times New Roman",Times,Georgia,serif;color:#000;font-size:12px;line-height:1.5}
+.doc .doc-section{background:#fff;border:1px solid #000;padding:16px 20px 16px 30px;margin-bottom:14px}
+.doc .doc-section.page-break-before{page-break-before:always;break-before:page}
+.doc .section-hdr{display:none;font-family:"Times New Roman",Times,Georgia,serif;font-size:10.5pt;font-weight:700;letter-spacing:.5px;text-align:center;border-bottom:1px solid #000;padding-bottom:4px;margin-bottom:10px}
+.doc .section-ftr{display:none;font-family:"Times New Roman",Times,Georgia,serif;font-size:8.5pt;font-style:italic;text-align:center;border-top:1px solid #000;padding-top:4px;margin-top:14px;color:#333}
+.doc .cover-page{background:#fff;border:4px double #000;padding:22mm 16mm;min-height:245mm;display:flex;flex-direction:column;justify-content:space-between;text-align:center;font-family:"Times New Roman",Times,Georgia,serif;color:#000;page-break-after:always;break-after:page}
+.doc .cover-top{text-align:center}
+.doc .cover-org{font-size:22px;font-weight:700;letter-spacing:3px;text-transform:uppercase;line-height:1.2}
+.doc .cover-sub{font-size:13px;margin-top:4px;letter-spacing:1px}
+.doc .cover-rule{width:55%;margin:14px auto;border:none;border-top:2px solid #000}
+.doc .cover-rule-thin{width:35%;margin:10px auto;border:none;border-top:1px solid #000}
+.doc .cover-title{font-size:26px;font-weight:700;letter-spacing:5px;text-transform:uppercase;margin:22px 0 8px}
+.doc .cover-for{font-size:13px;font-style:italic;margin-bottom:6px}
+.doc .cover-project{font-size:17px;font-weight:700;margin:6px 0}
+.doc .cover-fy{font-size:14px;margin-top:6px}
+.doc .cover-middle{margin:auto 0}
+.doc .cover-bottom{margin-top:auto}
+.doc .cover-prepared-label{font-size:11px;font-style:italic;margin-bottom:5px}
+.doc .cover-consultant{font-size:13.5px;font-weight:700;line-height:1.45}
+.doc .cover-date{font-size:12px;margin-top:16px;border-top:1px solid #000;display:inline-block;padding-top:6px}
+.doc .doc-title{text-align:center;font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:10px 0 14px;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.doc .sec-title{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:18px 0 8px;border-bottom:1.5px solid #000;padding-bottom:4px}
+.doc .sub-title{font-size:12px;font-weight:700;margin:14px 0 6px;color:#111}
+.doc .para{text-align:justify;margin:7px 0;font-size:12px}
+.doc .meta{margin:10px 0}
+.doc .meta .row{display:flex;padding:2.5px 0;border-bottom:1px dotted #999}
+.doc .meta .row:last-child{border-bottom:none}
+.doc .meta .lbl{font-weight:700;width:220px}
+.doc .meta .val{flex:1}
+.doc ol,.doc ul{margin:8px 0 10px 0;padding-left:24px}
+.doc ul{list-style-type:disc}
+.doc ul li{margin:5px 0;padding-left:4px;text-align:justify}
+.doc ol{list-style-type:decimal}
+.doc ol li{margin:5px 0;padding-left:4px;text-align:justify}
+.doc table{border-collapse:collapse;width:100%;font-size:11.5px;margin:8px 0;border:1px solid #000}
+.doc th,.doc td{border:1px solid #000;padding:4px 7px;vertical-align:top}
+.doc th{font-weight:700;text-align:center;background:#fff}
+.doc .sec-head td{font-weight:700;background:#eee}
+.doc .amt-col{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.doc .qty-col{text-align:right;font-variant-numeric:tabular-nums}
+.doc .unit-col{text-align:center}
+.doc .desc{padding-left:8px}
+.doc .tot-row td{font-weight:700}
+.doc .note{margin-top:12px;font-size:11px;font-style:italic}
+.doc .inwords{margin-top:10px;font-size:12px;font-style:italic}
+.ma-block{padding:6px 0 8px 26px;margin-bottom:16px;background:#fff}
+.ma-block .ma-title{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;border-bottom:1px solid #000;padding-bottom:4px}
+.ma-block .ma-tbl{border-collapse:collapse;width:100%;font-size:11px}
+.ma-block .ma-tbl td{padding:2.5px 4px;border:none}
+.ma-block .ma-tbl .lbl{width:60%}
+.ma-block .ma-tbl .val{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ma-calc{margin:10px 0 12px 0;font-size:11px;line-height:1.75}
+.ma-calc-hdr{font-weight:700;margin:10px 0 4px;font-size:11.5px}
+.ma-calc-subhdr{font-weight:700;margin:8px 0 3px 12px;font-size:11px}
+.ma-calc-line{padding:2px 0 2px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:11px}
+.ma-calc-line.indent2{padding-left:30px}
+.ma-calc-line.indent3{padding-left:48px}
+.ma-calc-line.tot{padding-left:30px;font-weight:700;border-top:1px dotted #999;margin-top:3px;padding-top:4px}
+.ma-calc-line.final{padding-left:0;font-weight:700;border-top:1px solid #000;margin-top:8px;padding-top:5px}
+.ma-calc-line.final2{padding-left:0;font-weight:700;font-size:11.5px}
+.ma-calc-line .res{font-variant-numeric:tabular-nums;font-weight:700}
+.ma-calc .frac{display:inline-flex;flex-direction:column;align-items:center;text-align:center;font-size:10px;line-height:1.15;padding:0 4px;vertical-align:middle;margin:0 4px}
+.ma-calc .frac .num{padding:0 4px 1px;border-bottom:1px solid #000;white-space:nowrap}
+.ma-calc .frac .den{padding:1px 4px 0;white-space:nowrap}
+.ra-block{padding:6px 0 8px 26px;margin-bottom:16px;background:#fff;page-break-inside:avoid;break-inside:avoid}
+.ra-block .ra-hdr{font-weight:700;font-size:11.5px;margin-bottom:4px;border-bottom:1px solid #999;padding-bottom:3px}
+.ra-block .ra-meta{font-size:11px;margin-bottom:6px}
+.ra-block .ra-tbl{border-collapse:collapse;width:100%;font-size:11px}
+.ra-block .ra-tbl th,.ra-block .ra-tbl td{border:1px solid #999;padding:2px 5px}
+.ra-block .ra-tbl th{font-weight:700;text-align:center;font-size:10.5px}
+.ra-block .ra-tbl td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ra-block .ra-tbl td.unit{text-align:center}
+.ra-block .ra-tbl tr.grp td{font-weight:700;background:#f0f0f0}
+.ra-block .ra-tbl tr.sub td{font-weight:700}
+.ra-block .ra-tbl tr.final td{font-weight:700;font-size:11.5px;background:#e8e8e8}
+.info{border:1px solid #bbb;padding:8px 12px;font-size:11.5px;margin-bottom:12px;color:#333;background:#fff}
+.hidden{display:none!important}
+.err{font-family:Menlo,Consolas,monospace;font-size:11px;border:1px solid #000;padding:8px 12px;margin:12px 18px;white-space:pre-wrap;background:#fff}
+.seg-ok{color:#0e7a5f;font-weight:700}
+.seg-warn{color:#c0392b;font-weight:700}
+.seg-note{color:#555}
+@media (max-width:720px){.top-bar{flex-direction:column;align-items:flex-start}main{padding:10px}.tabs{overflow-x:auto;white-space:nowrap;padding:0 8px}.doc .doc-section{padding:12px}.doc .cover-page{padding:14px;min-height:auto}.doc .meta .lbl{width:130px}}
+@media print{
+  @page { size:A4; margin:18mm 14mm 18mm 28mm; }
+  body{background:#fff;font-size:11pt;font-family:"Times New Roman",Times,Georgia,serif}
+  .no-print,.top-bar,.tabs,.info,#tab-machinery,#tab-rates,#tab-scope{display:none!important}
+  main{padding:0;max-width:none;margin:0}
+  .tab-panel{display:none!important}
+  body.print-estimate #tab-estimate{display:block!important}
+  body.print-boq #tab-boq{display:block!important}
+  body.print-detailed #tab-detailed{display:block!important}
+  .doc{font-size:11pt}
+  .doc .section-hdr{display:block!important;font-size:10pt;padding-bottom:3px;margin-bottom:10px}
+  .doc .section-ftr{display:block!important;font-size:8.5pt;padding-top:3px;margin-top:14px}
+  .doc .doc-section{border:none;padding:0;margin:0}
+  .doc .doc-section.page-break-before{page-break-before:always;break-before:page}
+  .doc .doc-section + .doc-section{page-break-before:always;break-before:page}
+  .doc .cover-page{border:3px double #000;min-height:250mm;padding:22mm 16mm;page-break-after:always;break-after:page;margin:0}
+  .ma-block,.ra-block{page-break-inside:avoid;break-inside:avoid}
+  .doc tr{page-break-inside:avoid}
+  .doc .sec-title{page-break-after:avoid}
+  .doc .sub-title{page-break-after:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="top-bar no-print">
+  <div class="title-wrap">
+    <h1>Deep Boring Works — Estimate</h1>
+    <p>Nepal Oil Corporation · Gandaki Province Office · Kaski, Pokhara · FY 2083/84</p>
+  </div>
+  <div class="top-actions">
+    <button id="btn-print-est" class="primary">Print Estimate</button>
+    <button id="btn-print-boq" class="primary">Print BOQ</button>
+    <button id="btn-print-detailed" class="primary">Print Detailed Report</button>
+    <button id="btn-save">Save</button>
+    <button id="btn-load">Load</button>
+    <button id="btn-reset">Reset</button>
+  </div>
+</header>
+
+<div id="error-box" class="err hidden"></div>
+
+<nav class="tabs no-print" id="tabs">
+  <button data-tab="machinery" class="active">1 · Machinery Primitives</button>
+  <button data-tab="rates">2 · Labour &amp; Material Rates</button>
+  <button data-tab="scope">3 · Project, Depth &amp; Quantities</button>
+  <button data-tab="estimate">4 · Estimate</button>
+  <button data-tab="boq">5 · BOQ (Tender)</button>
+  <button data-tab="detailed">6 · Detailed Report</button>
+</nav>
+
+<main>
+
+<section id="tab-machinery" class="tab-panel active">
+  <div class="info">Enter primitive cost data. Working rate and idle rate are computed automatically per the standard rate-analysis formulae.</div>
+  <div class="card"><h2>Fuel &amp; Lubricant Prices</h2><div class="grid c3" id="fuel-grid"></div></div>
+  <div class="card"><h2>Machinery Cost Primitives</h2><div id="machine-container"></div></div>
+</section>
+
+<section id="tab-rates" class="tab-panel">
+  <div class="info">Enter district labour rates and market rates of materials. Total rate at site = Market Rate + Transport.</div>
+  <div class="card"><h2>Labour Rates</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th style="width:70px">Code</th><th>Description</th><th class="num" style="width:180px">Rate (Rs./m.d.)</th></tr></thead>
+      <tbody id="tbl-labour"></tbody>
+    </table></div>
+  </div>
+  <div class="card"><h2>Material Rates</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th style="width:70px">Code</th><th>Material</th><th style="width:70px">Unit</th><th class="num" style="width:150px">Market Rate</th><th class="num" style="width:150px">Transport / unit</th><th class="num" style="width:150px">Total at Site</th></tr></thead>
+      <tbody id="tbl-material"></tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="tab-scope" class="tab-panel">
+  <div class="card"><h2>Client / Office</h2>
+    <div class="grid c3">
+      <label class="f">Organization<input type="text" data-save="p_org" value="NEPAL OIL CORPORATION"></label>
+      <label class="f">Province / Office<input type="text" data-save="p_div" value="Gandaki Province Office"></label>
+      <label class="f">Location<input type="text" data-save="p_loc" value="Kaski, Pokhara"></label>
+    </div>
+  </div>
+  <div class="card"><h2>Project Information</h2>
+    <div class="grid c3">
+      <label class="f">Project Name<input type="text" data-save="p_name" value="Deep Boring Works"></label>
+      <label class="f">Fiscal Year<input type="text" data-save="p_fy" value="2083/84"></label>
+      <label class="f">Name of Work<input type="text" data-save="p_work" value="Drilling and Installation of Deep Tubewell"></label>
+      <label class="f">Contract / IFB No.<input type="text" data-save="p_pkg" value=""></label>
+      <label class="f">Well ID<input type="text" data-save="p_well" value="DTW-01"></label>
+      <label class="f">No. of Wells<input type="number" id="in_wells" data-save="p_wells" value="1" min="1" step="1"></label>
+    </div>
+  </div>
+  <div class="card"><h2>Signatories</h2>
+    <div class="grid c3">
+      <label class="f">Prepared By<input type="text" data-save="p_by" value=""></label>
+      <label class="f">Checked By<input type="text" data-save="p_chk" value=""></label>
+      <label class="f">Approved By<input type="text" data-save="p_appr" value=""></label>
+      <label class="f">Consultant<input type="text" data-save="p_consultant" value="TechArc Engineering and Construction Private Limited, Pokhara 07"></label>
+    </div>
+  </div>
+
+  <div class="card"><h2>Drilling Depth &amp; Options</h2>
+    <div class="grid c4">
+      <label class="f">Total Depth (m)<input type="number" id="in_depth" data-save="p_depth" value="150" min="1" step="1"></label>
+      <label class="f">Include 3rd reaming (22½")?
+        <select id="in_r3" data-save="p_r3"><option value="0">No</option><option value="1">Yes</option></select>
+      </label>
+      <label class="f">Include water jetting?
+        <select id="in_jet" data-save="p_jet"><option value="1">Yes</option><option value="0">No</option></select>
+      </label>
+      <label class="f">Include gravel packing?
+        <select id="in_gravel" data-save="p_gravel"><option value="1">Yes</option><option value="0">No</option></select>
+      </label>
+      <label class="f">Include reconditioning?
+        <select id="in_recond" data-save="p_recond"><option value="1">Yes</option><option value="0">No</option></select>
+      </label>
+      <label class="f">Well development
+        <select id="in_dev" data-save="p_dev">
+          <option value="compressor">By compressor machine</option>
+          <option value="pump">By pump</option>
+          <option value="both">Both</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <div class="card"><h2>Depth Segments — Soil Type &amp; Drilling Method</h2>
+    <div class="hint">
+      Define the well as one or more depth segments. For each segment, choose the <b>soil type</b> (Soft / Medium / Hard) and the <b>drilling method</b> (Rotary / DTH).
+      The DoWR Norms are then applied segment by segment, using the appropriate coefficient tables for each combination.
+      Rotary is used for Soft, Medium and Hard formations; DTH is used for Hard rock only, and produces the final-diameter bore in a single pass, so no reaming is applied for DTH segments.
+    </div>
+    <div style="margin-bottom:10px">
+      <button id="btn-add-segment" type="button">+ Add Segment</button>
+      <button id="btn-reset-segments" type="button" class="mini">Reset to Default Segments</button>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th style="width:40px">#</th>
+        <th style="width:110px">From (m)</th>
+        <th style="width:110px">To (m)</th>
+        <th style="width:160px">Soil Type</th>
+        <th style="width:160px">Method</th>
+        <th style="width:70px">Action</th>
+      </tr></thead>
+      <tbody id="tbl-segments"></tbody>
+    </table></div>
+    <div class="hint" id="segment-summary" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card"><h2>Rate &amp; Tax Parameters</h2>
+    <div class="grid c3">
+      <label class="f">VAT (%)<input type="number" id="in_vat" data-save="p_vat" value="13" step="0.01" min="0"></label>
+      <label class="f">Mobilization &amp; Site Prep (Rs., L.S.)<input type="number" id="in_mob" data-save="p_mob" value="150000" step="1000" min="0"></label>
+      <label class="f">Contractor's Profit (%)<input type="number" id="in_profit" data-save="p_profit" value="15" step="0.01" min="0"></label>
+    </div>
+  </div>
+
+  <div class="card"><h2>Well Assembly Quantities</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Material</th><th style="width:70px">Unit</th><th class="num" style="width:180px">Quantity</th></tr></thead>
+      <tbody id="tbl-wellqty"></tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="tab-estimate" class="tab-panel">
+  <div class="info no-print">Formal Estimate. Click <b>Print Estimate</b> to produce a printable document.</div>
+  <div class="doc" id="estimate-doc"></div>
+</section>
+
+<section id="tab-boq" class="tab-panel">
+  <div class="info no-print">Blank Bill of Quantity for tender. Rate, Amount columns left blank for the bidder.</div>
+  <div class="doc" id="boq-doc"></div>
+</section>
+
+<section id="tab-detailed" class="tab-panel">
+  <div class="info no-print">Detailed Report. Click <b>Print Detailed Report</b> to produce a printable document.</div>
+  <div class="doc" id="detailed-doc"></div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+window.onerror = function(msg, src, line, col, err){
+  var box = document.getElementById('error-box');
+  if(box){ box.classList.remove('hidden'); box.textContent = 'Script error: ' + msg + '\n' + (src||'') + ':' + (line||'') + ':' + (col||'') + (err && err.stack ? '\n\n' + err.stack : ''); }
+  return false;
+};
+function el(id){ return document.getElementById(id); }
+function val(id, def){ var e = document.getElementById(id); if(!e) return def; var v = parseFloat(e.value); return isFinite(v) ? v : def; }
+function strVal(id, def){ var e = document.getElementById(id); if(!e) return def; return e.value; }
+function savedVal(key, def){ var e = document.querySelector('[data-save="'+cssEsc(key)+'"]'); if(!e) return def; return e.value; }
+function nf2(n){ n = Number(n); if(!isFinite(n)) n = 0; return n.toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+function nf(n){ n = Number(n); if(!isFinite(n)) n = 0; return n.toLocaleString('en-IN',{maximumFractionDigits:2}); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function cssEsc(s){ return String(s==null?'':s).replace(/["\\]/g, '\\$&'); }
+function attrInput(attrs){ var s = '<input '; for(var k in attrs) s += k+'="'+esc(attrs[k])+'" '; return s + '>'; }
+
+/* ============ DATA ============ */
+var MACHINE_DEFS = [
+  {id:'rig', name:'Drilling Rig Machine', cost:20000000, life:30000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.23,
+   fuel:{hsd:70, mobil:0.15, gear:0.11, hyd:0.1, brake:0.012, grease:0.05},
+   spareType:'ls', spareMisc:500, spareExtra:50, driverSalary:28050, helperSalary:17550, minorRepair:75},
+  {id:'truck', name:'6 MT Truck (Water / Cargo)', cost:3500000, life:10000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.23,
+   fuel:{hsd:5.5, mobil:0.1, gear:0.03, grease:0.015},
+   spareType:'tyre', tyreCost:8000, tyreNum:6, tyreLife:2000, spareMisc:5, spareExtra:2, driverSalary:28050, helperSalary:17550, minorRepair:15},
+  {id:'pickup', name:'Pick-up Truck', cost:2500000, life:15000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.15,
+   fuel:{hsd:5, mobil:0.05, gear:0.001, grease:0.015},
+   spareType:'tyre', tyreCost:5000, tyreNum:6, tyreLife:2000, spareMisc:6.5, spareExtra:5, driverSalary:28050, helperSalary:17550, minorRepair:0},
+  {id:'tanker', name:'Water Tanker (Tractor)', cost:600000, life:10000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.23,
+   fuel:{hsd:5.5, mobil:0.1, gear:0.03, grease:0.015},
+   spareType:'tyre', tyreCost:5000, tyreNum:6, tyreLife:2000, spareMisc:5, spareExtra:2, driverSalary:28050, helperSalary:17550, minorRepair:50},
+  {id:'generator', name:'Electric Generator', cost:600000, life:10000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.23,
+   fuel:{hsd:9, mobil:0.1}, spareType:'ls', spareMisc:5, spareExtra:0, driverSalary:0, helperSalary:0, minorRepair:0},
+  {id:'compressor', name:'Air Compressor', cost:3500000, life:10000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.23,
+   fuel:{hsd:14, mobil:0.208, gear:0.227}, spareType:'ls', spareMisc:0, spareExtra:0, driverSalary:0, helperSalary:0, minorRepair:15},
+  {id:'wpump', name:'Water Pump', cost:30000, life:5000, yearlyHrs:1000, overhaulPct:0.55, maintPct:0.23,
+   fuel:{hsd:1.25, mobil:0.03}, spareType:'ls', spareMisc:5, spareExtra:0, driverSalary:0, helperSalary:0, minorRepair:5},
+  {id:'spump', name:'Submersible Pump Set', cost:400000, life:10000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.15,
+   fuel:{hsd:2, mobil:0.07}, spareType:'ls', spareMisc:3, spareExtra:0, driverSalary:0, helperSalary:0, minorRepair:0},
+  {id:'logger', name:'Electrical Logging Set', fixedRate:250},
+  {id:'wli', name:'Water Level Indicator', fixedRate:50},
+  {id:'dmeter', name:'Discharge Meter', fixedRate:50},
+  {id:'tripod', name:'Tripod Set', fixedRate:50},
+  {id:'cempump', name:'Cementation Pump', fixedRate:300}
+];
+var FUEL_DEFAULTS = {hsd:75, mobil:550, gear:450, hyd:400, brake:750, grease:350};
+var FUEL_LABELS = {hsd:'HSD (Rs/L)',mobil:'Mobil (Rs/L)',gear:'Gear Oil (Rs/L)',hyd:'Hydraulic Oil (Rs/L)',brake:'Brake Oil (Rs/L)',grease:'Grease (Rs/kg)'};
+var FUEL_SHORT  = {hsd:'HSD',mobil:'Mobil',gear:'Gear Oil',hyd:'Hyd. Oil',brake:'Brake Oil',grease:'Grease'};
+
+var LABOUR_DEFS = [
+  {id:'hg',name:'Hydro geologist',rate:2800},{id:'ahg',name:'Asst. Hydro geologist',rate:1030},
+  {id:'driller',name:'Driller / Operator',rate:1000},{id:'srmech',name:'Sr. Mechanic',rate:1000},
+  {id:'asstdr',name:'Asst. Driller',rate:775},{id:'dh',name:'Driller Helper',rate:775},
+  {id:'mh',name:'Mechanical Helper',rate:775},{id:'wm',name:'Watchman',rate:700},
+  {id:'cw',name:'Camp Worker',rate:700},{id:'welder',name:'Welder',rate:775},
+  {id:'pumptech',name:'Pump Test Technician',rate:1000},{id:'pumpasst',name:'Pump Test Assistant',rate:775},
+  {id:'pumphelp',name:'Pump Helper',rate:550},{id:'mecheng',name:'Mechanical Engineer',rate:2800},
+  {id:'skilled',name:'Skilled Labourer',rate:1000},{id:'semisk',name:'Semi-skilled Labourer',rate:775},
+  {id:'unsk',name:'Unskilled Labourer',rate:700}
+];
+
+var MATERIAL_DEFS = [
+  {id:'bentonite', name:'Bentonite', unit:'kg', rate:11.109},
+  {id:'barite', name:'Barite (CMC)', unit:'kg', rate:13.225},
+  {id:'drillbit', name:'Drill Bit', unit:'no.', rate:420000},
+  {id:'oxygen', name:'Oxygen Gas', unit:'cyl', rate:446.25},
+  {id:'acetylene', name:'Acetylene Gas', unit:'cyl', rate:3060.75},
+  {id:'wrod', name:'Welding Rod', unit:'pkt', rate:499.1},
+  {id:'gravel', name:'Pea Gravel', unit:'cum', rate:3000},
+  {id:'gipipe65', name:'65 mm GI Pipe (Medium Class)', unit:'m', rate:605},
+  {id:'cicap65', name:'65 mm CI Cap', unit:'no.', rate:197},
+  {id:'cement', name:'Cement', unit:'bag', rate:710},
+  {id:'pipe250', name:'NB 250 mm MS ERW Casing (blind) Pipe, 7 mm thick', unit:'m', rate:5424.36},
+  {id:'pipe200', name:'NB 200 mm MS ERW Casing (blind) Pipe, 7 mm thick', unit:'m', rate:3826.02},
+  {id:'slot200', name:'200 mm dia. SS304 Continuous Slotted Pipe (strainer)', unit:'m', rate:22000},
+  {id:'plug200', name:'200 mm Bottom Plug', unit:'no.', rate:2500},
+  {id:'plate', name:'14 mm thick 45 cm dia. Surface Plate with Ventilator Holes', unit:'no.', rate:8000},
+  {id:'guide250', name:'250 mm Centering Guide', unit:'no.', rate:2001},
+  {id:'guide200', name:'200 mm Centering Guide', unit:'no.', rate:1651}
+];
+var WELL_MATERIAL_IDS = ['pipe250','pipe200','slot200','plug200','plate','guide250','guide200'];
+
+function N(L,M,X){ return {L:L||{},M:M||{},X:X||{}}; }
+
+/* --- ROTARY NORMS --- */
+var PILOT_SOFT_B = N({hg:.02,ahg:.02,driller:.08,srmech:.04,asstdr:.08,dh:.83,mh:.16,wm:.08,cw:.08},{rig:.33,tanker:.1,pickup:.1,wpump:.2},{bentonite:1.5,barite:.25,drillbit:.002});
+var PILOT_SOFT_I = N({hg:.022,ahg:.022,driller:.088,srmech:.044,asstdr:.088,dh:.913,mh:.176,wm:.088,cw:.088},{rig:.363,tanker:.11,pickup:.11,wpump:.22},{bentonite:1.65,barite:.275,drillbit:.0022});
+var PILOT_MED_B  = N({hg:.031,ahg:.031,driller:.125,srmech:.063,asstdr:.188,dh:1.25,mh:.25,wm:.125,cw:.125},{rig:.5,tanker:.12,pickup:.15,wpump:.3},{bentonite:1.75,barite:.37,drillbit:.005});
+var PILOT_MED_I  = N({hg:.003,ahg:.003,driller:.012,srmech:.006,asstdr:.018,dh:.125,mh:.025,wm:.012,cw:.012},{rig:.05,tanker:.012,pickup:.015,wpump:.003},{bentonite:.175,barite:.037,drillbit:.0005});
+var PILOT_HARD_B = N({hg:.041,ahg:.041,driller:.165,srmech:.083,asstdr:.248,dh:1.65,mh:.33,wm:.165,cw:.165},{rig:.66,tanker:.2,pickup:.4,wpump:.4},{bentonite:3,barite:.5,drillbit:.1});
+var PILOT_HARD_I = N({hg:.004,ahg:.004,driller:.016,srmech:.008,asstdr:.024,dh:.165,mh:.033,wm:.016,cw:.016},{rig:.06,tanker:.02,pickup:.04,wpump:.04},{bentonite:.3,barite:.05,drillbit:.001});
+var R1_SOFT_B = N({hg:.007,ahg:.007,driller:.028,srmech:.014,asstdr:.028,dh:.275,mh:.055,wm:.028,cw:.028},{rig:.11,tanker:.1,wpump:.2,pickup:.1},{bentonite:1,barite:.25,drillbit:.001});
+var R1_SOFT_I = N({hg:.0077,ahg:.0077,driller:.0308,srmech:.0154,asstdr:.0308,dh:.3025,mh:.0605,wm:.0308,cw:.0308},{rig:.121,tanker:.11,wpump:.22,pickup:.11},{bentonite:1.1,barite:.275,drillbit:.0011});
+var R1_MED_B  = N({hg:.01,ahg:.011,driller:.043,srmech:.021,asstdr:.043,dh:.425,mh:.085,wm:.043,cw:.043},{rig:.17,tanker:.15,wpump:.3,pickup:.15},{bentonite:1,barite:.25,drillbit:.001});
+var R1_MED_I  = N({hg:.001,ahg:.001,driller:.004,srmech:.002,asstdr:.006,dh:.04,mh:.008,wm:.004,cw:.004},{rig:.017,tanker:.015,wpump:.03,pickup:.015},{bentonite:.04,barite:.01,drillbit:.0005});
+var R1_HARD_B = N({hg:.013,ahg:.013,driller:.055,srmech:.027,asstdr:.055,dh:.55,mh:.11,wm:.055,cw:.055},{rig:.22,tanker:.2,wpump:.4,pickup:.2},{bentonite:1.25,barite:.25,drillbit:.033});
+var R1_HARD_I = N({hg:.001,ahg:.001,driller:.005,srmech:.002,asstdr:.008,dh:.05,mh:.01,wm:.005,cw:.005},{rig:.02,tanker:.02,wpump:.04,pickup:.02},{bentonite:.12,barite:.02,drillbit:.0033});
+var R2_SOFT_B = N({hg:.006,ahg:.006,driller:.027,srmech:.013,asstdr:.041,dh:.275,mh:.055,wm:.027,cw:.027},{rig:.11,tanker:.1,wpump:.2,pickup:.1},{bentonite:1,barite:.25,drillbit:.001});
+var R2_SOFT_I = N({hg:.0066,ahg:.0066,driller:.0297,srmech:.0143,asstdr:.0451,dh:.3025,mh:.0605,wm:.0297,cw:.0297},{rig:.121,tanker:.11,wpump:.22,pickup:.11},{bentonite:1.1,barite:.275,drillbit:.0011});
+var R2_MED_B  = N({hg:.01,ahg:.01,driller:.042,srmech:.021,asstdr:.063,dh:.425,mh:.085,wm:.042,cw:.042},{rig:.17,tanker:.15,wpump:.3,pickup:.15},{bentonite:1,barite:.25,drillbit:.001});
+var R2_MED_I  = N({hg:.001,ahg:.001,driller:.004,srmech:.002,asstdr:.006,dh:.04,mh:.008,wm:.004,cw:.004},{rig:.015,tanker:.015,wpump:.0225,pickup:.0075},{bentonite:.04,barite:.01,drillbit:.0005});
+var R2_HARD_B = N({hg:.013,ahg:.013,driller:.055,srmech:.027,asstdr:.055,dh:.55,mh:.11,wm:.055,cw:.055},{rig:.22,tanker:.2,wpump:.4,pickup:.2},{bentonite:1.25,barite:.25,drillbit:.333});
+var R2_HARD_I = N({hg:.001,ahg:.001,driller:.005,srmech:.002,asstdr:.008,dh:.05,mh:.01,wm:.005,cw:.005},{rig:.22,tanker:.2,wpump:.4,pickup:.2},{bentonite:.12,barite:.02,drillbit:.0033});
+
+/* --- DTH NORMS (only hard formation provided in norms) --- */
+var DTH_PILOT_HARD_B = N(
+  {hg:.015, ahg:.015, driller:.031, srmech:.031, asstdr:.062, dh:.31, mh:.062, wm:.031, cw:.031},
+  {rig:.25, pickup:.1},
+  {drillbit:.005});
+var DTH_PILOT_HARD_I = N(
+  {hg:.001, ahg:.001, driller:.003, srmech:.003, asstdr:.006, dh:.031, mh:.006, wm:.003, cw:.003},
+  {rig:.025, pickup:.01},
+  {drillbit:.0005});
+
+var LOGGING  = N({hg:.01,ahg:.01,driller:.01,dh:.08},{logger:.12},{});
+var RECOND   = N({driller:.0075,srmech:.0075,asstdr:.0075,dh:.045,wm:.0075,cw:.015},{rig:.06,tanker:.03,wpump:.005},{bentonite:.5,barite:.25});
+var LOWERING = N({hg:.004,driller:.004,srmech:.004,asstdr:.004,welder:.004,dh:.034,mh:.004,wm:.008,cw:.008},{rig:.03,tanker:.005,wpump:.005,generator:.015},{oxygen:.015,acetylene:.0075,wrod:.09});
+var GRAVEL   = N({hg:.005,driller:.005,srmech:.005,asstdr:.005,dh:.03,wm:.005,cw:.01},{rig:.04,tanker:.028,wpump:.055,pickup:.01},{gravel:.225});
+var JETTING  = N({driller:.003,srmech:.003,asstdr:.003,dh:.023,wm:.003,cw:.006},{rig:.03,tanker:.015,wpump:.015,pickup:.002},{});
+var DEV_COMP = N({hg:7,pumptech:9,driller:.5,pumphelp:27,wm:9,cw:18},{rig:4,compressor:72,pickup:2},{});
+var DEV_PUMP = N({hg:4.5,ahg:9,mecheng:4.5,pumpasst:9,pumphelp:27,wm:9,cw:18},{spump:72,generator:72,dmeter:72,wli:72,tripod:72,pickup:3},{});
+var PUMP_TEST= N({hg:3,ahg:3,mecheng:3,pumpasst:3,pumphelp:9,wm:3,cw:3},{spump:24,generator:24,dmeter:24,wli:24,tripod:24,pickup:3},{});
+var RECOVERY = N({hg:1.5,pumpasst:1.5,pumphelp:4.5,wm:1.5,cw:1.5},{wli:12},{});
+var SEALING  = N({skilled:.25,semisk:.25,unsk:1.25},{cempump:2},{gipipe65:6,cicap65:2,cement:15.75});
+
+/* ============ STATE ============ */
+var SAVE_KEY = 'dtw_estimate_v14';
+var state = defaultState();
+
+function defaultSegments(){
+  return [
+    {start: 0,  end: 100, soil:'medium', method:'rotary'},
+    {start: 100, end: 150, soil:'hard',   method:'dth'}
+  ];
+}
+
+function defaultState(){
+  var s = {fuel:{}, machines:{}, labour:{}, material:{}, qty:{}, wellQty:{}, segments: defaultSegments()};
+  for(var k in FUEL_DEFAULTS) s.fuel[k] = FUEL_DEFAULTS[k];
+  for(var i=0;i<MACHINE_DEFS.length;i++) s.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
+  for(var j=0;j<LABOUR_DEFS.length;j++) s.labour[LABOUR_DEFS[j].id] = LABOUR_DEFS[j].rate;
+  for(var l=0;l<MATERIAL_DEFS.length;l++) s.material[MATERIAL_DEFS[l].id] = {rate:MATERIAL_DEFS[l].rate, transport:0};
+  s.wellQty = {pipe250:48, pipe200:78, slot200:24, plug200:1, plate:1, guide250:2, guide200:4};
+  return s;
+}
+
+/* ============ CALC ENGINE ============ */
+function calcMachineRate(m, fuel){
+  if(!m) return {working:0, idle:0, bd:null, isFixed:true};
+  if(m.fixedRate !== undefined && m.fixedRate !== null && !m.cost){
+    return {working:Number(m.fixedRate)||0, idle:0, bd:null, isFixed:true};
+  }
+  var cost = Number(m.cost)||0, life = Number(m.life)||1, yearly = Number(m.yearlyHrs)||1;
+  var oh = Number(m.overhaulPct)||0, mt = Number(m.maintPct)||0;
+  var dep = cost/life, ins = cost*0.02/yearly, inter = cost*0.01/yearly;
+  var cap = dep+ins+inter;
+  var over = cost*oh/life, maint = cost*mt/life, om = over+maint;
+  var f = m.fuel||{}, fuelCost = 0;
+  for(var fk in f){ fuelCost += f[fk]*(fuel[fk]||0); }
+  var spare;
+  if(m.spareType==='tyre'){
+    spare = ((Number(m.tyreCost)||0)*(Number(m.tyreNum)||0))/(Number(m.tyreLife)||1) + (Number(m.spareMisc)||0) + (Number(m.spareExtra)||0);
+  } else {
+    spare = (Number(m.spareMisc)||0) + (Number(m.spareExtra)||0);
+  }
+  var personnel = ((Number(m.driverSalary)||0)+(Number(m.helperSalary)||0))/240;
+  var minor = Number(m.minorRepair)||0;
+  var running = fuelCost + spare + personnel + minor;
+  var sup = cost*0.05/yearly;
+  return {working: cap+om+running+sup, idle: cap+om+sup,
+    bd:{dep:dep,ins:ins,inter:inter,cap:cap,over:over,maint:maint,om:om,
+        fuelCost:fuelCost,spare:spare,personnel:personnel,minor:minor,
+        running:running,sup:sup},
+    isFixed:false};
+}
+function getAllMachineRates(){
+  var r = {};
+  for(var i=0;i<MACHINE_DEFS.length;i++) r[MACHINE_DEFS[i].id] = calcMachineRate(state.machines[MACHINE_DEFS[i].id], state.fuel);
+  return r;
+}
+function getMaterialRate(id){ var m = state.material[id]; if(!m) return 0; return (Number(m.rate)||0) + (Number(m.transport)||0); }
+function profitFactor(){ return 1 + val('in_profit', 15)/100; }
+function opRate(norm, mr){
+  var L=0,M=0,X=0,rid,mid,xid;
+  for(rid in norm.L) L += norm.L[rid]*(Number(state.labour[rid])||0);
+  for(mid in norm.M) M += norm.M[mid]*(mr[mid]?mr[mid].working:0);
+  for(xid in norm.X) X += norm.X[xid]*getMaterialRate(xid);
+  var base = L+M+X;
+  return {L:norm.L, M:norm.M, X:norm.X, costL:L, costM:M, costX:X, base:base, rate:base*profitFactor()};
+}
+function normForBand(baseN, band2N, bandIdx){
+  if(bandIdx === 0) return baseN;
+  if(bandIdx === 1) return band2N;
+  var n = bandIdx;
+  var r = {L:{}, M:{}, X:{}};
+  var kinds = ['L','M','X'];
+  for(var ki=0; ki<kinds.length; ki++){
+    var k = kinds[ki];
+    var ids = {};
+    for(var id in baseN[k]) ids[id] = 1;
+    for(var id2 in band2N[k]) ids[id2] = 1;
+    for(var id3 in ids){
+      var b = baseN[k][id3] || 0;
+      var b2 = band2N[k][id3] || 0;
+      r[k][id3] = n * b2 - (n - 1) * b;
+    }
+  }
+  return r;
+}
+function getWellQty(id){
+  if(state.wellQty && state.wellQty[id] !== undefined && state.wellQty[id] !== null && state.wellQty[id] !== ''){
+    var v = parseFloat(state.wellQty[id]); return isFinite(v) ? v : 0;
+  }
+  return 0;
+}
+
+/* ---- Segment helpers ---- */
+function getSegments(){
+  var segs = state.segments;
+  if(!segs || !segs.length){
+    segs = defaultSegments();
+    state.segments = segs;
+  }
+  var copy = segs.slice();
+  copy.sort(function(a,b){ return a.start - b.start; });
+  return copy;
+}
+function splitSegmentByNormBands(seg){
+  var result = [];
+  var s = Number(seg.start) || 0;
+  var e = Number(seg.end) || 0;
+  if(e <= s) return result;
+  while(s < e - 0.0001){
+    var idx = Math.floor(s / 100);
+    var bandEnd = Math.min((idx + 1) * 100, e);
+    result.push({start: s, end: bandEnd, bandIdx: idx});
+    s = bandEnd;
+  }
+  return result;
+}
+function buildMethodSummary(segments){
+  var methods = {};
+  for(var i=0;i<segments.length;i++) methods[segments[i].method] = true;
+  var list = [];
+  for(var k in methods) list.push(k);
+  if(list.length === 0) return 'Rotary Only';
+  if(list.length === 1){
+    return list[0] === 'rotary' ? 'Rotary Only' : 'DTH Only';
+  }
+  var parts = [];
+  for(var j=0;j<list.length;j++) parts.push(list[j] === 'rotary' ? 'Rotary' : 'DTH');
+  return 'Mixed (' + parts.join(' + ') + ')';
+}
+function buildSoilSummary(segments){
+  var soils = {};
+  for(var i=0;i<segments.length;i++) soils[segments[i].soil] = true;
+  var list = [];
+  for(var k in soils) list.push(k);
+  if(list.length === 0) return 'Medium';
+  if(list.length === 1) return list[0].charAt(0).toUpperCase() + list[0].slice(1);
+  var parts = [];
+  for(var j=0;j<list.length;j++) parts.push(list[j].charAt(0).toUpperCase() + list[j].slice(1));
+  return 'Multiple (' + parts.join(' + ') + ')';
+}
+
+/* ============ RENDER — segments table ============ */
+function renderSegments(){
+  var tbody = el('tbl-segments');
+  if(!tbody) return;
+  var segs = state.segments || [];
+  var h = '';
+  for(var i=0;i<segs.length;i++){
+    var s = segs[i];
+    h += '<tr>';
+    h += '<td>' + (i+1) + '</td>';
+    h += '<td class="num"><input class="c" type="number" step="1" min="0" data-seg="' + i + ':start" value="' + esc(s.start) + '"></td>';
+    h += '<td class="num"><input class="c" type="number" step="1" min="0" data-seg="' + i + ':end" value="' + esc(s.end) + '"></td>';
+    h += '<td><select class="c" data-seg="' + i + ':soil">'
+       + '<option value="soft"' + (s.soil === 'soft' ? ' selected' : '') + '>Soft</option>'
+       + '<option value="medium"' + (s.soil === 'medium' ? ' selected' : '') + '>Medium</option>'
+       + '<option value="hard"' + (s.soil === 'hard' ? ' selected' : '') + '>Hard</option>'
+       + '</select></td>';
+    h += '<td><select class="c" data-seg="' + i + ':method">'
+       + '<option value="rotary"' + (s.method === 'rotary' ? ' selected' : '') + '>Rotary</option>'
+       + '<option value="dth"' + (s.method === 'dth' ? ' selected' : '') + '>DTH</option>'
+       + '</select></td>';
+    h += '<td style="text-align:center"><button type="button" class="mini" data-remove-seg="' + i + '">Remove</button></td>';
+    h += '</tr>';
+  }
+  tbody.innerHTML = h;
+  updateSegmentSummary();
+}
+function updateSegmentSummary(){
+  var summary = el('segment-summary');
+  if(!summary) return;
+  var segs = getSegments();
+  var total = 0;
+  var gaps = [];
+  var prevEnd = 0;
+  for(var i=0;i<segs.length;i++){
+    if(segs[i].start > prevEnd + 0.001) gaps.push('Gap between ' + nf(prevEnd) + ' and ' + nf(segs[i].start));
+    if(segs[i].start < prevEnd - 0.001) gaps.push('Overlap between ' + nf(segs[i].start) + ' and ' + nf(prevEnd));
+    total += (segs[i].end - segs[i].start);
+    prevEnd = segs[i].end;
+  }
+  var depth = val('in_depth', 0);
+  var html = 'Total segment depth: <b>' + nf(total) + ' m</b>. ';
+  if(Math.abs(total - depth) < 0.01 && gaps.length === 0){
+    html += '<span class="seg-ok">✓ Segments cover the full well depth continuously.</span>';
+  } else {
+    html += '<span class="seg-warn">⚠ ';
+    if(Math.abs(total - depth) >= 0.01) html += 'Total segment depth does not match well depth (' + nf(depth) + ' m). ';
+    if(gaps.length) html += gaps.join('; ') + '. ';
+    html += '</span>';
+  }
+  summary.innerHTML = html;
+}
+
+/* ============ INPUT TABLES ============ */
+function renderFuel(){
+  var h = '';
+  for(var k in FUEL_LABELS){
+    h += '<label class="f">'+esc(FUEL_LABELS[k])+'<input type="number" step="0.01" data-fuel="'+k+'" data-save="fuel:'+k+'" value="'+esc(state.fuel[k])+'"></label>';
+  }
+  var c = el('fuel-grid'); if(c) c.innerHTML = h;
+}
+function buildMachineCardHTML(m){
+  var mm = state.machines[m.id]; if(!mm) return '';
+  var r = calcMachineRate(mm, state.fuel);
+  var isFixed = r.isFixed, bd = r.bd || {};
+  var h = '<details class="machine" data-machcard="'+esc(m.id)+'">';
+  h += '<summary>'+esc(m.name)+'<span class="rate-tag">Working: Rs '+nf2(r.working)+'/hr';
+  if(!isFixed) h += ' | Idle: Rs '+nf2(r.idle)+'/hr';
+  h += '</span></summary><div class="body">';
+  if(isFixed){
+    h += '<h4>Fixed Rate</h4><div class="grid c2"><label class="f">Fixed Working Rate (Rs./hr)'+attrInput({type:'number',step:'1','data-mach':m.id+':fixedRate','data-save':'mach:'+m.id+':fixedRate',value:mm.fixedRate})+'</label></div>';
+  } else {
+    h += '<h4>1. Cost &amp; Life</h4><div class="grid c3">';
+    h += '<label class="f">Cost of Machine (Rs.)'+attrInput({type:'number',step:'1000','data-mach':m.id+':cost','data-save':'mach:'+m.id+':cost',value:mm.cost})+'</label>';
+    h += '<label class="f">Economical Life (hrs)'+attrInput({type:'number',step:'100','data-mach':m.id+':life','data-save':'mach:'+m.id+':life',value:mm.life})+'</label>';
+    h += '<label class="f">Yearly Working Hours'+attrInput({type:'number',step:'100','data-mach':m.id+':yearlyHrs','data-save':'mach:'+m.id+':yearlyHrs',value:mm.yearlyHrs})+'</label>';
+    h += '<label class="f">Overhaul % of cost'+attrInput({type:'number',step:'0.01','data-mach':m.id+':overhaulPct','data-save':'mach:'+m.id+':overhaulPct',value:mm.overhaulPct})+'</label>';
+    h += '<label class="f">Maintenance % of cost'+attrInput({type:'number',step:'0.01','data-mach':m.id+':maintPct','data-save':'mach:'+m.id+':maintPct',value:mm.maintPct})+'</label>';
+    h += '<label class="f">Minor Repair (Rs./hr)'+attrInput({type:'number',step:'1','data-mach':m.id+':minorRepair','data-save':'mach:'+m.id+':minorRepair',value:mm.minorRepair})+'</label>';
+    h += '</div>';
+    h += '<h4>2. Fuel &amp; Lubricant Consumption</h4>';
+    h += '<table><thead><tr><th>Item</th><th class="num" style="width:120px">Consumption</th><th class="num" style="width:120px">Rate</th><th class="num" style="width:120px">Cost/hr</th></tr></thead><tbody>';
+    var any = false;
+    for(var fk in mm.fuel){
+      any = true;
+      h += '<tr><td>'+esc(FUEL_SHORT[fk]||fk)+'</td><td class="num">'+attrInput({type:'number',step:'0.001','data-mach':m.id+':fuel:'+fk,'data-save':'mach:'+m.id+':fuel:'+fk,value:mm.fuel[fk],'class':'c'})+'</td><td class="num">'+nf2(state.fuel[fk]||0)+'</td><td class="num">'+nf2((mm.fuel[fk]||0)*(state.fuel[fk]||0))+'</td></tr>';
+    }
+    if(!any) h += '<tr><td colspan="4">No fuel items</td></tr>';
+    h += '</tbody></table>';
+    h += '<h4>3. Spare Parts</h4>';
+    if(mm.spareType==='tyre'){
+      h += '<div class="grid c4">';
+      h += '<label class="f">Cost per Tyre'+attrInput({type:'number',step:'100','data-mach':m.id+':tyreCost','data-save':'mach:'+m.id+':tyreCost',value:mm.tyreCost})+'</label>';
+      h += '<label class="f">No. of Tyres'+attrInput({type:'number',step:'1','data-mach':m.id+':tyreNum','data-save':'mach:'+m.id+':tyreNum',value:mm.tyreNum})+'</label>';
+      h += '<label class="f">Tyre Life (hrs)'+attrInput({type:'number',step:'100','data-mach':m.id+':tyreLife','data-save':'mach:'+m.id+':tyreLife',value:mm.tyreLife})+'</label>';
+      h += '<label class="f">Misc L.S.'+attrInput({type:'number',step:'0.5','data-mach':m.id+':spareMisc','data-save':'mach:'+m.id+':spareMisc',value:mm.spareMisc})+'</label>';
+      h += '<label class="f">Extra L.S.'+attrInput({type:'number',step:'0.5','data-mach':m.id+':spareExtra','data-save':'mach:'+m.id+':spareExtra',value:mm.spareExtra})+'</label>';
+      h += '</div>';
+    } else {
+      h += '<div class="grid c2">';
+      h += '<label class="f">Spare Misc (Rs./hr)'+attrInput({type:'number',step:'1','data-mach':m.id+':spareMisc','data-save':'mach:'+m.id+':spareMisc',value:mm.spareMisc})+'</label>';
+      h += '<label class="f">Extra (Rs./hr)'+attrInput({type:'number',step:'1','data-mach':m.id+':spareExtra','data-save':'mach:'+m.id+':spareExtra',value:mm.spareExtra})+'</label>';
+      h += '</div>';
+    }
+    h += '<h4>4. Personnel</h4><div class="grid c2">';
+    h += '<label class="f">Driver Salary (Rs./mo.)'+attrInput({type:'number',step:'500','data-mach':m.id+':driverSalary','data-save':'mach:'+m.id+':driverSalary',value:mm.driverSalary})+'</label>';
+    h += '<label class="f">Helper Salary (Rs./mo.)'+attrInput({type:'number',step:'500','data-mach':m.id+':helperSalary','data-save':'mach:'+m.id+':helperSalary',value:mm.helperSalary})+'</label>';
+    h += '</div>';
+    h += '<h4>5. Computed Rate (Rs./hr)</h4><table><tbody>';
+    h += '<tr><td>Depreciation</td><td class="num">'+nf2(bd.dep)+'</td></tr>';
+    h += '<tr><td>Insurance</td><td class="num">'+nf2(bd.ins)+'</td></tr>';
+    h += '<tr><td>Interest</td><td class="num">'+nf2(bd.inter)+'</td></tr>';
+    h += '<tr><td><b>Capital Recovery Sub-total</b></td><td class="num"><b>'+nf2(bd.cap)+'</b></td></tr>';
+    h += '<tr><td>Overhauling</td><td class="num">'+nf2(bd.over)+'</td></tr>';
+    h += '<tr><td>Maintenance</td><td class="num">'+nf2(bd.maint)+'</td></tr>';
+    h += '<tr><td><b>O&amp;M Sub-total</b></td><td class="num"><b>'+nf2(bd.om)+'</b></td></tr>';
+    h += '<tr><td>Fuel &amp; Lubricants</td><td class="num">'+nf2(bd.fuelCost)+'</td></tr>';
+    h += '<tr><td>Spare Parts</td><td class="num">'+nf2(bd.spare)+'</td></tr>';
+    h += '<tr><td>Personnel</td><td class="num">'+nf2(bd.personnel)+'</td></tr>';
+    h += '<tr><td>Minor Repair</td><td class="num">'+nf2(bd.minor)+'</td></tr>';
+    h += '<tr><td><b>Running Sub-total</b></td><td class="num"><b>'+nf2(bd.running)+'</b></td></tr>';
+    h += '<tr><td>Supervision &amp; Overhead</td><td class="num">'+nf2(bd.sup)+'</td></tr>';
+    h += '<tr><td><b>Working Rate</b></td><td class="num"><b>'+nf2(r.working)+'</b></td></tr>';
+    h += '<tr><td>Idle Rate</td><td class="num">'+nf2(r.idle)+'</td></tr>';
+    h += '</tbody></table>';
+  }
+  h += '</div></details>';
+  return h;
+}
+function renderMachines(){
+  var container = el('machine-container'); if(!container) return;
+  var openCards = {};
+  var opened = container.querySelectorAll('details.machine[open]');
+  for(var i=0;i<opened.length;i++) openCards[opened[i].getAttribute('data-machcard')] = 1;
+  var active = document.activeElement, focusKey = null, selStart = 0, selEnd = 0;
+  if(active && active.getAttribute){
+    focusKey = active.getAttribute('data-mach');
+    try{ selStart = active.selectionStart||0; selEnd = active.selectionEnd||selStart; }catch(e){}
+  }
+  var html = '';
+  for(var j=0;j<MACHINE_DEFS.length;j++) html += buildMachineCardHTML(MACHINE_DEFS[j]);
+  container.innerHTML = html;
+  var details = container.querySelectorAll('details.machine');
+  for(var k=0;k<details.length;k++){ if(openCards[details[k].getAttribute('data-machcard')]) details[k].open = true; }
+  if(focusKey){
+    var f = container.querySelector('[data-mach="'+cssEsc(focusKey)+'"]');
+    if(f){ f.focus(); try{ f.setSelectionRange(selStart, selEnd); }catch(e){} }
+  }
+}
+function renderLabour(){
+  var h = '';
+  for(var i=0;i<LABOUR_DEFS.length;i++){
+    var l = LABOUR_DEFS[i];
+    var v = (state.labour[l.id] !== undefined && isFinite(state.labour[l.id])) ? state.labour[l.id] : l.rate;
+    h += '<tr><td>'+esc(l.id)+'</td><td>'+esc(l.name)+'</td><td class="num">'+attrInput({type:'number',step:'1',min:'0','data-lab':l.id,'data-save':'lab:'+l.id,value:v,'class':'c'})+'</td></tr>';
+  }
+  var t = el('tbl-labour'); if(t) t.innerHTML = h;
+}
+function renderMaterial(){
+  var h = '';
+  for(var i=0;i<MATERIAL_DEFS.length;i++){
+    var m = MATERIAL_DEFS[i];
+    var s = state.material[m.id] || {rate:0, transport:0};
+    var total = (Number(s.rate)||0) + (Number(s.transport)||0);
+    h += '<tr><td>'+esc(m.id)+'</td><td>'+esc(m.name)+'</td><td class="unit-col">'+esc(m.unit)+'</td>';
+    h += '<td class="num">'+attrInput({type:'number',step:'0.01','data-mat':m.id+':rate','data-save':'mat:'+m.id+':rate',value:s.rate,'class':'c'})+'</td>';
+    h += '<td class="num">'+attrInput({type:'number',step:'0.01','data-mat':m.id+':transport','data-save':'mat:'+m.id+':transport',value:s.transport,'class':'c'})+'</td>';
+    h += '<td class="num" data-mattotal="'+esc(m.id)+'">'+nf2(total)+'</td></tr>';
+  }
+  var t = el('tbl-material'); if(t) t.innerHTML = h;
+}
+function renderWellQtyTable(){
+  var t = el('tbl-wellqty'); if(!t) return;
+  var h = '';
+  for(var i=0;i<WELL_MATERIAL_IDS.length;i++){
+    var id = WELL_MATERIAL_IDS[i];
+    var m = null; for(var j=0;j<MATERIAL_DEFS.length;j++) if(MATERIAL_DEFS[j].id===id){ m = MATERIAL_DEFS[j]; break; }
+    if(!m) continue;
+    h += '<tr><td>'+esc(m.name)+'</td><td class="unit-col">'+esc(m.unit)+'</td><td class="num">'+attrInput({type:'number',step:'0.01',min:'0','data-wq':id,'data-save':'wq:'+id,value:getWellQty(id),'class':'c'})+'</td></tr>';
+  }
+  t.innerHTML = h;
+}
+
+/* ============ BUILD BOQ — now driven by segments ============ */
+function buildBOQ(){
+  var depth = val('in_depth', 0);
+  var wells = Math.max(1, Math.round(val('in_wells', 1)));
+  var r3 = strVal('in_r3','0')==='1', jet = strVal('in_jet','0')==='1';
+  var gravel = strVal('in_gravel','0')==='1', recond = strVal('in_recond','0')==='1';
+  var dev = strVal('in_dev','compressor');
+  var vatPct = val('in_vat', 13);
+  var mob = val('in_mob', 150000);
+  var machines = getAllMachineRates();
+  var segments = getSegments();
+
+  var PMAP  = {soft:[PILOT_SOFT_B,PILOT_SOFT_I], medium:[PILOT_MED_B,PILOT_MED_I], hard:[PILOT_HARD_B,PILOT_HARD_I]};
+  var R1MAP = {soft:[R1_SOFT_B,R1_SOFT_I], medium:[R1_MED_B,R1_MED_I], hard:[R1_HARD_B,R1_HARD_I]};
+  var R2MAP = {soft:[R2_SOFT_B,R2_SOFT_I], medium:[R2_MED_B,R2_MED_I], hard:[R2_HARD_B,R2_HARD_I]};
+
+  var sec1 = [{no:'1.1', desc:'Mobilization and demobilization of drilling equipment including site clearance, camp setting, rig setting up and preparation of mud pit', unit:'job', qty:1, rate:mob, amount:mob, ri:null}];
+
+  var sec2 = []; var sn2 = 1;
+  for(var i=0;i<WELL_MATERIAL_IDS.length;i++){
+    var id = WELL_MATERIAL_IDS[i];
+    var m = null; for(var j=0;j<MATERIAL_DEFS.length;j++) if(MATERIAL_DEFS[j].id===id){ m = MATERIAL_DEFS[j]; break; }
+    if(!m) continue;
+    var q = getWellQty(id); var rt = getMaterialRate(id);
+    sec2.push({no:'2.'+(sn2++), desc:m.name, unit:m.unit, qty:q, rate:rt, amount:q*rt, ri:null});
+  }
+
+  var sec3 = []; var sn3 = 1;
+  function add3(desc, unit, qty, ri, notes){ sec3.push({no:'3.'+(sn3++), desc:desc, unit:unit, qty:qty, rate:ri.rate, amount:ri.rate*qty, ri:ri, notes:notes||''}); }
+
+  /* ---- PILOT HOLE — one line per 100-m norm band per segment ---- */
+  for(var si=0; si<segments.length; si++){
+    var seg = segments[si];
+    var bands = splitSegmentByNormBands(seg);
+    for(var bi=0; bi<bands.length; bi++){
+      var band = bands[bi];
+      var bandQty = band.end - band.start;
+      if(bandQty <= 0) continue;
+      var segLabel = 'depth ' + nf(band.start) + ' to ' + nf(band.end) + ' m';
+      var bandLabel = '100-m norm band ' + (band.bandIdx + 1);
+      if(seg.method === 'rotary'){
+        var P = PMAP[seg.soil] || PMAP.medium;
+        var nrm = normForBand(P[0], P[1], band.bandIdx);
+        add3('Drilling of pilot hole by Rotary method (7-5/8" to 9-7/8" bit) in ' + seg.soil + ' formation, ' + segLabel,
+             'm', bandQty, opRate(nrm, machines),
+             'Rotary — ' + seg.soil + ' formation, ' + bandLabel);
+      } else {
+        var nrmd = normForBand(DTH_PILOT_HARD_B, DTH_PILOT_HARD_I, band.bandIdx);
+        add3('Drilling of pilot hole by DTH method (7-5/8" to 9-7/8" bit) in hard formation, ' + segLabel,
+             'm', bandQty, opRate(nrmd, machines),
+             'DTH — hard formation, ' + bandLabel + ', single pass (no reaming)');
+      }
+    }
+  }
+
+  add3('Electrical logging of borehole after pilot hole drilling','m',depth,opRate(LOGGING,machines),'Same rate for all formations and depths');
+  add3('Tubewell design, water quality analysis and submission of report in three copies; sampling of every metre of drilled length into plastic bags and wooden box','job',1,{rate:10000,base:10000,L:{},M:{},X:{}},'Lump-sum item');
+
+  /* ---- REAMING — only for rotary segments ---- */
+  for(var sir=0; sir<segments.length; sir++){
+    var segR = segments[sir];
+    if(segR.method !== 'rotary') continue;
+    var bandsR = splitSegmentByNormBands(segR);
+    var R1 = R1MAP[segR.soil] || R1MAP.medium;
+    var R2 = R2MAP[segR.soil] || R2MAP.medium;
+    for(var bir=0; bir<bandsR.length; bir++){
+      var bR = bandsR[bir];
+      var qR = bR.end - bR.start;
+      if(qR <= 0) continue;
+      var segLabelR = 'depth ' + nf(bR.start) + ' to ' + nf(bR.end) + ' m';
+      var bandLabelR = '100-m norm band ' + (bR.bandIdx + 1);
+      var n1 = normForBand(R1[0], R1[1], bR.bandIdx);
+      add3('1st reaming (13-3/4" bit) in ' + segR.soil + ' formation, ' + segLabelR,
+           'm', qR, opRate(n1, machines),
+           'Applied only to the Rotary-drilled portion — ' + bandLabelR);
+      var n2 = normForBand(R2[0], R2[1], bR.bandIdx);
+      add3('2nd reaming (17-1/2" bit) in ' + segR.soil + ' formation, ' + segLabelR,
+           'm', qR, opRate(n2, machines),
+           'Applied only to the Rotary-drilled portion — ' + bandLabelR);
+      if(r3){
+        var n3 = normForBand(R2[0], R2[1], bR.bandIdx);
+        add3('3rd reaming (22-1/2" bit) in ' + segR.soil + ' formation, ' + segLabelR,
+             'm', qR, opRate(n3, machines),
+             'Applied only to the Rotary-drilled portion — ' + bandLabelR);
+      }
+    }
+  }
+
+  if(recond) add3('Reconditioning of borehole before lowering of pipe assembly of 200 mm and 250 mm dia.','m',depth,opRate(RECOND,machines),'Same rate for all depths');
+  add3('Lowering of pipe assembly of 200 and 250 mm dia. including all necessary cutting, welding and supply and packing of approved size pea gravel in a continuous operation','m',depth,opRate(LOWERING,machines),'Rate independent of depth');
+  if(gravel) add3('Back washing, inner washing and gravel packing','m',depth,opRate(GRAVEL,machines),'Rate independent of depth');
+  if(jet) add3('Water jetting of strainer','m',depth,opRate(JETTING,machines),'Rate independent of depth');
+  add3('Sealing of the borehole with cement grouting including supply and installation of 2 x 3 m long 65 mm dia. medium class GI pipe','5 m',1,opRate(SEALING,machines),'Normally applied for a 5-metre segment at the top');
+  if(dev==='compressor' || dev==='both') add3('Well development by compressor machine (48 hours)','well',wells,opRate(DEV_COMP,machines),'Per well');
+  if(dev==='pump' || dev==='both') add3('Well development by pump','well',wells,opRate(DEV_PUMP,machines),'Per well');
+  add3('Time drawdown pump test (aquifer test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
+  add3('Step drawdown pump test (well test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
+  add3('Recovery test','well',wells,opRate(RECOVERY,machines),'Per well');
+
+  var tot1=0, tot2=0, tot3=0;
+  for(var a=0;a<sec1.length;a++) tot1 += sec1[a].amount;
+  for(var b=0;b<sec2.length;b++) tot2 += sec2[b].amount;
+  for(var c=0;c<sec3.length;c++) tot3 += sec3[c].amount;
+  var sub = tot1 + tot2 + tot3;
+  var vat = sub * vatPct/100;
+  var grand = sub + vat;
+
+  return {sec1:sec1, sec2:sec2, sec3:sec3, tot1:tot1, tot2:tot2, tot3:tot3,
+          sub:sub, vatPct:vatPct, vat:vat, grand:grand,
+          depth:depth, wells:wells,
+          formation: buildSoilSummary(segments),
+          method: buildMethodSummary(segments),
+          segments: segments};
+}
+
+/* ============ DOC HELPERS ============ */
+function docCoverPage(docTitle){
+  var org = savedVal('p_org','NEPAL OIL CORPORATION');
+  var div = savedVal('p_div','Gandaki Province Office');
+  var loc = savedVal('p_loc','Kaski, Pokhara');
+  var pname = savedVal('p_name','Deep Boring Works');
+  var pfy = savedVal('p_fy','2083/84');
+  var cons = savedVal('p_consultant','TechArc Engineering and Construction Private Limited, Pokhara 07');
+  var h = '<div class="cover-page">';
+  h += '<div class="cover-top">';
+  h += '<div class="cover-org">'+esc(org)+'</div>';
+  h += '<div class="cover-sub">'+esc(div)+'</div>';
+  h += '<div class="cover-sub">'+esc(loc)+'</div>';
+  h += '</div>';
+  h += '<div class="cover-middle">';
+  h += '<hr class="cover-rule">';
+  h += '<div class="cover-title">'+esc(docTitle)+'</div>';
+  h += '<hr class="cover-rule-thin">';
+  h += '<div class="cover-for">for</div>';
+  h += '<div class="cover-project">'+esc(pname)+'</div>';
+  h += '<div class="cover-fy">Fiscal Year '+esc(pfy)+'</div>';
+  h += '<hr class="cover-rule">';
+  h += '</div>';
+  h += '<div class="cover-bottom">';
+  h += '<div class="cover-prepared-label">Prepared by</div>';
+  h += '<div class="cover-consultant">'+esc(cons)+'</div>';
+  h += '<div class="cover-date">Date: ______________</div>';
+  h += '</div>';
+  h += '</div>';
+  return h;
+}
+function docSectionOpen(sectionName, isFirst){
+  var pname = savedVal('p_name','Deep Boring Works');
+  var h = '<div class="doc-section'+(isFirst?'':' page-break-before')+'">';
+  h += '<div class="section-hdr">'+esc(pname)+'</div>';
+  return h;
+}
+function docSectionClose(){
+  var cons = savedVal('p_consultant','TechArc Engineering and Construction Private Limited, Pokhara 07');
+  var h = '<div class="section-ftr">Consultant: '+esc(cons)+'</div>';
+  h += '</div>';
+  return h;
+}
+
+/* ============ ESTIMATE ============ */
+function renderEstimate(){
+  try{
+    var div = el('estimate-doc'); if(!div) return;
+    var data = buildBOQ();
+    var h = '';
+    h += docCoverPage('Estimate');
+    h += docSectionOpen('Abstract of Cost', true);
+    h += '<div class="doc-title">Estimate / Abstract of Cost</div>';
+    h += '<div class="meta">';
+    h += '<div class="row"><span class="lbl">Name of Work :</span><span class="val">'+esc(savedVal('p_work','Drilling and Installation of Deep Tubewell'))+'</span></div>';
+    var ifb = savedVal('p_pkg',''); if(ifb) h += '<div class="row"><span class="lbl">Contract / IFB No. :</span><span class="val">'+esc(ifb)+'</span></div>';
+    h += '<div class="row"><span class="lbl">Well ID :</span><span class="val">'+esc(savedVal('p_well','')||'—')+'</span></div>';
+    h += '<div class="row"><span class="lbl">Drilling Method :</span><span class="val">'+esc(data.method)+'</span></div>';
+    h += '<div class="row"><span class="lbl">Drilling Depth :</span><span class="val">'+nf(data.depth)+' m below ground level</span></div>';
+    h += '<div class="row"><span class="lbl">Formation :</span><span class="val">'+esc(data.formation)+'</span></div>';
+    h += '<div class="row"><span class="lbl">No. of Wells :</span><span class="val">'+data.wells+'</span></div>';
+    h += '</div>';
+    h += '<table><thead><tr><th style="width:6%">S.No.</th><th>Description of Work</th><th style="width:6%">Unit</th><th style="width:9%" class="amt-col">Quantity</th><th style="width:11%" class="amt-col">Rate (Rs.)</th><th style="width:13%" class="amt-col">Amount (Rs.)</th><th style="width:8%">Remarks</th></tr></thead><tbody>';
+    h += '<tr class="sec-head"><td>1.</td><td colspan="6">Mobilization, Demobilization and Site Preparation</td></tr>';
+    for(var i=0;i<data.sec1.length;i++){ var it = data.sec1[i]; h += '<tr><td>'+esc(it.no)+'</td><td class="desc">'+esc(it.desc)+'</td><td class="unit-col">'+esc(it.unit)+'</td><td class="amt-col">'+nf(it.qty)+'</td><td class="amt-col">'+nf2(it.rate)+'</td><td class="amt-col">'+nf2(it.amount)+'</td><td></td></tr>'; }
+    h += '<tr class="tot-row"><td colspan="5">Total of Section 1</td><td class="amt-col">'+nf2(data.tot1)+'</td><td></td></tr>';
+    h += '<tr class="sec-head"><td>2.</td><td colspan="6">Supply of Well Materials</td></tr>';
+    for(var j=0;j<data.sec2.length;j++){ var it2 = data.sec2[j]; h += '<tr><td>'+esc(it2.no)+'</td><td class="desc">'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="amt-col">'+nf(it2.qty)+'</td><td class="amt-col">'+nf2(it2.rate)+'</td><td class="amt-col">'+nf2(it2.amount)+'</td><td></td></tr>'; }
+    h += '<tr class="tot-row"><td colspan="5">Total of Section 2</td><td class="amt-col">'+nf2(data.tot2)+'</td><td></td></tr>';
+    h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
+    for(var k=0;k<data.sec3.length;k++){ var it3 = data.sec3[k]; h += '<tr><td>'+esc(it3.no)+'</td><td class="desc">'+esc(it3.desc)+'</td><td class="unit-col">'+esc(it3.unit)+'</td><td class="amt-col">'+nf(it3.qty)+'</td><td class="amt-col">'+nf2(it3.rate)+'</td><td class="amt-col">'+nf2(it3.amount)+'</td><td></td></tr>'; }
+    h += '<tr class="tot-row"><td colspan="5">Total of Section 3</td><td class="amt-col">'+nf2(data.tot3)+'</td><td></td></tr>';
+    h += '<tr><td colspan="7" style="border:none;height:6px"></td></tr>';
+    h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
+    h += '<tr class="tot-row"><td colspan="5">VAT @ '+data.vatPct.toFixed(2)+'%</td><td class="amt-col">'+nf2(data.vat)+'</td><td></td></tr>';
+    h += '<tr class="tot-row"><td colspan="5"><b>Grand Total</b></td><td class="amt-col"><b>'+nf2(data.grand)+'</b></td><td></td></tr>';
+    h += '</tbody></table>';
+    h += '<div class="inwords">Amount in words (Grand Total): <b>'+numberToWords(data.grand)+'</b></div>';
+    h += '<div class="note">The above rates are inclusive of all labour, machinery, materials and contractor\'s profit, exclusive of VAT unless specified. Estimate prepared on the basis of DoWR Tubewell Drilling Norms (Revised 2057).</div>';
+    h += docSectionClose();
+    div.innerHTML = h;
+  }catch(e){ console.error('renderEstimate', e); var box = el('estimate-doc'); if(box) box.innerHTML = '<div style="padding:20px;border:1px solid #000">Error: '+esc(e.message)+'</div>'; }
+}
+
+/* ============ BLANK BOQ ============ */
+function renderBlankBOQ(){
+  try{
+    var div = el('boq-doc'); if(!div) return;
+    var data = buildBOQ();
+    var ifb = savedVal('p_pkg','');
+    var h = '';
+    h += docCoverPage('Bill of Quantity');
+    h += docSectionOpen('Bill of Quantity', true);
+    h += '<div class="doc-title">Bill of Quantity</div>';
+    h += '<div class="meta">';
+    h += '<div class="row"><span class="lbl">Name of Work :</span><span class="val">'+esc(savedVal('p_work','Drilling and Installation of Deep Tubewell'))+'</span></div>';
+    if(ifb) h += '<div class="row"><span class="lbl">IFB / Contract No. :</span><span class="val">'+esc(ifb)+'</span></div>';
+    h += '<div class="row"><span class="lbl">Drilling Depth :</span><span class="val">'+nf(data.depth)+' m below ground level</span></div>';
+    h += '<div class="row"><span class="lbl">Formation :</span><span class="val">'+esc(data.formation)+'</span></div>';
+    h += '<div class="row"><span class="lbl">No. of Wells :</span><span class="val">'+data.wells+'</span></div>';
+    h += '</div>';
+    h += '<table><thead><tr><th style="width:7%">S.No.</th><th>Description of Work</th><th style="width:7%">Unit</th><th style="width:10%">Quantity</th><th style="width:13%">Rate (Rs.)</th><th style="width:15%">Amount (Rs.)</th><th style="width:9%">Remarks</th></tr></thead><tbody>';
+    h += '<tr class="sec-head"><td>1.</td><td colspan="6">Mobilization, Demobilization and Site Preparation</td></tr>';
+    for(var i=0;i<data.sec1.length;i++){ var it = data.sec1[i]; h += '<tr><td>'+esc(it.no)+'</td><td class="desc">'+esc(it.desc)+'</td><td class="unit-col">'+esc(it.unit)+'</td><td class="qty-col">'+nf(it.qty)+'</td><td></td><td></td><td></td></tr>'; }
+    h += '<tr class="sec-head"><td>2.</td><td colspan="6">Supply of Well Materials</td></tr>';
+    for(var j=0;j<data.sec2.length;j++){ var it2 = data.sec2[j]; h += '<tr><td>'+esc(it2.no)+'</td><td class="desc">'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="qty-col">'+nf(it2.qty)+'</td><td></td><td></td><td></td></tr>'; }
+    h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
+    for(var k=0;k<data.sec3.length;k++){ var it3 = data.sec3[k]; h += '<tr><td>'+esc(it3.no)+'</td><td class="desc">'+esc(it3.desc)+'</td><td class="unit-col">'+esc(it3.unit)+'</td><td class="qty-col">'+nf(it3.qty)+'</td><td></td><td></td><td></td></tr>'; }
+    h += '<tr><td colspan="7" style="border:none;height:8px"></td></tr>';
+    h += '<tr><td colspan="5" style="text-align:right;font-weight:700">Sub-Total (1 + 2 + 3) Rs.</td><td></td><td></td></tr>';
+    h += '<tr><td colspan="5" style="text-align:right;font-weight:700">VAT @ '+data.vatPct.toFixed(2)+'% Rs.</td><td></td><td></td></tr>';
+    h += '<tr><td colspan="5" style="text-align:right;font-weight:700">Grand Total Rs.</td><td></td><td></td></tr>';
+    h += '</tbody></table>';
+    h += '<div class="inwords" style="margin-top:14px">Amount in words (Grand Total): <span style="display:inline-block;min-width:80%;border-bottom:1px dotted #000">&nbsp;</span></div>';
+    h += '<div style="margin-top:16px;font-size:11.5px"><div style="font-weight:700;margin-bottom:4px">Note:</div>The bidder shall fill in the Rate (Rs.) and Amount (Rs.) columns in ink. Rates shall be quoted in figures and the Grand Total shall also be written in words. Any erasure or overwriting shall be duly initialled by the bidder. The quantities are as per design and are subject to variation as per actual site conditions and directions of the Engineer-in-Charge.</div>';
+    h += '<div style="margin-top:34px;display:grid;grid-template-columns:1fr 1fr;gap:50px;font-size:12px"><div><div style="font-weight:700;margin-bottom:6px">Bidder\'s Declaration</div><div style="margin-bottom:4px">Name of Firm: ______________________________</div><div style="margin-bottom:4px">Name of Authorized Person: _______________________</div><div style="margin-bottom:4px;margin-top:12px">Signature: ______________________</div><div style="margin-bottom:4px">Date: ___________________________</div><div style="margin-bottom:4px;margin-top:8px">Office Seal:</div></div><div><div style="font-weight:700;margin-bottom:6px">For Office Use</div><div style="margin-bottom:4px">Checked By: ______________________</div><div style="margin-bottom:4px;margin-top:12px">Verified By: ______________________</div><div style="margin-bottom:4px;margin-top:12px">Approved By: ______________________</div></div></div>';
+    h += docSectionClose();
+    div.innerHTML = h;
+  }catch(e){ console.error('renderBlankBOQ', e); var box = el('boq-doc'); if(box) box.innerHTML = '<div style="padding:20px;border:1px solid #000">Error: '+esc(e.message)+'</div>'; }
+}
+
+/* ============ MACHINERY ANALYSIS BLOCK ============ */
+function buildMachineReportHTML(m, mr, fuel, numberPrefix){
+  var isFixed = mr.isFixed, bd = mr.bd || {};
+  var h = '<div class="ma-block">';
+  h += '<div class="ma-title">'+(numberPrefix ? esc(numberPrefix) + '   ' : '')+esc(m.name)+'</div>';
+  if(isFixed){
+    h += '<p class="para">This item is a fixed-rate charge prescribed by the norms for the corresponding operation. It is not derived from cost primitives.</p>';
+    h += '<div class="ma-calc">';
+    h += '<div class="ma-calc-line final">Fixed Working Charge of '+esc(m.name)+' = Rs. '+nf2(mr.working)+' /hr</div>';
+    h += '</div>';
+    h += '</div>';
+    return h;
+  }
+  h += '<p class="para">The working rate of this machine has been derived from its primitives following the calculation format adopted in the norms. Every component below is shown with the numerator and denominator placed as they appear in the norms sheet, so that the arithmetic may be verified line by line.</p>';
+  h += '<table class="ma-tbl">';
+  h += '<tr><td class="lbl">Cost of Machine (Rs.)</td><td class="val">'+nf2(m.cost)+'</td></tr>';
+  h += '<tr><td class="lbl">Economical Life (hrs)</td><td class="val">'+nf(m.life)+'</td></tr>';
+  h += '<tr><td class="lbl">Yearly Working Hours</td><td class="val">'+nf(m.yearlyHrs)+'</td></tr>';
+  h += '<tr><td class="lbl">Overhaul % of Cost</td><td class="val">'+(Number(m.overhaulPct)*100).toFixed(0)+'%</td></tr>';
+  h += '<tr><td class="lbl">Maintenance % of Cost</td><td class="val">'+(Number(m.maintPct)*100).toFixed(0)+'%</td></tr>';
+  h += '<tr><td class="lbl">Minor Repair (Rs./hr)</td><td class="val">'+nf2(m.minorRepair)+'</td></tr>';
+  h += '</table>';
+  h += '<div class="ma-calc">';
+  h += '<div class="ma-calc-hdr">1. Ownership Cost :&ndash;</div>';
+  h += '<div class="ma-calc-line">a) Depreciation cost/hr = <span class="frac"><span class="num">'+nf2(m.cost)+'</span><span class="den">'+nf(m.life)+'</span></span> = Rs. <span class="res">'+nf2(bd.dep)+'</span></div>';
+  h += '<div class="ma-calc-line">b) Insurance cost/hr = <span class="frac"><span class="num">'+nf2(m.cost)+' X 0.02</span><span class="den">'+nf(m.yearlyHrs)+'</span></span> = Rs. <span class="res">'+nf2(bd.ins)+'</span></div>';
+  h += '<div class="ma-calc-line">c) Interest cost/hr = <span class="frac"><span class="num">'+nf2(m.cost)+' X 0.01</span><span class="den">'+nf(m.yearlyHrs)+'</span></span> = Rs. <span class="res">'+nf2(bd.inter)+'</span></div>';
+  h += '<div class="ma-calc-line tot"><span>Total</span> Rs. <span class="res">'+nf2(bd.cap)+'</span></div>';
+  h += '<div class="ma-calc-hdr">2. Operation Cost :&ndash;</div>';
+  h += '<div class="ma-calc-subhdr">2.1 Maintenance Cost :&ndash;</div>';
+  h += '<div class="ma-calc-line">a) Overhauling cost/hr = <span class="frac"><span class="num">'+nf2(m.cost)+' X '+(Number(m.overhaulPct)).toFixed(2)+'</span><span class="den">'+nf(m.life)+'</span></span> = Rs. <span class="res">'+nf2(bd.over)+'</span></div>';
+  h += '<div class="ma-calc-line">b) Operation &amp; maintenance cost/hr = <span class="frac"><span class="num">'+nf2(m.cost)+' X '+(Number(m.maintPct)).toFixed(2)+'</span><span class="den">'+nf(m.life)+'</span></span> = Rs. <span class="res">'+nf2(bd.maint)+'</span></div>';
+  h += '<div class="ma-calc-line tot"><span>Sub-total</span> Rs. <span class="res">'+nf2(bd.om)+'</span></div>';
+  h += '<div class="ma-calc-subhdr">2.2 Consumables Cost :&ndash;</div>';
+  var fuelAny = false;
+  for(var fk in m.fuel){ fuelAny = true; break; }
+  if(fuelAny){
+    h += '<div class="ma-calc-line">a) Oil &amp; lubrication cost/hr :&ndash;</div>';
+    for(var fk2 in m.fuel){
+      var cons = m.fuel[fk2], price = fuel[fk2] || 0;
+      h += '<div class="ma-calc-line indent3">'+esc(FUEL_SHORT[fk2]||fk2)+' '+nf(cons)+' lit @ Rs. '+nf2(price)+' = Rs. '+nf2(cons*price)+'</div>';
+    }
+    h += '<div class="ma-calc-line indent2 tot"><span>Sub-total</span> Rs. <span class="res">'+nf2(bd.fuelCost)+'</span></div>';
+  }
+  h += '<div class="ma-calc-line">b) Spare parts/hr :&ndash;</div>';
+  if(m.spareType==='tyre'){
+    h += '<div class="ma-calc-line indent3">Cost of tyre = <span class="frac"><span class="num">Rs. '+nf2(m.tyreCost)+' X '+nf(m.tyreNum)+'</span><span class="den">'+nf(m.tyreLife)+' hrs.</span></span> = Rs. '+nf2((m.tyreCost*m.tyreNum)/m.tyreLife)+'</div>';
+    h += '<div class="ma-calc-line indent3">Consumable spare parts (L.S.) = Rs. '+nf2(m.spareMisc)+'</div>';
+    h += '<div class="ma-calc-line indent3">Extra (L.S.) = Rs. '+nf2(m.spareExtra)+'</div>';
+  } else {
+    h += '<div class="ma-calc-line indent3">Consumable spare parts (L.S.) = Rs. '+nf2(m.spareMisc)+'</div>';
+    h += '<div class="ma-calc-line indent3">Extra (L.S.) = Rs. '+nf2(m.spareExtra)+'</div>';
+  }
+  h += '<div class="ma-calc-line indent2 tot"><span>Total</span> Rs. <span class="res">'+nf2(bd.spare)+'</span></div>';
+  var hasDriver = (Number(m.driverSalary)||0) > 0;
+  var hasHelper = (Number(m.helperSalary)||0) > 0;
+  if(hasDriver || hasHelper){
+    h += '<div class="ma-calc-line">c) Salaries/hr :&ndash;</div>';
+    if(hasDriver){
+      h += '<div class="ma-calc-line indent3">Driver = <span class="frac"><span class="num">Rs. '+nf2(m.driverSalary)+'</span><span class="den">30 day X 8 hrs.</span></span> = Rs. '+nf2(m.driverSalary/240)+'</div>';
+    }
+    if(hasHelper){
+      h += '<div class="ma-calc-line indent3">Helper = <span class="frac"><span class="num">Rs. '+nf2(m.helperSalary)+'</span><span class="den">30 day X 8 hrs.</span></span> = Rs. '+nf2(m.helperSalary/240)+'</div>';
+    }
+    h += '<div class="ma-calc-line indent2 tot"><span>Sub-total</span> Rs. <span class="res">'+nf2(bd.personnel)+'</span></div>';
+  }
+  if(bd.minor > 0){
+    h += '<div class="ma-calc-line">d) Improvement and other minor repair/hr (L.S.) = Rs. '+nf2(bd.minor)+'</div>';
+  }
+  h += '<div class="ma-calc-line tot"><span>Actual Consumer Cost/hr = (a + b + c + d)</span> Rs. <span class="res">'+nf2(bd.running)+'</span></div>';
+  h += '<div class="ma-calc-hdr">3. Supervision &amp; Overhead Expenses/hr :&ndash;</div>';
+  h += '<div class="ma-calc-line">= <span class="frac"><span class="num">'+nf2(m.cost)+' X 0.05</span><span class="den">'+nf(m.yearlyHrs)+'</span></span> = Rs. <span class="res">'+nf2(bd.sup)+'</span></div>';
+  h += '<div class="ma-calc-line final">Total Expenses per Hour = (1 + 2 + 3) = Rs. '+nf2(mr.working)+'</div>';
+  h += '<div class="ma-calc-line final2">Working Charge of '+esc(m.name)+' = Rs. '+nf2(mr.working)+' /hr</div>';
+  h += '<div class="ma-calc-line final2">Say Rs. '+nf2(Math.floor(mr.working))+' /hr</div>';
+  h += '<div class="ma-calc-line final2">Idle Charge = Capital Recovery + O&amp;M + Supervision = Rs. '+nf2(mr.idle)+' /hr</div>';
+  h += '</div>';
+  h += '<p class="para"><b>Interpretation:</b> The working rate of Rs '+nf2(mr.working)+' per hour is charged whenever the machine is productive on site. The idle rate of Rs '+nf2(mr.idle)+' per hour applies only when the machine is on site but non-productive, and excludes fuel, spares and personnel components not consumed while idle.</p>';
+  h += '</div>';
+  return h;
+}
+
+/* ============ RATE ANALYSIS BLOCK ============ */
+function buildRateAnalysisHTML(item){
+  if(!item.ri) return '';
+  var ri = item.ri;
+  var hasL = Object.keys(ri.L).length > 0;
+  var hasM = Object.keys(ri.M).length > 0;
+  var hasX = Object.keys(ri.X).length > 0;
+  var h = '<div class="ra-block">';
+  h += '<div class="ra-hdr">'+esc(item.no)+'. '+esc(item.desc)+'</div>';
+  h += '<div class="ra-meta"><b>Quantity:</b> '+nf(item.qty)+' '+esc(item.unit)+' &nbsp; | &nbsp; <b>Unit Rate:</b> Rs '+nf2(item.rate)+' &nbsp; | &nbsp; <b>Amount:</b> Rs '+nf2(item.amount)+'</div>';
+  if(item.notes) h += '<p class="para" style="font-size:11px;margin:4px 0"><b>Note:</b> '+esc(item.notes)+'</p>';
+  h += '<p class="para" style="font-size:11px">The unit rate of this item is built up from the underlying labour, machinery and material coefficients prescribed by the DoWR Norms (Revised 2057). Each coefficient is multiplied by the corresponding unit rate from Section 4, Section 5 or Section 6 of this report. The sum of all components forms the base rate, to which the prescribed contractor\'s profit is added.</p>';
+  h += '<table class="ra-tbl">';
+  h += '<thead><tr><th style="width:50%">Resource</th><th style="width:12%">Unit</th><th style="width:12%">Coeff.</th><th style="width:13%">Rate (Rs.)</th><th style="width:13%">Amount (Rs.)</th></tr></thead><tbody>';
+  if(hasL){
+    h += '<tr class="grp"><td colspan="5">Labour Component</td></tr>';
+    for(var rid in ri.L){
+      var lname = rid;
+      for(var x=0;x<LABOUR_DEFS.length;x++) if(LABOUR_DEFS[x].id===rid){ lname = LABOUR_DEFS[x].name; break; }
+      var lrate = Number(state.labour[rid])||0;
+      var amt = ri.L[rid] * lrate;
+      h += '<tr><td>'+esc(lname)+'</td><td class="unit">man-day</td><td class="num">'+Number(ri.L[rid]).toFixed(4)+'</td><td class="num">'+nf2(lrate)+'</td><td class="num">'+nf2(amt)+'</td></tr>';
+    }
+  }
+  if(hasM){
+    h += '<tr class="grp"><td colspan="5">Machinery Component</td></tr>';
+    for(var mid in ri.M){
+      var mname = mid;
+      for(var y=0;y<MACHINE_DEFS.length;y++) if(MACHINE_DEFS[y].id===mid){ mname = MACHINE_DEFS[y].name; break; }
+      var mrate = (state.machines[mid] ? calcMachineRate(state.machines[mid], state.fuel).working : 0);
+      var amt2 = ri.M[mid] * mrate;
+      h += '<tr><td>'+esc(mname)+'</td><td class="unit">hour</td><td class="num">'+Number(ri.M[mid]).toFixed(4)+'</td><td class="num">'+nf2(mrate)+'</td><td class="num">'+nf2(amt2)+'</td></tr>';
+    }
+  }
+  if(hasX){
+    h += '<tr class="grp"><td colspan="5">Material Component</td></tr>';
+    for(var xid in ri.X){
+      var xname = xid, xunit = '';
+      for(var z=0;z<MATERIAL_DEFS.length;z++) if(MATERIAL_DEFS[z].id===xid){ xname = MATERIAL_DEFS[z].name; xunit = MATERIAL_DEFS[z].unit; break; }
+      var xrate = getMaterialRate(xid);
+      var amt3 = ri.X[xid] * xrate;
+      h += '<tr><td>'+esc(xname)+'</td><td class="unit">'+esc(xunit)+'</td><td class="num">'+Number(ri.X[xid]).toFixed(4)+'</td><td class="num">'+nf2(xrate)+'</td><td class="num">'+nf2(amt3)+'</td></tr>';
+    }
+  }
+  var subL = ri.L ? Object.keys(ri.L).reduce(function(a,k){return a + ri.L[k]*(Number(state.labour[k])||0);},0) : 0;
+  var subM = ri.M ? Object.keys(ri.M).reduce(function(a,k){return a + ri.M[k]*(state.machines[k] ? calcMachineRate(state.machines[k], state.fuel).working : 0);},0) : 0;
+  var subX = ri.X ? Object.keys(ri.X).reduce(function(a,k){return a + ri.X[k]*getMaterialRate(k);},0) : 0;
+  h += '<tr class="sub"><td colspan="4">Total Cost of Labour (per unit)</td><td class="num">'+nf2(subL)+'</td></tr>';
+  h += '<tr class="sub"><td colspan="4">Total Cost of Machinery (per unit)</td><td class="num">'+nf2(subM)+'</td></tr>';
+  h += '<tr class="sub"><td colspan="4">Total Cost of Material (per unit)</td><td class="num">'+nf2(subX)+'</td></tr>';
+  h += '<tr><td colspan="5" style="border:none;height:6px"></td></tr>';
+  h += '<tr class="sub" style="background:#e8e8e8"><td colspan="4"><b>Labour cost (per unit)</b></td><td class="num"><b>Rs. '+nf2(subL)+'</b></td></tr>';
+  h += '<tr class="sub" style="background:#e8e8e8"><td colspan="4"><b>Machinery cost (per unit)</b></td><td class="num"><b>Rs. '+nf2(subM)+'</b></td></tr>';
+  h += '<tr class="sub" style="background:#e8e8e8"><td colspan="4"><b>Material cost (per unit)</b></td><td class="num"><b>Rs. '+nf2(subX)+'</b></td></tr>';
+  h += '<tr class="sub"><td colspan="4">Base Rate (L + M + X)</td><td class="num">'+nf2(ri.base)+'</td></tr>';
+  h += '<tr class="sub"><td colspan="4">Contractor\'s Profit @ '+val('in_profit',15).toFixed(2)+'% of Base Rate</td><td class="num">'+nf2(ri.rate - ri.base)+'</td></tr>';
+  h += '<tr class="final"><td colspan="4"><b>Unit Rate (Rs/'+esc(item.unit)+')</b></td><td class="num"><b>'+nf2(ri.rate)+'</b></td></tr>';
+  h += '<tr class="final"><td colspan="4"><b>Amount for '+nf(item.qty)+' '+esc(item.unit)+'</b></td><td class="num"><b>'+nf2(item.amount)+'</b></td></tr>';
+  h += '</tbody></table>';
+  h += '</div>';
+  return h;
+}
+
+/* ============ DETAILED REPORT ============ */
+function renderDetailed(){
+  try{
+    var div = el('detailed-doc'); if(!div) return;
+    var data = buildBOQ();
+    var machines = getAllMachineRates();
+    var pname = savedVal('p_name','Deep Boring Works');
+    var pfy = savedVal('p_fy','2083/84');
+    var pwork = savedVal('p_work','Drilling and Installation of Deep Tubewell');
+    var cons = savedVal('p_consultant','TechArc Engineering and Construction Private Limited, Pokhara 07');
+    var h = '';
+
+    h += '<div class="cover-page">';
+    h += '<div class="cover-top">';
+    h += '<div class="cover-org">'+esc(savedVal('p_org','NEPAL OIL CORPORATION'))+'</div>';
+    h += '<div class="cover-sub">'+esc(savedVal('p_div','Gandaki Province Office'))+'</div>';
+    h += '<div class="cover-sub">'+esc(savedVal('p_loc','Kaski, Pokhara'))+'</div>';
+    h += '</div>';
+    h += '<div class="cover-middle">';
+    h += '<hr class="cover-rule">';
+    h += '<div class="cover-title">Detailed Report</div>';
+    h += '<hr class="cover-rule-thin">';
+    h += '<div class="cover-for">on</div>';
+    h += '<div class="cover-project">'+esc(pwork)+'</div>';
+    h += '<div class="cover-for" style="margin-top:10px">for</div>';
+    h += '<div class="cover-project">'+esc(pname)+'</div>';
+    h += '<div class="cover-fy">Fiscal Year '+esc(pfy)+'</div>';
+    h += '<hr class="cover-rule">';
+    h += '</div>';
+    h += '<div class="cover-bottom">';
+    h += '<div class="cover-prepared-label">Prepared by</div>';
+    h += '<div class="cover-consultant">'+esc(cons)+'</div>';
+    h += '<div class="cover-date">Date: ______________</div>';
+    h += '</div>';
+    h += '</div>';
+
+    h += docSectionOpen('Table of Contents', true);
+    h += '<div class="sec-title">Table of Contents</div>';
+    h += '<ol style="font-size:12.5px;line-height:2">';
+    h += '<li>Introduction</li>';
+    h += '<li>Project Description</li>';
+    h += '<li>Methodology</li>';
+    h += '<li>Machinery Analysis</li>';
+    h += '<li>Labour Analysis</li>';
+    h += '<li>Material Analysis</li>';
+    h += '<li>Item-wise Rate Analysis</li>';
+    h += '<li>Assumed Rates Summary</li>';
+    h += '<li>Abstract of Cost</li>';
+    h += '<li>References</li>';
+    h += '<li>Limitations and Disclaimers</li>';
+    h += '</ol>';
+    h += docSectionClose();
+
+    h += docSectionOpen('Introduction', false);
+    h += '<div class="sec-title">1. Introduction</div>';
+    h += '<div class="sub-title">1.1 Purpose</div>';
+    h += '<p class="para">This report presents in detail the estimation, rate analysis and quantity determination for the <b>'+esc(pwork)+'</b> under <b>'+esc(pname)+'</b> for the Fiscal Year <b>'+esc(pfy)+'</b>. The report is prepared as a supporting document to the Abstract of Cost and the Bill of Quantity, and is intended to demonstrate the basis on which each and every rate has been derived.</p>';
+    h += '<p class="para">The estimate follows the analytical approach mandated by the Nepal Oil Corporation for deep boring works, in strict conformity with the <i>Norms for Tubewell Drilling (Revised 2057)</i> issued by the Ministry of Water Resources, Government of Nepal.</p>';
+    h += '<div class="sub-title">1.2 Scope</div>';
+    h += '<p class="para">The scope of the present estimate covers the complete execution of one deep tubewell as designed, including mobilization, well materials, pilot hole drilling, reaming, logging, reconditioning, lowering of pipe assembly, gravel packing, water jetting, sealing, well development and pump testing.</p>';
+    h += '<div class="sub-title">1.3 Basis of Estimate</div>';
+    h += '<p class="para">The estimate has been prepared on the following basis:</p>';
+    h += '<ol>';
+    h += '<li><b>Norms.</b> The coefficient tables of the DoWR Tubewell Drilling Norms (Revised 2057) have been strictly applied, including the depth-band convention whereby, for every additional 100 m of depth beyond the first, the increment shown in the corresponding row is added to the base coefficient set.</li>';
+    h += '<li><b>Depth Segments.</b> The well is divided into one or more depth segments. Each segment has a specific soil type (Soft, Medium or Hard) and a specific drilling method (Rotary or DTH). The applicable coefficient set for each segment is chosen by (soil type) x (drilling method). For DTH segments, the norms provide only the hard-formation coefficient table — the same table is used regardless of soil selection, and no reaming operations are billed for DTH segments because DTH produces the final-diameter bore in a single pass.</li>';
+    h += '<li><b>Labour Rates.</b> District labour rates for Fiscal Year '+esc(pfy)+' for Kaski District have been adopted and are listed in Section 5.</li>';
+    h += '<li><b>Material Rates.</b> Prevailing market rates of materials have been adopted, with transport cost added per unit where applicable, and are listed in Section 6.</li>';
+    h += '<li><b>Machinery Rates.</b> Machinery working and idle rates are derived from first principles. Each derivation is presented in Section 4.</li>';
+    h += '<li><b>Contractor\'s Profit.</b> A profit margin of '+(val('in_profit',15)).toFixed(2)+'% on the base rate has been applied to each item.</li>';
+    h += '<li><b>VAT.</b> Value Added Tax at '+val('in_vat',13).toFixed(2)+'% has been applied on the sub-total of the Abstract of Cost.</li>';
+    h += '</ol>';
+    h += docSectionClose();
+
+    h += docSectionOpen('Project Description', false);
+    h += '<div class="sec-title">2. Project Description</div>';
+    h += '<div class="sub-title">2.1 Location and Client</div>';
+    h += '<p class="para">The project site is located in <b>'+esc(savedVal('p_loc','Kaski, Pokhara'))+'</b>, under the jurisdiction of the <b>'+esc(savedVal('p_div','Gandaki Province Office'))+'</b> of the <b>'+esc(savedVal('p_org','Nepal Oil Corporation'))+'</b>. All works described herein are proposed to be executed during the Fiscal Year <b>'+esc(pfy)+'</b>.</p>';
+    h += '<div class="sub-title">2.2 Design Parameters</div>';
+    h += '<table><tbody>';
+    h += '<tr><td>Total Design Depth</td><td class="amt-col">'+nf(data.depth)+' m below ground level</td></tr>';
+    h += '<tr><td>Drilling Method (Overall)</td><td class="amt-col">'+esc(data.method)+'</td></tr>';
+    h += '<tr><td>Formation (Overall)</td><td class="amt-col">'+esc(data.formation)+'</td></tr>';
+    h += '<tr><td>Number of Wells</td><td class="amt-col">'+data.wells+'</td></tr>';
+    h += '<tr><td>Final Borehole Diameter</td><td class="amt-col">17-1/2 inch (450 mm) typical / 22-1/2 inch (550 mm) if 3rd reaming</td></tr>';
+    h += '</tbody></table>';
+    h += '<div class="sub-title">2.3 Depth Segments — Soil Type and Drilling Method</div>';
+    h += '<p class="para">The well has been analysed as the following depth segments. The applicable norm coefficient table is chosen per segment from the soil type and drilling method shown.</p>';
+    h += '<table><thead><tr><th>#</th><th class="amt-col">From (m)</th><th class="amt-col">To (m)</th><th>Soil Type</th><th>Drilling Method</th><th class="amt-col">Length (m)</th></tr></thead><tbody>';
+    for(var si=0; si<data.segments.length; si++){
+      var seg = data.segments[si];
+      h += '<tr><td>'+(si+1)+'</td><td class="amt-col">'+nf(seg.start)+'</td><td class="amt-col">'+nf(seg.end)+'</td><td style="text-transform:capitalize">'+esc(seg.soil)+'</td><td>'+(seg.method === 'rotary' ? 'Rotary' : 'DTH')+'</td><td class="amt-col">'+nf(seg.end - seg.start)+'</td></tr>';
+    }
+    h += '</tbody></table>';
+    h += docSectionClose();
+
+    h += docSectionOpen('Methodology', false);
+    h += '<div class="sec-title">3. Methodology</div>';
+    h += '<div class="sub-title">3.1 General Approach</div>';
+    h += '<p class="para">The estimate has been prepared by the conventional unit-rate method. For each item of work, a unit rate is derived from the underlying labour, machinery and material coefficients, and the unit rate is then multiplied by the quantity of that item to obtain the amount.</p>';
+    h += '<div class="sub-title">3.2 Norms and Depth-Band Convention</div>';
+    h += '<p class="para">The DoWR Norms give, for each drilling and reaming operation, a base coefficient set applicable to the first 100 m of depth and a separate increment coefficient set applicable to each additional 100 m. The rate applicable to a borehole segment between 100 m and 200 m is the sum of the base and one increment; the rate for a segment between 200 m and 300 m is the sum of the base and two increments; and so on. This is applied per depth segment defined by the user.</p>';
+    h += '<div class="sub-title">3.3 Rate Build-Up Formula</div>';
+    h += '<table style="width:auto;margin-left:20px"><tbody>';
+    h += '<tr><td style="border:none;padding:2px 8px">Labour cost</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Sum of (coefficient x labour rate)</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Machinery cost</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Sum of (hours x machine working rate)</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Material cost</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Sum of (quantity x material rate at site)</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Base rate</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Labour + Machinery + Material</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Unit rate</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Base rate x (1 + Profit percent)</td></tr>';
+    h += '</tbody></table>';
+    h += '<div class="sub-title">3.4 Machinery Working and Idle Rates</div>';
+    h += '<table style="width:auto;margin-left:20px"><tbody>';
+    h += '<tr><td style="border:none;padding:2px 8px">Depreciation / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost / Economical life (hrs)</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Insurance / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost x 2% / Yearly working hours</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Interest / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost x 1% / Yearly working hours</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Overhaul / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost x Overhaul % / Economical life</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Maintenance / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost x Maintenance % / Economical life</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Supervision / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost x 5% / Yearly working hours</td></tr>';
+    h += '</tbody></table>';
+    h += '<p class="para" style="margin-top:8px"><b>Working rate</b> = Capital Recovery + O &amp; M + Running + Supervision. <b>Idle rate</b> = Capital Recovery + O &amp; M + Supervision.</p>';
+    h += '<div class="sub-title">3.5 Contractor\'s Profit</div>';
+    h += '<p class="para">A profit margin of <b>'+(val('in_profit',15)).toFixed(2)+'%</b> on the base rate has been applied to each item of work as prescribed by the norms.</p>';
+    h += '<div class="sub-title">3.6 Value Added Tax</div>';
+    h += '<p class="para">Value Added Tax at <b>'+val('in_vat',13).toFixed(2)+'%</b> has been applied on the Sub-Total of the Abstract of Cost.</p>';
+    h += docSectionClose();
+
+    h += docSectionOpen('Machinery Analysis', false);
+    h += '<div class="sec-title">4. Machinery Analysis</div>';
+    h += '<p class="para">This section derives the working rate and idle rate of every machine used in the execution of the borehole, following the formulae stated in Section 3.4 and presented in the same format as the norms sheet.</p>';
+    for(var i=0;i<MACHINE_DEFS.length;i++){
+      h += buildMachineReportHTML(state.machines[MACHINE_DEFS[i].id], machines[MACHINE_DEFS[i].id], state.fuel, '4.' + (i+1));
+    }
+    h += docSectionClose();
+
+    h += docSectionOpen('Labour Analysis', false);
+    h += '<div class="sec-title">5. Labour Analysis</div>';
+    h += '<p class="para">Labour is engaged on a man-day basis. The district rates below have been adopted for Fiscal Year '+esc(pfy)+' for the district of Kaski.</p>';
+    h += '<table><thead><tr><th style="width:8%">Code</th><th>Description</th><th class="amt-col" style="width:20%">Rate (Rs./m.d.)</th></tr></thead><tbody>';
+    for(var l=0;l<LABOUR_DEFS.length;l++){
+      var lb = LABOUR_DEFS[l];
+      var lv = (state.labour[lb.id] !== undefined && isFinite(state.labour[lb.id])) ? state.labour[lb.id] : lb.rate;
+      h += '<tr><td>'+esc(lb.id)+'</td><td>'+esc(lb.name)+'</td><td class="amt-col">'+nf2(lv)+'</td></tr>';
+    }
+    h += '</tbody></table>';
+    h += docSectionClose();
+
+    h += docSectionOpen('Material Analysis', false);
+    h += '<div class="sec-title">6. Material Analysis</div>';
+    h += '<p class="para">The rate at site for each material is the sum of its market rate and the transport cost per unit to the project site.</p>';
+    h += '<table><thead><tr><th style="width:6%">#</th><th>Material</th><th style="width:8%">Unit</th><th class="amt-col" style="width:14%">Market (Rs.)</th><th class="amt-col" style="width:14%">Transport (Rs.)</th><th class="amt-col" style="width:14%">Total at Site (Rs.)</th></tr></thead><tbody>';
+    for(var m=0;m<MATERIAL_DEFS.length;m++){
+      var md = MATERIAL_DEFS[m];
+      var ms = state.material[md.id] || {rate:0, transport:0};
+      var tot = (Number(ms.rate)||0) + (Number(ms.transport)||0);
+      h += '<tr><td>'+(m+1)+'</td><td>'+esc(md.name)+'</td><td class="amt-col">'+esc(md.unit)+'</td><td class="amt-col">'+nf2(ms.rate)+'</td><td class="amt-col">'+nf2(ms.transport)+'</td><td class="amt-col"><b>'+nf2(tot)+'</b></td></tr>';
+    }
+    h += '</tbody></table>';
+    h += docSectionClose();
+
+    h += docSectionOpen('Item-wise Rate Analysis', false);
+    h += '<div class="sec-title">7. Item-wise Rate Analysis</div>';
+    h += '<p class="para">This section presents the rate analysis of each item of the Bill of Quantity. Each item is presented with the item number and description, the quantity, the derived unit rate, the resource-wise breakdown, sub-totals of the labour, machinery and material components, and the final unit rate and total amount.</p>';
+    h += '<div class="sub-title">7.1 Section 1 &mdash; Mobilization, Demobilization and Site Preparation</div>';
+    for(var a=0;a<data.sec1.length;a++){
+      var it1 = data.sec1[a];
+      h += '<div class="ra-block"><div class="ra-hdr">'+esc(it1.no)+'. '+esc(it1.desc)+'</div>';
+      h += '<div class="ra-meta"><b>Quantity:</b> 1 job &nbsp; | &nbsp; <b>Amount:</b> Rs '+nf2(it1.amount)+'</div>';
+      h += '<p class="para" style="font-size:11px">This is a lump-sum allowance covering all costs of moving the rig to site, setting up the camp, and preparing the mud pit.</p>';
+      h += '</div>';
+    }
+    h += '<div class="sub-title">7.2 Section 2 &mdash; Supply of Well Materials</div>';
+    h += '<table><thead><tr><th>S.No.</th><th>Description</th><th>Unit</th><th class="amt-col">Quantity</th><th class="amt-col">Rate (Rs.)</th><th class="amt-col">Amount (Rs.)</th></tr></thead><tbody>';
+    for(var b=0;b<data.sec2.length;b++){
+      var it2 = data.sec2[b];
+      h += '<tr><td>'+esc(it2.no)+'</td><td>'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="amt-col">'+nf(it2.qty)+'</td><td class="amt-col">'+nf2(it2.rate)+'</td><td class="amt-col">'+nf2(it2.amount)+'</td></tr>';
+    }
+    h += '</tbody></table>';
+    h += '<div class="sub-title">7.3 Section 3 &mdash; Execution of Works</div>';
+    for(var c=0;c<data.sec3.length;c++){
+      h += buildRateAnalysisHTML(data.sec3[c]);
+    }
+    h += docSectionClose();
+
+    h += docSectionOpen('Assumed Rates Summary', false);
+    h += '<div class="sec-title">8. Assumed Rates Summary</div>';
+    h += '<div class="sub-title">8.1 Base Parameters</div>';
+    h += '<table><tbody>';
+    h += '<tr><td>Total Design Depth</td><td class="amt-col">'+nf(data.depth)+' m</td></tr>';
+    h += '<tr><td>Drilling Method</td><td class="amt-col">'+esc(data.method)+'</td></tr>';
+    h += '<tr><td>Formation</td><td class="amt-col">'+esc(data.formation)+'</td></tr>';
+    h += '<tr><td>Number of Wells</td><td class="amt-col">'+data.wells+'</td></tr>';
+    h += '<tr><td>Contractor\'s Profit</td><td class="amt-col">'+val('in_profit',15).toFixed(2)+' %</td></tr>';
+    h += '<tr><td>VAT</td><td class="amt-col">'+val('in_vat',13).toFixed(2)+' %</td></tr>';
+    h += '</tbody></table>';
+    h += '<div class="sub-title">8.2 Depth Segments</div>';
+    h += '<table><thead><tr><th>#</th><th class="amt-col">From (m)</th><th class="amt-col">To (m)</th><th>Soil Type</th><th>Method</th><th class="amt-col">Length (m)</th></tr></thead><tbody>';
+    for(var sg=0; sg<data.segments.length; sg++){
+      var s = data.segments[sg];
+      h += '<tr><td>'+(sg+1)+'</td><td class="amt-col">'+nf(s.start)+'</td><td class="amt-col">'+nf(s.end)+'</td><td style="text-transform:capitalize">'+esc(s.soil)+'</td><td>'+(s.method === 'rotary' ? 'Rotary' : 'DTH')+'</td><td class="amt-col">'+nf(s.end - s.start)+'</td></tr>';
+    }
+    h += '</tbody></table>';
+    h += '<div class="sub-title">8.3 Assumed Machinery Working and Idle Rates</div>';
+    h += '<table><thead><tr><th style="width:6%">#</th><th>Machine</th><th class="amt-col">Working (Rs./hr)</th><th class="amt-col">Idle (Rs./hr)</th></tr></thead><tbody>';
+    for(var n=0;n<MACHINE_DEFS.length;n++){
+      var mn = MACHINE_DEFS[n], mr = machines[mn.id];
+      h += '<tr><td>'+(n+1)+'</td><td>'+esc(mn.name)+'</td><td class="amt-col">'+nf2(mr.working)+'</td><td class="amt-col">'+(mr.isFixed?'—':nf2(mr.idle))+'</td></tr>';
+    }
+    h += '</tbody></table>';
+    h += '<div class="sub-title">8.4 Assumed Labour Rates</div>';
+    h += '<table><thead><tr><th style="width:6%">#</th><th>Description</th><th class="amt-col">Unit</th><th class="amt-col">Rate (Rs.)</th></tr></thead><tbody>';
+    for(var lb2=0;lb2<LABOUR_DEFS.length;lb2++){
+      var lbf = LABOUR_DEFS[lb2];
+      var lvf = (state.labour[lbf.id] !== undefined && isFinite(state.labour[lbf.id])) ? state.labour[lbf.id] : lbf.rate;
+      h += '<tr><td>'+(lb2+1)+'</td><td>'+esc(lbf.name)+'</td><td class="amt-col">man-day</td><td class="amt-col">'+nf2(lvf)+'</td></tr>';
+    }
+    h += '</tbody></table>';
+    h += '<div class="sub-title">8.5 Assumed Material Rates</div>';
+    h += '<table><thead><tr><th style="width:6%">#</th><th>Material</th><th class="amt-col">Unit</th><th class="amt-col">Market (Rs.)</th><th class="amt-col">Transport (Rs.)</th><th class="amt-col">Total (Rs.)</th></tr></thead><tbody>';
+    for(var m2=0;m2<MATERIAL_DEFS.length;m2++){
+      var md2 = MATERIAL_DEFS[m2];
+      var ms2 = state.material[md2.id] || {rate:0, transport:0};
+      var tot2 = (Number(ms2.rate)||0) + (Number(ms2.transport)||0);
+      h += '<tr><td>'+(m2+1)+'</td><td>'+esc(md2.name)+'</td><td class="amt-col">'+esc(md2.unit)+'</td><td class="amt-col">'+nf2(ms2.rate)+'</td><td class="amt-col">'+nf2(ms2.transport)+'</td><td class="amt-col">'+nf2(tot2)+'</td></tr>';
+    }
+    h += '</tbody></table>';
+    h += docSectionClose();
+
+    h += docSectionOpen('Abstract of Cost', false);
+    h += '<div class="sec-title">9. Abstract of Cost</div>';
+    h += '<table><thead><tr><th style="width:6%">S.No.</th><th>Description of Work</th><th style="width:6%">Unit</th><th class="amt-col" style="width:9%">Qty</th><th class="amt-col" style="width:11%">Rate (Rs.)</th><th class="amt-col" style="width:13%">Amount (Rs.)</th><th style="width:8%">Remarks</th></tr></thead><tbody>';
+    h += '<tr class="sec-head"><td>1.</td><td colspan="6">Mobilization, Demobilization and Site Preparation</td></tr>';
+    for(var p1=0;p1<data.sec1.length;p1++){ var s1 = data.sec1[p1]; h += '<tr><td>'+esc(s1.no)+'</td><td class="desc">'+esc(s1.desc)+'</td><td class="unit-col">'+esc(s1.unit)+'</td><td class="amt-col">'+nf(s1.qty)+'</td><td class="amt-col">'+nf2(s1.rate)+'</td><td class="amt-col">'+nf2(s1.amount)+'</td><td></td></tr>'; }
+    h += '<tr class="tot-row"><td colspan="5">Total of Section 1</td><td class="amt-col">'+nf2(data.tot1)+'</td><td></td></tr>';
+    h += '<tr class="sec-head"><td>2.</td><td colspan="6">Supply of Well Materials</td></tr>';
+    for(var p2=0;p2<data.sec2.length;p2++){ var s2 = data.sec2[p2]; h += '<tr><td>'+esc(s2.no)+'</td><td class="desc">'+esc(s2.desc)+'</td><td class="unit-col">'+esc(s2.unit)+'</td><td class="amt-col">'+nf(s2.qty)+'</td><td class="amt-col">'+nf2(s2.rate)+'</td><td class="amt-col">'+nf2(s2.amount)+'</td><td></td></tr>'; }
+    h += '<tr class="tot-row"><td colspan="5">Total of Section 2</td><td class="amt-col">'+nf2(data.tot2)+'</td><td></td></tr>';
+    h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
+    for(var p3=0;p3<data.sec3.length;p3++){ var s3 = data.sec3[p3]; h += '<tr><td>'+esc(s3.no)+'</td><td class="desc">'+esc(s3.desc)+'</td><td class="unit-col">'+esc(s3.unit)+'</td><td class="amt-col">'+nf(s3.qty)+'</td><td class="amt-col">'+nf2(s3.rate)+'</td><td class="amt-col">'+nf2(s3.amount)+'</td><td></td></tr>'; }
+    h += '<tr class="tot-row"><td colspan="5">Total of Section 3</td><td class="amt-col">'+nf2(data.tot3)+'</td><td></td></tr>';
+    h += '<tr><td colspan="7" style="border:none;height:6px"></td></tr>';
+    h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
+    h += '<tr class="tot-row"><td colspan="5">VAT @ '+data.vatPct.toFixed(2)+'%</td><td class="amt-col">'+nf2(data.vat)+'</td><td></td></tr>';
+    h += '<tr class="tot-row"><td colspan="5"><b>Grand Total</b></td><td class="amt-col"><b>'+nf2(data.grand)+'</b></td><td></td></tr>';
+    h += '</tbody></table>';
+    h += '<div class="inwords">Amount in words: <b>'+numberToWords(data.grand)+'</b></div>';
+    h += docSectionClose();
+
+    h += docSectionOpen('References', false);
+    h += '<div class="sec-title">10. References</div>';
+    h += '<ol>';
+    h += '<li><b>Norms for Tubewell Drilling (Revised 2057)</b> - Ministry of Water Resources, Government of Nepal.</li>';
+    h += '<li><b>Water Well Drilling Rate Analysis Norms 2073</b> - Department of Water Supply and Sewerage (DWSS), Deep Tubewell Project.</li>';
+    h += '<li><b>District Rate Schedule for Fiscal Year '+esc(pfy)+'</b> - Gandaki Province, Kaski District.</li>';
+    h += '<li><b>Nepal Oil Corporation Fuel Price Circular</b> - prevailing prices for HSD, Mobil, Gear Oil, Hydraulic Oil, Brake Oil and Grease.</li>';
+    h += '<li><b>Manufacturer Specification Sheets</b> - for machinery cost, life, working hours, overhaul and maintenance percentages, fuel consumption and spare part schedules.</li>';
+    h += '<li><b>Prevailing Market Rates</b> - for MS ERW casing pipe, SS304 slotted pipe, GI pipe, cement, bentonite, barite, drill bits and other consumables.</li>';
+    h += '<li><b>Site Borehole Design Schematic</b> - for design depth, well assembly, strainer position and gravel pack envelope.</li>';
+    h += '</ol>';
+    h += docSectionClose();
+
+    h += docSectionOpen('Limitations and Disclaimers', false);
+    h += '<div class="sec-title">11. Limitations and Disclaimers</div>';
+    h += '<ol>';
+    h += '<li>The estimate assumes the geological formation at the site as indicated by the depth segments. If the actual formation differs materially, the segments should be edited and the affected items re-analysed.</li>';
+    h += '<li>The market rates of materials used in this estimate are those prevailing at the time of preparation.</li>';
+    h += '<li>The fuel prices used in the machinery rate analysis are those in force at the time of preparation.</li>';
+    h += '<li>Quantities of well materials are based on the design well assembly.</li>';
+    h += '<li>The depths indicated in the BOQ are design depths. Payment will be made only for the actual metrage executed at the contract unit rates.</li>';
+    h += '<li>This estimate is prepared for budgeting and tender purposes.</li>';
+    h += '</ol>';
+    h += docSectionClose();
+
+    div.innerHTML = h;
+  }catch(e){ console.error('renderDetailed', e); var box = el('detailed-doc'); if(box) box.innerHTML = '<div style="padding:20px;border:1px solid #000">Error: '+esc(e.message)+'</div>'; }
+}
+
+/* ============ SYNC ============ */
+function syncMaterialTotals(){
+  for(var i=0;i<MATERIAL_DEFS.length;i++){
+    var id = MATERIAL_DEFS[i].id, s = state.material[id]; if(!s) continue;
+    var tot = (Number(s.rate)||0) + (Number(s.transport)||0);
+    var cells = document.querySelectorAll('[data-mattotal="'+cssEsc(id)+'"]');
+    for(var j=0;j<cells.length;j++) cells[j].textContent = nf2(tot);
+  }
+}
+function syncLabourInputs(){
+  for(var i=0;i<LABOUR_DEFS.length;i++){
+    var id = LABOUR_DEFS[i].id;
+    var v = (state.labour[id] !== undefined && isFinite(state.labour[id])) ? state.labour[id] : LABOUR_DEFS[i].rate;
+    var inputs = document.querySelectorAll('[data-lab="'+cssEsc(id)+'"]');
+    for(var j=0;j<inputs.length;j++){ if(document.activeElement !== inputs[j]) inputs[j].value = v; }
+  }
+}
+
+/* ============ SEGMENT BUTTON HANDLERS ============ */
+function addSegment(){
+  var segs = state.segments || [];
+  var lastEnd = 0;
+  if(segs.length) lastEnd = Number(segs[segs.length-1].end) || 0;
+  var total = val('in_depth', 150);
+  var newEnd = Math.min(lastEnd + 50, total);
+  if(newEnd <= lastEnd) newEnd = lastEnd + 50;
+  segs.push({start: lastEnd, end: newEnd, soil:'medium', method:'rotary'});
+  state.segments = segs;
+  renderSegments();
+  recalcNow();
+}
+function removeSegment(idx){
+  if(!state.segments) return;
+  state.segments.splice(idx, 1);
+  renderSegments();
+  recalcNow();
+}
+function resetSegmentsToDefault(){
+  state.segments = defaultSegments();
+  renderSegments();
+  recalcNow();
+}
+
+/* ============================================================
+   RECALC
+   ============================================================ */
+var rafId = null;
+var heavyTimer = null;
+var debounceTimer = null;
+
+function updateMachineRateTags(){
+  for(var i=0;i<MACHINE_DEFS.length;i++){
+    var m = MACHINE_DEFS[i];
+    var card = document.querySelector('[data-machcard="'+cssEsc(m.id)+'"]');
+    if(!card) continue;
+    var tag = card.querySelector('.rate-tag');
+    if(!tag) continue;
+    var r = calcMachineRate(state.machines[m.id], state.fuel);
+    tag.innerHTML = 'Working: Rs '+nf2(r.working)+'/hr' + (r.isFixed ? '' : ' | Idle: Rs '+nf2(r.idle)+'/hr');
+  }
+}
+function recalc(opts){
+  opts = opts || {};
+  var skipMachineRebuild = !!opts.skipMachineRebuild;
+  var skipDocs = !!opts.skipDocs;
+  if(rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(function(){
+    try{
+      if(skipMachineRebuild){ updateMachineRateTags(); } else { renderMachines(); }
+      syncMaterialTotals();
+      syncLabourInputs();
+      renderWellQtyTable();
+      updateSegmentSummary();
+      if(!skipDocs){
+        if(heavyTimer) clearTimeout(heavyTimer);
+        heavyTimer = setTimeout(function(){
+          try{
+            renderEstimate();
+            renderBlankBOQ();
+            renderDetailed();
+          }catch(e){ console.error('heavy recalc', e); }
+        }, 120);
+      }
+    }catch(e){ console.error('recalc', e); }
+  });
+}
+function recalcDebounced(light){
+  if(debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(function(){
+    recalc(light ? {skipMachineRebuild: true, skipDocs: false} : {});
+  }, 240);
+}
+function recalcNow(){
+  if(debounceTimer){ clearTimeout(debounceTimer); debounceTimer = null; }
+  recalc();
+}
+
+function syncStateFromInput(e){
+  var t = e.target; if(!t || !t.getAttribute) return false;
+  var v = parseFloat(t.value)||0;
+
+  /* Segments */
+  var segKey = t.getAttribute('data-seg');
+  if(segKey){
+    var parts = segKey.split(':');
+    var idx = parseInt(parts[0], 10);
+    var field = parts[1];
+    if(!state.segments) state.segments = defaultSegments();
+    if(state.segments[idx]){
+      if(field === 'start' || field === 'end'){
+        state.segments[idx][field] = v;
+      } else {
+        state.segments[idx][field] = t.value;
+      }
+    }
+    return true;
+  }
+
+  var fuelKey = t.getAttribute('data-fuel'); if(fuelKey){ state.fuel[fuelKey] = v; return true; }
+  var labKey = t.getAttribute('data-lab');
+  if(labKey){
+    state.labour[labKey] = v;
+    var twins = document.querySelectorAll('[data-lab="'+cssEsc(labKey)+'"]');
+    for(var i=0;i<twins.length;i++) if(twins[i] !== t) twins[i].value = v;
+    return true;
+  }
+  var matKey = t.getAttribute('data-mat');
+  if(matKey){
+    var mparts = matKey.split(':');
+    if(!state.material[mparts[0]]) state.material[mparts[0]] = {rate:0, transport:0};
+    state.material[mparts[0]][mparts[1]] = v;
+    return true;
+  }
+  var machKey = t.getAttribute('data-mach');
+  if(machKey){
+    var mp = machKey.split(':'), id = mp[0], field = mp[1];
+    if(!state.machines[id]) return false;
+    if(field==='fuel'){ if(!state.machines[id].fuel) state.machines[id].fuel = {}; state.machines[id].fuel[mp[2]] = v; }
+    else { state.machines[id][field] = v; }
+    return true;
+  }
+  var wqKey = t.getAttribute('data-wq'); if(wqKey){ if(!state.wellQty) state.wellQty = {}; state.wellQty[wqKey] = v; return true; }
+  return false;
+}
+
+/* ============ SAVE / LOAD / RESET ============ */
+function collectFormState(){
+  var data = {}, els = document.querySelectorAll('[data-save]');
+  for(var i=0;i<els.length;i++) data[els[i].getAttribute('data-save')] = els[i].type==='checkbox' ? els[i].checked : els[i].value;
+  return data;
+}
+function applyFormState(d){
+  for(var k in d){
+    var e = document.querySelector('[data-save="'+cssEsc(k)+'"]');
+    if(e){ if(e.type==='checkbox') e.checked = d[k]; else e.value = d[k]; }
+  }
+}
+function saveState(){
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify({form:collectFormState(), state:state}));
+    toast('Saved.');
+  }catch(e){ toast('Save failed: '+e.message); }
+}
+function loadState(){
+  try{
+    var raw = localStorage.getItem(SAVE_KEY); if(!raw){ toast('No saved estimate.'); return; }
+    var d = JSON.parse(raw);
+    if(d.state){
+      state = d.state;
+      if(!state.qty) state.qty = {};
+      if(!state.wellQty) state.wellQty = {};
+      if(!state.fuel) state.fuel = {};
+      if(!state.labour) state.labour = {};
+      if(!state.material) state.material = {};
+      if(!state.machines) state.machines = {};
+      if(!state.segments || !state.segments.length) state.segments = defaultSegments();
+      for(var i=0;i<MACHINE_DEFS.length;i++){
+        if(!state.machines[MACHINE_DEFS[i].id]) state.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
+      }
+    }
+    if(d.form) applyFormState(d.form);
+    renderFuel(); renderMachines(); renderLabour(); renderMaterial();
+    renderSegments(); renderWellQtyTable();
+    recalcNow();
+    toast('Restored.');
+  }catch(e){ toast('Load failed: '+e.message); }
+}
+function resetState(){
+  if(!confirm('Reset everything to default?')) return;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
+function toast(msg){
+  var t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:8px 16px;font-size:12px;z-index:9999;opacity:0;transition:.2s';
+  document.body.appendChild(t);
+  requestAnimationFrame(function(){ t.style.opacity='1'; });
+  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); }, 250); }, 2200);
+}
+function numberToWords(n){
+  n = Math.round(n); if(n===0) return 'Zero rupees only';
+  var a = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  var b = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function two(x){ return x<20 ? a[x] : b[Math.floor(x/10)] + (x%10 ? ' '+a[x%10] : ''); }
+  function three(x){ return x>=100 ? a[Math.floor(x/100)]+' Hundred'+(x%100?' '+two(x%100):'') : two(x); }
+  var out = '';
+  var crore = Math.floor(n/10000000); n%=10000000;
+  var lakh = Math.floor(n/100000); n%=100000;
+  var thou = Math.floor(n/1000); n%=1000;
+  if(crore) out += three(crore)+' Crore ';
+  if(lakh) out += three(lakh)+' Lakh ';
+  if(thou) out += three(thou)+' Thousand ';
+  if(n) out += three(n);
+  return 'Rupees '+out.trim()+' only';
+}
+function printAs(mode){
+  document.body.classList.remove('print-estimate','print-boq','print-detailed');
+  document.body.classList.add('print-'+mode);
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){ document.body.classList.remove('print-'+mode); }, 500);
+  }, 60);
+}
+
+function boot(){
+  try{
+    try{
+      var raw = localStorage.getItem(SAVE_KEY);
+      if(raw){
+        var d = JSON.parse(raw);
+        if(d.state){
+          state = d.state;
+          if(!state.qty) state.qty = {};
+          if(!state.wellQty) state.wellQty = {};
+          if(!state.fuel) state.fuel = {};
+          if(!state.labour) state.labour = {};
+          if(!state.material) state.material = {};
+          if(!state.machines) state.machines = {};
+          if(!state.segments || !state.segments.length) state.segments = defaultSegments();
+          for(var i=0;i<MACHINE_DEFS.length;i++){
+            if(!state.machines[MACHINE_DEFS[i].id]) state.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
+          }
+        }
+        if(d.form) setTimeout(function(){ applyFormState(d.form); }, 0);
+      }
+    }catch(e){ console.warn('Autosave restore failed:', e); }
+
+    renderFuel(); renderMachines(); renderLabour(); renderMaterial();
+    renderSegments(); renderWellQtyTable();
+
+    var tabsNav = el('tabs');
+    if(tabsNav){
+      tabsNav.addEventListener('click', function(ev){
+        var btn = ev.target.closest ? ev.target.closest('button[data-tab]') : null;
+        if(!btn) return;
+        var tab = btn.getAttribute('data-tab');
+        var btns = tabsNav.querySelectorAll('button');
+        for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
+        btn.classList.add('active');
+        var panels = document.querySelectorAll('.tab-panel');
+        for(var j=0;j<panels.length;j++) panels[j].classList.toggle('active', panels[j].id==='tab-'+tab);
+        window.scrollTo({top:0,behavior:'smooth'});
+      });
+    }
+
+    /* Add / Remove / Reset segment buttons via delegation */
+    document.addEventListener('click', function(ev){
+      var t = ev.target;
+      if(!t || !t.getAttribute) return;
+      if(t.getAttribute('data-remove-seg') !== null && t.getAttribute('data-remove-seg') !== undefined){
+        var idx = parseInt(t.getAttribute('data-remove-seg'), 10);
+        if(!isNaN(idx)) removeSegment(idx);
+      }
+    });
+    var bAdd = el('btn-add-segment');
+    if(bAdd) bAdd.addEventListener('click', addSegment);
+    var bReset = el('btn-reset-segments');
+    if(bReset) bReset.addEventListener('click', function(){ if(confirm('Reset to the default 0-100 m Medium-Rotary and 100-150 m Hard-DTH segments?')) resetSegmentsToDefault(); });
+
+    /* Input handler */
+    document.addEventListener('input', function(e){
+      if(!e.target || !e.target.matches) return;
+      if(!e.target.matches('input,select')) return;
+      if(!syncStateFromInput(e)) return;
+      var isSeg = !!(e.target.getAttribute && e.target.getAttribute('data-seg'));
+      var isMachineInput = !!(e.target.getAttribute && e.target.getAttribute('data-mach'));
+      if(isSeg){
+        /* For segments, re-render and full recalc immediately */
+        renderSegments();
+        recalcNow();
+        return;
+      }
+      recalcDebounced(isMachineInput);
+    });
+
+    document.addEventListener('change', function(e){
+      if(!e.target.matches || !e.target.matches('select')) return;
+      if(e.target.getAttribute && e.target.getAttribute('data-seg')){
+        /* Segment soil/method change — full recalc */
+        renderSegments();
+        recalcNow();
+        return;
+      }
+      recalcNow();
+    });
+
+    document.addEventListener('blur', function(e){
+      if(e.target.getAttribute && e.target.getAttribute('data-mach')) recalcNow();
+    }, true);
+
+    var bs = el('btn-save'); if(bs) bs.addEventListener('click', saveState);
+    var bl = el('btn-load'); if(bl) bl.addEventListener('click', loadState);
+    var br = el('btn-reset'); if(br) br.addEventListener('click', resetState);
+    var pe = el('btn-print-est'); if(pe) pe.addEventListener('click', function(){ printAs('estimate'); });
+    var pb = el('btn-print-boq'); if(pb) pb.addEventListener('click', function(){ printAs('boq'); });
+    var pd = el('btn-print-detailed'); if(pd) pd.addEventListener('click', function(){ printAs('detailed'); });
+
+    recalcNow();
+
+    setInterval(function(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({form:collectFormState(), state:state})); }catch(e){} }, 20000);
+  }catch(err){
+    console.error('boot', err);
+    var box = el('error-box');
+    if(box){ box.classList.remove('hidden'); box.textContent = 'Boot error: ' + err.message; }
+  }
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+</script>
+</body>
+</html>
