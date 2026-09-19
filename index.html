@@ -249,8 +249,14 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
   <div class="card"><h2>Drilling Depth &amp; Options</h2>
     <div class="grid c4">
       <label class="f">Total Depth (m)<input type="number" id="in_depth" data-save="p_depth" value="120" min="1" step="1"></label>
+      <label class="f">Include 2nd reaming (17½")?
+        <select id="in_r2" data-save="p_r2"><option value="1">Yes</option><option value="0">No</option></select>
+      </label>
       <label class="f">Include 3rd reaming (22½")?
         <select id="in_r3" data-save="p_r3"><option value="0">No</option><option value="1">Yes</option></select>
+      </label>
+      <label class="f">Strainer (screen) pipe type
+        <select id="in_strainer" data-save="p_strainer"><option value="ss">SS304 Slotted</option><option value="ms">MS Slotted (blind pipe rate + Rs 25,000 lump-sum slotting)</option></select>
       </label>
       <label class="f">Include water jetting?
         <select id="in_jet" data-save="p_jet"><option value="1">Yes</option><option value="0">No</option></select>
@@ -269,6 +275,7 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
         </select>
       </label>
     </div>
+    <div class="hint" style="margin-top:8px">1st reaming (13¾") is always included as the base pass. 2nd reaming (17½") and 3rd reaming (22½") are each optional, sequential enlargement passes — 3rd reaming is only meaningful if 2nd reaming is also included.</div>
   </div>
 
   <div class="card"><h2>Depth Segments — Soil Type &amp; Drilling Method</h2>
@@ -798,8 +805,9 @@ function updateWellQtySummary(){
 function buildBOQ(){
   var depth = val('in_depth', 0);
   var wells = Math.max(1, Math.round(val('in_wells', 1)));
-  var r3 = strVal('in_r3','0')==='1', jet = strVal('in_jet','0')==='1';
+  var r2 = strVal('in_r2','1')==='1', r3 = strVal('in_r3','0')==='1', jet = strVal('in_jet','0')==='1';
   var gravel = strVal('in_gravel','0')==='1', recond = strVal('in_recond','0')==='1';
+  var strainerType = strVal('in_strainer','ss');
   var dev = strVal('in_dev','compressor');
   var vatPct = val('in_vat', 13);
   var mob = val('in_mob', 150000);
@@ -817,8 +825,19 @@ function buildBOQ(){
     var id = WELL_MATERIAL_IDS[i];
     var m = null; for(var j=0;j<MATERIAL_DEFS.length;j++) if(MATERIAL_DEFS[j].id===id){ m = MATERIAL_DEFS[j]; break; }
     if(!m) continue;
-    var q = getWellQty(id); var rt = getMaterialRate(id);
-    sec2.push({no:'2.'+(sn2++), desc:m.name, unit:m.unit, qty:q, rate:rt, amount:q*rt, ri:null});
+    var q = getWellQty(id);
+    var rt, mdesc;
+    if(id === 'slot200' && strainerType === 'ms'){
+      rt = getMaterialRate('pipe200');
+      mdesc = '200 mm dia. MS ERW Slotted (strainer) Pipe, 7 mm thick (supply at same rate as MS blind casing pipe; slotting works billed separately below)';
+    } else {
+      rt = getMaterialRate(id);
+      mdesc = m.name;
+    }
+    sec2.push({no:'2.'+(sn2++), desc:mdesc, unit:m.unit, qty:q, rate:rt, amount:q*rt, ri:null});
+    if(id === 'slot200' && strainerType === 'ms'){
+      sec2.push({no:'2.'+(sn2++), desc:'Slotting works for MS strainer (screen) pipe', unit:'job', qty:1, rate:25000, amount:25000, ri:null});
+    }
   }
 
   var sec3 = []; var sn3 = 1;
@@ -869,11 +888,13 @@ function buildBOQ(){
       add3('1st reaming (13-3/4" bit) in ' + segR.soil + ' formation, ' + segLabelR,
            'm', qR, opRate(n1, machines),
            'Applied only to the Rotary-drilled portion — ' + bandLabelR);
-      var n2 = normForBand(R2[0], R2[1], bR.bandIdx);
-      add3('2nd reaming (17-1/2" bit) in ' + segR.soil + ' formation, ' + segLabelR,
-           'm', qR, opRate(n2, machines),
-           'Applied only to the Rotary-drilled portion — ' + bandLabelR);
-      if(r3){
+      if(r2){
+        var n2 = normForBand(R2[0], R2[1], bR.bandIdx);
+        add3('2nd reaming (17-1/2" bit) in ' + segR.soil + ' formation, ' + segLabelR,
+             'm', qR, opRate(n2, machines),
+             'Applied only to the Rotary-drilled portion — ' + bandLabelR);
+      }
+      if(r2 && r3){
         var n3 = normForBand(R2[0], R2[1], bR.bandIdx);
         add3('3rd reaming (22-1/2" bit) in ' + segR.soil + ' formation, ' + segLabelR,
              'm', qR, opRate(n3, machines),
@@ -907,7 +928,8 @@ function buildBOQ(){
           depth:depth, wells:wells,
           formation: buildSoilSummary(segments),
           method: buildMethodSummary(segments),
-          segments: segments};
+          segments: segments,
+          r2:r2, r3:r3, strainerType:strainerType};
 }
 
 /* ============ DOC HELPERS ============ */
@@ -1259,7 +1281,8 @@ function renderDetailed(){
     h += '<tr><td>Drilling Method (Overall)</td><td class="amt-col">'+esc(data.method)+'</td></tr>';
     h += '<tr><td>Formation (Overall)</td><td class="amt-col">'+esc(data.formation)+'</td></tr>';
     h += '<tr><td>Number of Wells</td><td class="amt-col">'+data.wells+'</td></tr>';
-    h += '<tr><td>Final Borehole Diameter</td><td class="amt-col">17-1/2 inch (450 mm) typical / 22-1/2 inch (550 mm) if 3rd reaming</td></tr>';
+    h += '<tr><td>Final Borehole Diameter</td><td class="amt-col">'+(data.r3 && data.r2 ? '22-1/2 inch (550 mm), after 1st, 2nd and 3rd reaming' : (data.r2 ? '17-1/2 inch (450 mm), after 1st and 2nd reaming' : '13-3/4 inch (350 mm), after 1st reaming only'))+'</td></tr>';
+    h += '<tr><td>Strainer (Screen) Pipe Type</td><td class="amt-col">'+(data.strainerType==='ms' ? 'MS Slotted (supply at MS blind pipe rate + Rs 25,000 lump-sum slotting works)' : 'SS304 Continuous Slotted Pipe')+'</td></tr>';
     h += '</tbody></table>';
     h += '<div class="sub-title">2.3 Depth Segments — Soil Type and Drilling Method</div>';
     h += '<p class="para">The well has been analysed as the following depth segments. The applicable norm coefficient table is chosen per segment from the soil type and drilling method shown.</p>';
@@ -1430,7 +1453,7 @@ function renderDetailed(){
     h += '<li><b>District Rate Schedule for Fiscal Year '+esc(pfy)+'</b> - Gandaki Province, Kaski District.</li>';
     h += '<li><b>Nepal Oil Corporation Fuel Price Circular</b> - prevailing prices for HSD, Mobil, Gear Oil, Hydraulic Oil, Brake Oil and Grease.</li>';
     h += '<li><b>Manufacturer Specification Sheets</b> - for machinery cost, life, working hours, overhaul and maintenance percentages, fuel consumption and spare part schedules.</li>';
-    h += '<li><b>Prevailing Market Rates</b> - for MS ERW casing pipe, SS304 slotted pipe, GI pipe, cement, bentonite, barite, drill bits and other consumables.</li>';
+    h += '<li><b>Prevailing Market Rates</b> - for MS ERW casing pipe, SS304/MS slotted (strainer) pipe, GI pipe, cement, bentonite, barite, drill bits and other consumables.</li>';
     h += '<li><b>Site Borehole Design Schematic</b> - for design depth, well assembly, strainer position and gravel pack envelope.</li>';
     h += '</ol>';
     h += docSectionClose();
