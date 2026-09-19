@@ -130,6 +130,12 @@ details.machine .body h4:first-child{margin-top:0}
 .seg-ok{color:#0e7a5f;font-weight:700}
 .seg-warn{color:#c0392b;font-weight:700}
 .seg-note{color:#555}
+.doc tr[data-jump]{cursor:pointer}
+.doc tr[data-jump]:hover{background:#eef6ff}
+.doc tr[data-jump]:hover td{background:#eef6ff}
+@keyframes jumpFlash{0%{background:#fff3b0}100%{background:transparent}}
+.ra-block.jump-highlight{animation:jumpFlash 1.6s ease}
+tr.jump-highlight td{animation:jumpFlash 1.6s ease}
 @media (max-width:720px){.top-bar{flex-direction:column;align-items:flex-start}main{padding:10px}.tabs{overflow-x:auto;white-space:nowrap;padding:0 8px}.doc .doc-section{padding:12px}.doc .cover-page{padding:14px;min-height:auto}.doc .meta .lbl{width:130px}}
 @media print{
   @page { size:A4; margin:18mm 14mm 18mm 28mm; }
@@ -150,6 +156,8 @@ details.machine .body h4:first-child{margin-top:0}
   .ma-block,.ra-block{page-break-inside:avoid;break-inside:avoid}
   .doc tr{page-break-inside:avoid}
   .doc .sec-title{page-break-after:avoid}
+  .doc tr[data-jump]{cursor:auto}
+  .doc tr[data-jump]:hover,.doc tr[data-jump]:hover td{background:transparent!important}
   .doc .sub-title{page-break-after:avoid}
 }
 </style>
@@ -961,13 +969,13 @@ function renderEstimate(){
     h += '</div>';
     h += '<table><thead><tr><th style="width:6%">S.No.</th><th>Description of Work</th><th style="width:6%">Unit</th><th style="width:9%" class="amt-col">Quantity</th><th style="width:11%" class="amt-col">Rate (Rs.)</th><th style="width:13%" class="amt-col">Amount (Rs.)</th><th style="width:8%">Remarks</th></tr></thead><tbody>';
     h += '<tr class="sec-head"><td>1.</td><td colspan="6">Mobilization, Demobilization and Site Preparation</td></tr>';
-    for(var i=0;i<data.sec1.length;i++){ var it = data.sec1[i]; h += '<tr><td>'+esc(it.no)+'</td><td class="desc">'+esc(it.desc)+'</td><td class="unit-col">'+esc(it.unit)+'</td><td class="amt-col">'+nf(it.qty)+'</td><td class="amt-col">'+nf2(it.rate)+'</td><td class="amt-col">'+nf2(it.amount)+'</td><td></td></tr>'; }
+    for(var i=0;i<data.sec1.length;i++){ var it = data.sec1[i]; h += '<tr data-jump="'+esc(it.no)+'"><td>'+esc(it.no)+'</td><td class="desc">'+esc(it.desc)+'</td><td class="unit-col">'+esc(it.unit)+'</td><td class="amt-col">'+nf(it.qty)+'</td><td class="amt-col">'+nf2(it.rate)+'</td><td class="amt-col">'+nf2(it.amount)+'</td><td></td></tr>'; }
     h += '<tr class="tot-row"><td colspan="5">Total of Section 1</td><td class="amt-col">'+nf2(data.tot1)+'</td><td></td></tr>';
     h += '<tr class="sec-head"><td>2.</td><td colspan="6">Supply of Well Materials</td></tr>';
-    for(var j=0;j<data.sec2.length;j++){ var it2 = data.sec2[j]; h += '<tr><td>'+esc(it2.no)+'</td><td class="desc">'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="amt-col">'+nf(it2.qty)+'</td><td class="amt-col">'+nf2(it2.rate)+'</td><td class="amt-col">'+nf2(it2.amount)+'</td><td></td></tr>'; }
+    for(var j=0;j<data.sec2.length;j++){ var it2 = data.sec2[j]; h += '<tr data-jump="'+esc(it2.no)+'"><td>'+esc(it2.no)+'</td><td class="desc">'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="amt-col">'+nf(it2.qty)+'</td><td class="amt-col">'+nf2(it2.rate)+'</td><td class="amt-col">'+nf2(it2.amount)+'</td><td></td></tr>'; }
     h += '<tr class="tot-row"><td colspan="5">Total of Section 2</td><td class="amt-col">'+nf2(data.tot2)+'</td><td></td></tr>';
     h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
-    for(var k=0;k<data.sec3.length;k++){ var it3 = data.sec3[k]; h += '<tr><td>'+esc(it3.no)+'</td><td class="desc">'+esc(it3.desc)+'</td><td class="unit-col">'+esc(it3.unit)+'</td><td class="amt-col">'+nf(it3.qty)+'</td><td class="amt-col">'+nf2(it3.rate)+'</td><td class="amt-col">'+nf2(it3.amount)+'</td><td></td></tr>'; }
+    for(var k=0;k<data.sec3.length;k++){ var it3 = data.sec3[k]; h += '<tr data-jump="'+esc(it3.no)+'"><td>'+esc(it3.no)+'</td><td class="desc">'+esc(it3.desc)+'</td><td class="unit-col">'+esc(it3.unit)+'</td><td class="amt-col">'+nf(it3.qty)+'</td><td class="amt-col">'+nf2(it3.rate)+'</td><td class="amt-col">'+nf2(it3.amount)+'</td><td></td></tr>'; }
     h += '<tr class="tot-row"><td colspan="5">Total of Section 3</td><td class="amt-col">'+nf2(data.tot3)+'</td><td></td></tr>';
     h += '<tr><td colspan="7" style="border:none;height:6px"></td></tr>';
     h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
@@ -1000,11 +1008,11 @@ function renderBlankBOQ(){
     h += '</div>';
     h += '<table><thead><tr><th style="width:7%">S.No.</th><th>Description of Work</th><th style="width:7%">Unit</th><th style="width:10%">Quantity</th><th style="width:13%">Rate (Rs.)</th><th style="width:15%">Amount (Rs.)</th><th style="width:9%">Remarks</th></tr></thead><tbody>';
     h += '<tr class="sec-head"><td>1.</td><td colspan="6">Mobilization, Demobilization and Site Preparation</td></tr>';
-    for(var i=0;i<data.sec1.length;i++){ var it = data.sec1[i]; h += '<tr><td>'+esc(it.no)+'</td><td class="desc">'+esc(it.desc)+'</td><td class="unit-col">'+esc(it.unit)+'</td><td class="qty-col">'+nf(it.qty)+'</td><td></td><td></td><td></td></tr>'; }
+    for(var i=0;i<data.sec1.length;i++){ var it = data.sec1[i]; h += '<tr data-jump="'+esc(it.no)+'"><td>'+esc(it.no)+'</td><td class="desc">'+esc(it.desc)+'</td><td class="unit-col">'+esc(it.unit)+'</td><td class="qty-col">'+nf(it.qty)+'</td><td></td><td></td><td></td></tr>'; }
     h += '<tr class="sec-head"><td>2.</td><td colspan="6">Supply of Well Materials</td></tr>';
-    for(var j=0;j<data.sec2.length;j++){ var it2 = data.sec2[j]; h += '<tr><td>'+esc(it2.no)+'</td><td class="desc">'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="qty-col">'+nf(it2.qty)+'</td><td></td><td></td><td></td></tr>'; }
+    for(var j=0;j<data.sec2.length;j++){ var it2 = data.sec2[j]; h += '<tr data-jump="'+esc(it2.no)+'"><td>'+esc(it2.no)+'</td><td class="desc">'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="qty-col">'+nf(it2.qty)+'</td><td></td><td></td><td></td></tr>'; }
     h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
-    for(var k=0;k<data.sec3.length;k++){ var it3 = data.sec3[k]; h += '<tr><td>'+esc(it3.no)+'</td><td class="desc">'+esc(it3.desc)+'</td><td class="unit-col">'+esc(it3.unit)+'</td><td class="qty-col">'+nf(it3.qty)+'</td><td></td><td></td><td></td></tr>'; }
+    for(var k=0;k<data.sec3.length;k++){ var it3 = data.sec3[k]; h += '<tr data-jump="'+esc(it3.no)+'"><td>'+esc(it3.no)+'</td><td class="desc">'+esc(it3.desc)+'</td><td class="unit-col">'+esc(it3.unit)+'</td><td class="qty-col">'+nf(it3.qty)+'</td><td></td><td></td><td></td></tr>'; }
     h += '<tr><td colspan="7" style="border:none;height:8px"></td></tr>';
     h += '<tr><td colspan="5" style="text-align:right;font-weight:700">Sub-Total (1 + 2 + 3) Rs.</td><td></td><td></td></tr>';
     h += '<tr><td colspan="5" style="text-align:right;font-weight:700">VAT @ '+data.vatPct.toFixed(2)+'% Rs.</td><td></td><td></td></tr>';
@@ -1107,7 +1115,7 @@ function buildRateAnalysisHTML(item){
   var hasL = Object.keys(ri.L).length > 0;
   var hasM = Object.keys(ri.M).length > 0;
   var hasX = Object.keys(ri.X).length > 0;
-  var h = '<div class="ra-block">';
+  var h = '<div class="ra-block" id="detail-'+esc(item.no)+'">';
   h += '<div class="ra-hdr">'+esc(item.no)+'. '+esc(item.desc)+'</div>';
   h += '<div class="ra-meta"><b>Quantity:</b> '+nf(item.qty)+' '+esc(item.unit)+' &nbsp; | &nbsp; <b>Unit Rate:</b> Rs '+nf2(item.rate)+' &nbsp; | &nbsp; <b>Amount:</b> Rs '+nf2(item.amount)+'</div>';
   if(item.notes) h += '<p class="para" style="font-size:11px;margin:4px 0"><b>Note:</b> '+esc(item.notes)+'</p>';
@@ -1327,7 +1335,7 @@ function renderDetailed(){
     h += '<div class="sub-title">7.1 Section 1 &mdash; Mobilization, Demobilization and Site Preparation</div>';
     for(var a=0;a<data.sec1.length;a++){
       var it1 = data.sec1[a];
-      h += '<div class="ra-block"><div class="ra-hdr">'+esc(it1.no)+'. '+esc(it1.desc)+'</div>';
+      h += '<div class="ra-block" id="detail-'+esc(it1.no)+'"><div class="ra-hdr">'+esc(it1.no)+'. '+esc(it1.desc)+'</div>';
       h += '<div class="ra-meta"><b>Quantity:</b> 1 job &nbsp; | &nbsp; <b>Amount:</b> Rs '+nf2(it1.amount)+'</div>';
       h += '<p class="para" style="font-size:11px">This is a lump-sum allowance covering all costs of moving the rig to site, setting up the camp, and preparing the mud pit.</p>';
       h += '</div>';
@@ -1336,7 +1344,7 @@ function renderDetailed(){
     h += '<table><thead><tr><th>S.No.</th><th>Description</th><th>Unit</th><th class="amt-col">Quantity</th><th class="amt-col">Rate (Rs.)</th><th class="amt-col">Amount (Rs.)</th></tr></thead><tbody>';
     for(var b=0;b<data.sec2.length;b++){
       var it2 = data.sec2[b];
-      h += '<tr><td>'+esc(it2.no)+'</td><td>'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="amt-col">'+nf(it2.qty)+'</td><td class="amt-col">'+nf2(it2.rate)+'</td><td class="amt-col">'+nf2(it2.amount)+'</td></tr>';
+      h += '<tr id="detail-'+esc(it2.no)+'"><td>'+esc(it2.no)+'</td><td>'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="amt-col">'+nf(it2.qty)+'</td><td class="amt-col">'+nf2(it2.rate)+'</td><td class="amt-col">'+nf2(it2.amount)+'</td></tr>';
     }
     h += '</tbody></table>';
     h += '<div class="sub-title">7.3 Section 3 &mdash; Execution of Works</div>';
@@ -1663,6 +1671,27 @@ function printAs(mode){
   }, 60);
 }
 
+function switchTab(tab){
+  var tabsNav = el('tabs');
+  if(tabsNav){
+    var btns = tabsNav.querySelectorAll('button[data-tab]');
+    for(var i=0;i<btns.length;i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-tab')===tab);
+  }
+  var panels = document.querySelectorAll('.tab-panel');
+  for(var j=0;j<panels.length;j++) panels[j].classList.toggle('active', panels[j].id==='tab-'+tab);
+}
+function jumpToDetail(no){
+  if(!no) return;
+  switchTab('detailed');
+  setTimeout(function(){
+    var target = document.getElementById('detail-'+no);
+    if(!target){ window.scrollTo({top:0,behavior:'smooth'}); return; }
+    target.scrollIntoView({behavior:'smooth', block:'start'});
+    target.classList.add('jump-highlight');
+    setTimeout(function(){ target.classList.remove('jump-highlight'); }, 1700);
+  }, 30);
+}
+
 function boot(){
   try{
     try{
@@ -1694,24 +1723,22 @@ function boot(){
       tabsNav.addEventListener('click', function(ev){
         var btn = ev.target.closest ? ev.target.closest('button[data-tab]') : null;
         if(!btn) return;
-        var tab = btn.getAttribute('data-tab');
-        var btns = tabsNav.querySelectorAll('button');
-        for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
-        btn.classList.add('active');
-        var panels = document.querySelectorAll('.tab-panel');
-        for(var j=0;j<panels.length;j++) panels[j].classList.toggle('active', panels[j].id==='tab-'+tab);
+        switchTab(btn.getAttribute('data-tab'));
         window.scrollTo({top:0,behavior:'smooth'});
       });
     }
 
-    /* Add / Remove / Reset segment buttons via delegation */
+    /* Add / Remove / Reset segment buttons via delegation, plus estimate/BOQ row -> detailed report jump */
     document.addEventListener('click', function(ev){
       var t = ev.target;
       if(!t || !t.getAttribute) return;
       if(t.getAttribute('data-remove-seg') !== null && t.getAttribute('data-remove-seg') !== undefined){
         var idx = parseInt(t.getAttribute('data-remove-seg'), 10);
         if(!isNaN(idx)) removeSegment(idx);
+        return;
       }
+      var jumpRow = ev.target.closest ? ev.target.closest('tr[data-jump]') : null;
+      if(jumpRow){ jumpToDetail(jumpRow.getAttribute('data-jump')); return; }
     });
     var bAdd = el('btn-add-segment');
     if(bAdd) bAdd.addEventListener('click', addSegment);
