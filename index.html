@@ -130,6 +130,17 @@ details.machine .body h4:first-child{margin-top:0}
 .seg-ok{color:#0e7a5f;font-weight:700}
 .seg-warn{color:#c0392b;font-weight:700}
 .seg-note{color:#555}
+.sig-block{display:flex;justify-content:space-between;margin-top:50px;gap:20px}
+.sig-col{flex:1;min-width:0}
+.sig-col.center{text-align:center}
+.sig-col.right{text-align:right}
+.sig-heading{font-weight:700;margin-bottom:6px;text-decoration:underline}
+.sig-slot{margin-top:55px}
+.sig-col.center .sig-slot,.sig-col.right .sig-slot{margin-top:70px}
+.sig-line{border-top:1px solid #000;width:170px;margin-bottom:4px}
+.sig-col.center .sig-line{margin-left:auto;margin-right:auto}
+.sig-col.right .sig-line{margin-left:auto}
+.sig-role{font-size:10.5px;color:#333}
 .doc tr[data-jump]{cursor:pointer}
 .doc tr[data-jump]:hover{background:#eef6ff}
 .doc tr[data-jump]:hover td{background:#eef6ff}
@@ -142,6 +153,15 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
 @media (max-width:720px){.top-bar{flex-direction:column;align-items:flex-start}main{padding:10px}.tabs{overflow-x:auto;white-space:nowrap;padding:0 8px}.doc .doc-section{padding:12px}.doc .cover-page{padding:14px;min-height:auto}.doc .meta .lbl{width:130px}}
 @media print{
   @page { size:A4; margin:18mm 14mm 18mm 28mm; }
+  @page detailedPage {
+    size:A4; margin:18mm 14mm 0.55in 28mm;
+    @bottom-left{ content: string(consultantLine); font-family:"Times New Roman",Times,Georgia,serif; font-size:9pt; border-top:1px solid #000; padding-top:4pt; vertical-align:top; }
+    @bottom-center{ content:""; border-top:1px solid #000; vertical-align:top; }
+    @bottom-right{ content:"Page " counter(page); font-family:"Times New Roman",Times,Georgia,serif; font-size:9pt; border-top:1px solid #000; padding-top:4pt; vertical-align:top; }
+  }
+  /* Only chapter pages (not the cover page) get the detailedPage footer, so the cover stays clean. */
+  body.print-detailed .doc-section{ page:detailedPage; }
+  .consultant-marker{ string-set: consultantLine content(); font-size:1px; line-height:0; height:0; overflow:hidden; }
   body{background:#fff;font-size:11pt;font-family:"Times New Roman",Times,Georgia,serif}
   .no-print,.top-bar,.tabs,.info,#tab-machinery,#tab-rates,#tab-scope{display:none!important}
   main{padding:0;max-width:none;margin:0}
@@ -152,11 +172,13 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
   .doc{font-size:11pt}
   .doc .section-hdr{display:block!important;font-size:10pt;padding-bottom:3px;margin-bottom:10px}
   .doc .section-ftr{display:block!important;font-size:8.5pt;padding-top:3px;margin-top:14px}
+  body.print-detailed .doc .section-ftr{display:none!important}
   .doc .doc-section{border:none;padding:0;margin:0}
   .doc .doc-section.page-break-before{page-break-before:always;break-before:page}
   .doc .doc-section + .doc-section{page-break-before:always;break-before:page}
   .doc .cover-page{border:3px double #000;min-height:250mm;padding:22mm 16mm;page-break-after:always;break-after:page;margin:0}
   .ma-block,.ra-block{page-break-inside:avoid;break-inside:avoid}
+  .sig-block{page-break-inside:avoid;break-inside:avoid}
   .doc tr{page-break-inside:avoid}
   .doc .sec-title{page-break-after:avoid}
   .doc tr[data-jump]{cursor:auto}
@@ -281,7 +303,7 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
   <div class="card"><h2>Depth Segments — Soil Type &amp; Drilling Method</h2>
     <div class="hint">
       Define the well as one or more depth segments. For each segment, choose the <b>soil type</b> (Soft / Medium / Hard) and the <b>drilling method</b> (Rotary / DTH).
-      The DoWR Norms are then applied segment by segment, using the appropriate coefficient tables for each combination.
+      The DWSS Rate Analysis Norms (2073) are then applied segment by segment, using the appropriate coefficient tables for each combination.
       Rotary is used for Soft, Medium and Hard formations; DTH is used for Hard rock only, and produces the final-diameter bore in a single pass, so no reaming is applied for DTH segments.
     </div>
     <div style="margin-bottom:10px">
@@ -913,17 +935,19 @@ function buildBOQ(){
   add3('Time drawdown pump test (aquifer test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
   add3('Step drawdown pump test (well test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
   add3('Recovery test','well',wells,opRate(RECOVERY,machines),'Per well');
-  add3('Insurance of construction works','job',1,{rate:40000, base:40000, L:{}, M:{}, X:{}},'Lump-sum item; premium for insurance cover of the construction works');
 
-  var tot1=0, tot2=0, tot3=0;
+  var sec4 = [{no:'4.1', desc:'Insurance of construction works', unit:'job', qty:1, rate:40000, amount:40000, ri:null}];
+
+  var tot1=0, tot2=0, tot3=0, tot4=0;
   for(var a=0;a<sec1.length;a++) tot1 += sec1[a].amount;
   for(var b=0;b<sec2.length;b++) tot2 += sec2[b].amount;
   for(var c=0;c<sec3.length;c++) tot3 += sec3[c].amount;
-  var sub = tot1 + tot2 + tot3;
+  for(var d=0;d<sec4.length;d++) tot4 += sec4[d].amount;
+  var sub = tot1 + tot2 + tot3 + tot4;
   var vat = sub * vatPct/100;
   var grand = sub + vat;
 
-  return {sec1:sec1, sec2:sec2, sec3:sec3, tot1:tot1, tot2:tot2, tot3:tot3,
+  return {sec1:sec1, sec2:sec2, sec3:sec3, sec4:sec4, tot1:tot1, tot2:tot2, tot3:tot3, tot4:tot4,
           sub:sub, vatPct:vatPct, vat:vat, grand:grand,
           depth:depth, wells:wells,
           formation: buildSoilSummary(segments),
@@ -958,7 +982,7 @@ function docCoverPage(docTitle){
   h += '<div class="cover-bottom">';
   h += '<div class="cover-prepared-label">Prepared by</div>';
   h += '<div class="cover-consultant">'+esc(cons)+'</div>';
-  h += '<div class="cover-date">Date: ______________</div>';
+  h += '<div class="cover-date">September 2026</div>';
   h += '</div>';
   h += '</div>';
   return h;
@@ -1004,13 +1028,16 @@ function renderEstimate(){
     h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
     for(var k=0;k<data.sec3.length;k++){ var it3 = data.sec3[k]; h += '<tr data-jump="'+esc(it3.no)+'"><td>'+esc(it3.no)+'</td><td class="desc">'+esc(it3.desc)+'</td><td class="unit-col">'+esc(it3.unit)+'</td><td class="amt-col">'+nf(it3.qty)+'</td><td class="amt-col">'+nf2(it3.rate)+'</td><td class="amt-col">'+nf2(it3.amount)+'</td><td></td></tr>'; }
     h += '<tr class="tot-row"><td colspan="5">Total of Section 3</td><td class="amt-col">'+nf2(data.tot3)+'</td><td></td></tr>';
+    h += '<tr class="sec-head"><td>4.</td><td colspan="6">Insurance of Construction Works</td></tr>';
+    for(var l=0;l<data.sec4.length;l++){ var it4 = data.sec4[l]; h += '<tr data-jump="'+esc(it4.no)+'"><td>'+esc(it4.no)+'</td><td class="desc">'+esc(it4.desc)+'</td><td class="unit-col">'+esc(it4.unit)+'</td><td class="amt-col">'+nf(it4.qty)+'</td><td class="amt-col">'+nf2(it4.rate)+'</td><td class="amt-col">'+nf2(it4.amount)+'</td><td></td></tr>'; }
+    h += '<tr class="tot-row"><td colspan="5">Total of Section 4</td><td class="amt-col">'+nf2(data.tot4)+'</td><td></td></tr>';
     h += '<tr><td colspan="7" style="border:none;height:6px"></td></tr>';
-    h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
+    h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3 + 4)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
     h += '<tr class="tot-row"><td colspan="5">VAT @ '+data.vatPct.toFixed(2)+'%</td><td class="amt-col">'+nf2(data.vat)+'</td><td></td></tr>';
     h += '<tr class="tot-row"><td colspan="5"><b>Grand Total</b></td><td class="amt-col"><b>'+nf2(data.grand)+'</b></td><td></td></tr>';
     h += '</tbody></table>';
     h += '<div class="inwords">Amount in words (Grand Total): <b>'+numberToWords(data.grand)+'</b></div>';
-    h += '<div class="note">The above rates are inclusive of all labour, machinery, materials and contractor\'s profit, exclusive of VAT unless specified. Estimate prepared on the basis of DoWR Tubewell Drilling Norms (Revised 2057).</div>';
+    h += '<div class="note">The above rates are inclusive of all labour, machinery, materials and contractor\'s profit, exclusive of VAT unless specified. Estimate prepared on the basis of the DWSS Rate Analysis Norms (2073).</div>';
     h += docSectionClose();
     div.innerHTML = h;
   }catch(e){ console.error('renderEstimate', e); var box = el('estimate-doc'); if(box) box.innerHTML = '<div style="padding:20px;border:1px solid #000">Error: '+esc(e.message)+'</div>'; }
@@ -1040,8 +1067,10 @@ function renderBlankBOQ(){
     for(var j=0;j<data.sec2.length;j++){ var it2 = data.sec2[j]; h += '<tr data-jump="'+esc(it2.no)+'"><td>'+esc(it2.no)+'</td><td class="desc">'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="qty-col">'+nf(it2.qty)+'</td><td></td><td></td><td></td></tr>'; }
     h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
     for(var k=0;k<data.sec3.length;k++){ var it3 = data.sec3[k]; h += '<tr data-jump="'+esc(it3.no)+'"><td>'+esc(it3.no)+'</td><td class="desc">'+esc(it3.desc)+'</td><td class="unit-col">'+esc(it3.unit)+'</td><td class="qty-col">'+nf(it3.qty)+'</td><td></td><td></td><td></td></tr>'; }
+    h += '<tr class="sec-head"><td>4.</td><td colspan="6">Insurance of Construction Works</td></tr>';
+    for(var l=0;l<data.sec4.length;l++){ var it4 = data.sec4[l]; h += '<tr data-jump="'+esc(it4.no)+'"><td>'+esc(it4.no)+'</td><td class="desc">'+esc(it4.desc)+'</td><td class="unit-col">'+esc(it4.unit)+'</td><td class="qty-col">'+nf(it4.qty)+'</td><td></td><td></td><td></td></tr>'; }
     h += '<tr><td colspan="7" style="border:none;height:8px"></td></tr>';
-    h += '<tr><td colspan="5" style="text-align:right;font-weight:700">Sub-Total (1 + 2 + 3) Rs.</td><td></td><td></td></tr>';
+    h += '<tr><td colspan="5" style="text-align:right;font-weight:700">Sub-Total (1 + 2 + 3 + 4) Rs.</td><td></td><td></td></tr>';
     h += '<tr><td colspan="5" style="text-align:right;font-weight:700">VAT @ '+data.vatPct.toFixed(2)+'% Rs.</td><td></td><td></td></tr>';
     h += '<tr><td colspan="5" style="text-align:right;font-weight:700">Grand Total Rs.</td><td></td><td></td></tr>';
     h += '</tbody></table>';
@@ -1059,14 +1088,14 @@ function buildMachineReportHTML(m, mr, fuel, numberPrefix){
   var h = '<div class="ma-block" id="machine-'+esc(m.id)+'">';
   h += '<div class="ma-title">'+(numberPrefix ? esc(numberPrefix) + '   ' : '')+esc(m.name)+'</div>';
   if(isFixed){
-    h += '<p class="para">This item is a fixed-rate charge prescribed by the norms for the corresponding operation. It is not derived from cost primitives.</p>';
+    h += '<p class="para">This item is a fixed-rate charge prescribed by the DWSS Rate Analysis Norms (2073) for the corresponding operation. It is not derived from cost primitives.</p>';
     h += '<div class="ma-calc">';
     h += '<div class="ma-calc-line final">Fixed Working Charge of '+esc(m.name)+' = Rs. '+nf2(mr.working)+' /hr</div>';
     h += '</div>';
     h += '</div>';
     return h;
   }
-  h += '<p class="para">The working rate of this machine has been derived from its primitives following the calculation format adopted in the norms. Every component below is shown with the numerator and denominator placed as they appear in the norms sheet, so that the arithmetic may be verified line by line.</p>';
+  h += '<p class="para">The working rate of this machine has been derived from its primitives following the calculation format adopted in the DWSS Rate Analysis Norms (2073). Every component below is shown with the numerator and denominator placed as they appear in the norms sheet, so that the arithmetic may be verified line by line.</p>';
   h += '<table class="ma-tbl">';
   h += '<tr><td class="lbl">Cost of Machine (Rs.)</td><td class="val">'+nf2(m.cost)+'</td></tr>';
   h += '<tr><td class="lbl">Economical Life (hrs)</td><td class="val">'+nf(m.life)+'</td></tr>';
@@ -1146,7 +1175,7 @@ function buildRateAnalysisHTML(item){
   h += '<div class="ra-hdr">'+esc(item.no)+'. '+esc(item.desc)+'</div>';
   h += '<div class="ra-meta"><b>Quantity:</b> '+nf(item.qty)+' '+esc(item.unit)+' &nbsp; | &nbsp; <b>Unit Rate:</b> Rs '+nf2(item.rate)+' &nbsp; | &nbsp; <b>Amount:</b> Rs '+nf2(item.amount)+'</div>';
   if(item.notes) h += '<p class="para" style="font-size:11px;margin:4px 0"><b>Note:</b> '+esc(item.notes)+'</p>';
-  h += '<p class="para" style="font-size:11px">The unit rate of this item is built up from the underlying labour, machinery and material coefficients prescribed by the DoWR Norms (Revised 2057). Each coefficient is multiplied by the corresponding unit rate from Section 4, Section 5 or Section 6 of this report. The sum of all components forms the base rate, to which the prescribed contractor\'s profit is added.</p>';
+  h += '<p class="para" style="font-size:11px">The unit rate of this item is built up from the underlying labour, machinery and material coefficients prescribed by the DWSS Rate Analysis Norms (2073). Each coefficient is multiplied by the corresponding unit rate from Section 4, Section 5 or Section 6 of this report. The sum of all components forms the base rate, to which the prescribed contractor\'s profit is added.</p>';
   h += '<table class="ra-tbl">';
   h += '<thead><tr><th style="width:50%">Resource</th><th style="width:12%">Unit</th><th style="width:12%">Coeff.</th><th style="width:13%">Rate (Rs.)</th><th style="width:13%">Amount (Rs.)</th></tr></thead><tbody>';
   if(hasL){
@@ -1230,9 +1259,11 @@ function renderDetailed(){
     h += '<div class="cover-bottom">';
     h += '<div class="cover-prepared-label">Prepared by</div>';
     h += '<div class="cover-consultant">'+esc(cons)+'</div>';
-    h += '<div class="cover-date">Date: ______________</div>';
+    h += '<div class="cover-date">September 2026</div>';
     h += '</div>';
     h += '</div>';
+
+    h += '<span class="consultant-marker">Consultant: '+esc(cons)+'</span>';
 
     h += docSectionOpen('Table of Contents', true);
     h += '<div class="sec-title">Table of Contents</div>';
@@ -1255,14 +1286,14 @@ function renderDetailed(){
     h += '<div class="sec-title">1. Introduction</div>';
     h += '<div class="sub-title">1.1 Purpose</div>';
     h += '<p class="para">This report presents in detail the estimation, rate analysis and quantity determination for the <b>'+esc(pwork)+'</b> under <b>'+esc(pname)+'</b> for the Fiscal Year <b>'+esc(pfy)+'</b>. The report is prepared as a supporting document to the Abstract of Cost and the Bill of Quantity, and is intended to demonstrate the basis on which each and every rate has been derived.</p>';
-    h += '<p class="para">The estimate follows the analytical approach mandated by the norms for deep boring works, in strict conformity with the <i>Norms for Tubewell Drilling (Revised 2057)</i> issued by the Ministry of Water Resources, Government of Nepal.</p>';
+    h += '<p class="para">The estimate follows the analytical approach mandated by the DWSS Rate Analysis Norms (2073) for deep boring works, in strict conformity with the <i>Water Well Drilling, Rate Analysis Norms (2073)</i> issued by the Government of Nepal, Ministry of Water Supply &amp; Sanitation, Department of Water Supply &amp; Sewerage.</p>';
     h += '<div class="sub-title">1.2 Scope</div>';
     h += '<p class="para">The scope of the present estimate covers the complete execution of one deep tubewell as designed, including mobilization, well materials, pilot hole drilling, reaming, logging, reconditioning, lowering of pipe assembly, gravel packing, water jetting, sealing, well development and pump testing.</p>';
     h += '<div class="sub-title">1.3 Basis of Estimate</div>';
     h += '<p class="para">The estimate has been prepared on the following basis:</p>';
     h += '<ol>';
-    h += '<li><b>Norms.</b> The coefficient tables of the DoWR Tubewell Drilling Norms (Revised 2057) have been strictly applied, including the depth-band convention whereby, for every additional 100 m of depth beyond the first, the increment shown in the corresponding row is added to the base coefficient set.</li>';
-    h += '<li><b>Depth Segments.</b> The well is divided into one or more depth segments. Each segment has a specific soil type (Soft, Medium or Hard) and a specific drilling method (Rotary or DTH). The applicable coefficient set for each segment is chosen by (soil type) x (drilling method). For DTH segments, the norms provide only the hard-formation coefficient table — the same table is used regardless of soil selection, and no reaming operations are billed for DTH segments because DTH produces the final-diameter bore in a single pass.</li>';
+    h += '<li><b>Norms.</b> The coefficient tables of the DWSS Rate Analysis Norms (2073) have been strictly applied, including the depth-band convention whereby, for every additional 100 m of depth beyond the first, the increment shown in the corresponding row is added to the base coefficient set.</li>';
+    h += '<li><b>Depth Segments.</b> The well is divided into one or more depth segments. Each segment has a specific soil type (Soft, Medium or Hard) and a specific drilling method (Rotary or DTH). The applicable coefficient set for each segment is chosen by (soil type) x (drilling method). For DTH segments, the DWSS Rate Analysis Norms (2073) provide only the hard-formation coefficient table — the same table is used regardless of soil selection, and no reaming operations are billed for DTH segments because DTH produces the final-diameter bore in a single pass.</li>';
     h += '<li><b>Labour Rates.</b> District labour rates for Fiscal Year '+esc(pfy)+' for Kaski District have been adopted and are listed in Section 5.</li>';
     h += '<li><b>Material Rates.</b> Prevailing market rates of materials have been adopted, with transport cost added per unit where applicable, and are listed in Section 6.</li>';
     h += '<li><b>Machinery Rates.</b> Machinery working and idle rates are derived from first principles. Each derivation is presented in Section 4.</li>';
@@ -1285,7 +1316,7 @@ function renderDetailed(){
     h += '<tr><td>Strainer (Screen) Pipe Type</td><td class="amt-col">'+(data.strainerType==='ms' ? 'MS Slotted (supply at MS blind pipe rate + Rs 25,000 lump-sum slotting works)' : 'SS304 Continuous Slotted Pipe')+'</td></tr>';
     h += '</tbody></table>';
     h += '<div class="sub-title">2.3 Depth Segments — Soil Type and Drilling Method</div>';
-    h += '<p class="para">The well has been analysed as the following depth segments. The applicable norm coefficient table is chosen per segment from the soil type and drilling method shown.</p>';
+    h += '<p class="para">The well has been analysed as the following depth segments. The applicable coefficient table of the DWSS Rate Analysis Norms (2073) is chosen per segment from the soil type and drilling method shown.</p>';
     h += '<table><thead><tr><th>#</th><th class="amt-col">From (m)</th><th class="amt-col">To (m)</th><th>Soil Type</th><th>Drilling Method</th><th class="amt-col">Length (m)</th></tr></thead><tbody>';
     for(var si=0; si<data.segments.length; si++){
       var seg = data.segments[si];
@@ -1299,7 +1330,7 @@ function renderDetailed(){
     h += '<div class="sub-title">3.1 General Approach</div>';
     h += '<p class="para">The estimate has been prepared by the conventional unit-rate method. For each item of work, a unit rate is derived from the underlying labour, machinery and material coefficients, and the unit rate is then multiplied by the quantity of that item to obtain the amount.</p>';
     h += '<div class="sub-title">3.2 Norms and Depth-Band Convention</div>';
-    h += '<p class="para">The DoWR Norms give, for each drilling and reaming operation, a base coefficient set applicable to the first 100 m of depth and a separate increment coefficient set applicable to each additional 100 m. The rate applicable to a borehole segment between 100 m and 200 m is the sum of the base and one increment; the rate for a segment between 200 m and 300 m is the sum of the base and two increments; and so on. This is applied per depth segment defined by the user.</p>';
+    h += '<p class="para">The DWSS Rate Analysis Norms (2073) give, for each drilling and reaming operation, a base coefficient set applicable to the first 100 m of depth and a separate increment coefficient set applicable to each additional 100 m. The rate applicable to a borehole segment between 100 m and 200 m is the sum of the base and one increment; the rate for a segment between 200 m and 300 m is the sum of the base and two increments; and so on. This is applied per depth segment defined by the user.</p>';
     h += '<div class="sub-title">3.3 Rate Build-Up Formula</div>';
     h += '<table style="width:auto;margin-left:20px"><tbody>';
     h += '<tr><td style="border:none;padding:2px 8px">Labour cost</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Sum of (coefficient x labour rate)</td></tr>';
@@ -1319,14 +1350,14 @@ function renderDetailed(){
     h += '</tbody></table>';
     h += '<p class="para" style="margin-top:8px"><b>Working rate</b> = Capital Recovery + O &amp; M + Running + Supervision. <b>Idle rate</b> = Capital Recovery + O &amp; M + Supervision.</p>';
     h += '<div class="sub-title">3.5 Contractor\'s Profit</div>';
-    h += '<p class="para">A profit margin of <b>'+(val('in_profit',15)).toFixed(2)+'%</b> on the base rate has been applied to each item of work as prescribed by the norms.</p>';
+    h += '<p class="para">A profit margin of <b>'+(val('in_profit',15)).toFixed(2)+'%</b> on the base rate has been applied to each item of work as prescribed by the DWSS Rate Analysis Norms (2073).</p>';
     h += '<div class="sub-title">3.6 Value Added Tax</div>';
     h += '<p class="para">Value Added Tax at <b>'+val('in_vat',13).toFixed(2)+'%</b> has been applied on the Sub-Total of the Abstract of Cost.</p>';
     h += docSectionClose();
 
     h += docSectionOpen('Machinery Analysis', false);
     h += '<div class="sec-title">4. Machinery Analysis</div>';
-    h += '<p class="para">This section derives the working rate and idle rate of every machine used in the execution of the borehole, following the formulae stated in Section 3.4 and presented in the same format as the norms sheet.</p>';
+    h += '<p class="para">This section derives the working rate and idle rate of every machine used in the execution of the borehole, following the formulae stated in Section 3.4 and presented in the same format as the DWSS Rate Analysis Norms (2073) sheet.</p>';
     for(var i=0;i<MACHINE_DEFS.length;i++){
       h += buildMachineReportHTML(state.machines[MACHINE_DEFS[i].id], machines[MACHINE_DEFS[i].id], state.fuel, '4.' + (i+1));
     }
@@ -1378,6 +1409,19 @@ function renderDetailed(){
     h += '<div class="sub-title">7.3 Section 3 &mdash; Execution of Works</div>';
     for(var c=0;c<data.sec3.length;c++){
       h += buildRateAnalysisHTML(data.sec3[c]);
+    }
+    h += '<div class="sub-title">7.4 Section 4 &mdash; Insurance of Construction Works</div>';
+    for(var c4=0;c4<data.sec4.length;c4++){
+      var it4d = data.sec4[c4];
+      h += '<div class="ra-block" id="detail-'+esc(it4d.no)+'"><div class="ra-hdr">'+esc(it4d.no)+'. '+esc(it4d.desc)+'</div>';
+      h += '<table><tbody>';
+      h += '<tr><td style="width:60%">Unit</td><td class="amt-col">'+esc(it4d.unit)+'</td></tr>';
+      h += '<tr><td>Quantity</td><td class="amt-col">'+nf(it4d.qty)+'</td></tr>';
+      h += '<tr><td>Rate (Rs.)</td><td class="amt-col">'+nf2(it4d.rate)+'</td></tr>';
+      h += '<tr><td><b>Amount (Rs.)</b></td><td class="amt-col"><b>'+nf2(it4d.amount)+'</b></td></tr>';
+      h += '</tbody></table>';
+      h += '<p class="para" style="font-size:11px">This is a fixed lump-sum provision for insurance cover of the construction works (e.g. Contractor\'s All Risk insurance) for the duration of the contract. It is not derived from the DWSS Rate Analysis Norms (2073) coefficient tables and is entered directly as a project-specific lump sum.</p>';
+      h += '</div>';
     }
     h += docSectionClose();
 
@@ -1437,8 +1481,11 @@ function renderDetailed(){
     h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
     for(var p3=0;p3<data.sec3.length;p3++){ var s3 = data.sec3[p3]; h += '<tr><td>'+esc(s3.no)+'</td><td class="desc">'+esc(s3.desc)+'</td><td class="unit-col">'+esc(s3.unit)+'</td><td class="amt-col">'+nf(s3.qty)+'</td><td class="amt-col">'+nf2(s3.rate)+'</td><td class="amt-col">'+nf2(s3.amount)+'</td><td></td></tr>'; }
     h += '<tr class="tot-row"><td colspan="5">Total of Section 3</td><td class="amt-col">'+nf2(data.tot3)+'</td><td></td></tr>';
+    h += '<tr class="sec-head"><td>4.</td><td colspan="6">Insurance of Construction Works</td></tr>';
+    for(var p4=0;p4<data.sec4.length;p4++){ var s4 = data.sec4[p4]; h += '<tr><td>'+esc(s4.no)+'</td><td class="desc">'+esc(s4.desc)+'</td><td class="unit-col">'+esc(s4.unit)+'</td><td class="amt-col">'+nf(s4.qty)+'</td><td class="amt-col">'+nf2(s4.rate)+'</td><td class="amt-col">'+nf2(s4.amount)+'</td><td></td></tr>'; }
+    h += '<tr class="tot-row"><td colspan="5">Total of Section 4</td><td class="amt-col">'+nf2(data.tot4)+'</td><td></td></tr>';
     h += '<tr><td colspan="7" style="border:none;height:6px"></td></tr>';
-    h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
+    h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3 + 4)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
     h += '<tr class="tot-row"><td colspan="5">VAT @ '+data.vatPct.toFixed(2)+'%</td><td class="amt-col">'+nf2(data.vat)+'</td><td></td></tr>';
     h += '<tr class="tot-row"><td colspan="5"><b>Grand Total</b></td><td class="amt-col"><b>'+nf2(data.grand)+'</b></td><td></td></tr>';
     h += '</tbody></table>';
@@ -1448,8 +1495,7 @@ function renderDetailed(){
     h += docSectionOpen('References', false);
     h += '<div class="sec-title">10. References</div>';
     h += '<ol>';
-    h += '<li><b>Norms for Tubewell Drilling (Revised 2057)</b> - Ministry of Water Resources, Government of Nepal.</li>';
-    h += '<li><b>Water Well Drilling Rate Analysis Norms 2073</b> - Department of Water Supply and Sewerage (DWSS), Deep Tubewell Project.</li>';
+    h += '<li><b>Water Well Drilling, Rate Analysis Norms (2073)</b> - Government of Nepal, Ministry of Water Supply &amp; Sanitation, Department of Water Supply &amp; Sewerage. (Referred to throughout this report in short form as the "DWSS Rate Analysis Norms (2073)".)</li>';
     h += '<li><b>District Rate Schedule for Fiscal Year '+esc(pfy)+'</b> - Gandaki Province, Kaski District.</li>';
     h += '<li><b>Nepal Oil Corporation Fuel Price Circular</b> - prevailing prices for HSD, Mobil, Gear Oil, Hydraulic Oil, Brake Oil and Grease.</li>';
     h += '<li><b>Manufacturer Specification Sheets</b> - for machinery cost, life, working hours, overhaul and maintenance percentages, fuel consumption and spare part schedules.</li>';
@@ -1468,6 +1514,23 @@ function renderDetailed(){
     h += '<li>The depths indicated in the BOQ are design depths. Payment will be made only for the actual metrage executed at the contract unit rates.</li>';
     h += '<li>This estimate is prepared for budgeting and tender purposes.</li>';
     h += '</ol>';
+    h += '<div class="sub-title" style="margin-top:22px;border-bottom:none">Certification</div>';
+    h += '<div class="sig-block">';
+    h += '  <div class="sig-col">';
+    h += '    <div class="sig-heading">Prepared by</div>';
+    h += '    <div class="sig-slot"><div class="sig-line"></div><div class="sig-role">Name &amp; Designation</div></div>';
+    h += '    <div class="sig-slot"><div class="sig-line"></div><div class="sig-role">Name &amp; Designation</div></div>';
+    h += '    <div class="sig-slot"><div class="sig-line"></div><div class="sig-role">Name &amp; Designation</div></div>';
+    h += '  </div>';
+    h += '  <div class="sig-col center">';
+    h += '    <div class="sig-heading">Checked by</div>';
+    h += '    <div class="sig-slot"><div class="sig-line"></div><div class="sig-role">Name &amp; Designation</div></div>';
+    h += '  </div>';
+    h += '  <div class="sig-col right">';
+    h += '    <div class="sig-heading">Approved by</div>';
+    h += '    <div class="sig-slot"><div class="sig-line"></div><div class="sig-role">Name &amp; Designation</div></div>';
+    h += '  </div>';
+    h += '</div>';
     h += docSectionClose();
 
     div.innerHTML = h;
