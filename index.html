@@ -133,8 +133,11 @@ details.machine .body h4:first-child{margin-top:0}
 .doc tr[data-jump]{cursor:pointer}
 .doc tr[data-jump]:hover{background:#eef6ff}
 .doc tr[data-jump]:hover td{background:#eef6ff}
+.doc .jump-link{cursor:pointer}
+.doc .jump-link:hover{background:#eef6ff}
 @keyframes jumpFlash{0%{background:#fff3b0}100%{background:transparent}}
 .ra-block.jump-highlight{animation:jumpFlash 1.6s ease}
+.ma-block.jump-highlight{animation:jumpFlash 1.6s ease}
 tr.jump-highlight td{animation:jumpFlash 1.6s ease}
 @media (max-width:720px){.top-bar{flex-direction:column;align-items:flex-start}main{padding:10px}.tabs{overflow-x:auto;white-space:nowrap;padding:0 8px}.doc .doc-section{padding:12px}.doc .cover-page{padding:14px;min-height:auto}.doc .meta .lbl{width:130px}}
 @media print{
@@ -158,6 +161,8 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
   .doc .sec-title{page-break-after:avoid}
   .doc tr[data-jump]{cursor:auto}
   .doc tr[data-jump]:hover,.doc tr[data-jump]:hover td{background:transparent!important}
+  .doc .jump-link{cursor:auto}
+  .doc .jump-link:hover{background:transparent!important}
   .doc .sub-title{page-break-after:avoid}
 }
 </style>
@@ -1029,7 +1034,7 @@ function renderBlankBOQ(){
 /* ============ MACHINERY ANALYSIS BLOCK ============ */
 function buildMachineReportHTML(m, mr, fuel, numberPrefix){
   var isFixed = mr.isFixed, bd = mr.bd || {};
-  var h = '<div class="ma-block">';
+  var h = '<div class="ma-block" id="machine-'+esc(m.id)+'">';
   h += '<div class="ma-title">'+(numberPrefix ? esc(numberPrefix) + '   ' : '')+esc(m.name)+'</div>';
   if(isFixed){
     h += '<p class="para">This item is a fixed-rate charge prescribed by the norms for the corresponding operation. It is not derived from cost primitives.</p>';
@@ -1139,7 +1144,7 @@ function buildRateAnalysisHTML(item){
       for(var y=0;y<MACHINE_DEFS.length;y++) if(MACHINE_DEFS[y].id===mid){ mname = MACHINE_DEFS[y].name; break; }
       var mrate = (state.machines[mid] ? calcMachineRate(state.machines[mid], state.fuel).working : 0);
       var amt2 = ri.M[mid] * mrate;
-      h += '<tr><td>'+esc(mname)+'</td><td class="unit">hour</td><td class="num">'+Number(ri.M[mid]).toFixed(4)+'</td><td class="num">'+nf2(mrate)+'</td><td class="num">'+nf2(amt2)+'</td></tr>';
+      h += '<tr><td><span class="jump-link" data-jump-mach="'+esc(mid)+'">'+esc(mname)+'</span></td><td class="unit">hour</td><td class="num">'+Number(ri.M[mid]).toFixed(4)+'</td><td class="num">'+nf2(mrate)+'</td><td class="num">'+nf2(amt2)+'</td></tr>';
     }
   }
   if(hasX){
@@ -1692,6 +1697,20 @@ function jumpToDetail(no){
   }, 30);
 }
 
+function jumpToMachine(mid){
+  if(!mid) return;
+  /* The machinery rate-analysis link only appears within the Detailed Report tab itself,
+     so no tab switch is needed here — just scroll within the same document. */
+  switchTab('detailed');
+  setTimeout(function(){
+    var target = document.getElementById('machine-'+mid);
+    if(!target){ window.scrollTo({top:0,behavior:'smooth'}); return; }
+    target.scrollIntoView({behavior:'smooth', block:'start'});
+    target.classList.add('jump-highlight');
+    setTimeout(function(){ target.classList.remove('jump-highlight'); }, 1700);
+  }, 30);
+}
+
 function boot(){
   try{
     try{
@@ -1739,6 +1758,8 @@ function boot(){
       }
       var jumpRow = ev.target.closest ? ev.target.closest('tr[data-jump]') : null;
       if(jumpRow){ jumpToDetail(jumpRow.getAttribute('data-jump')); return; }
+      var jumpMach = ev.target.closest ? ev.target.closest('.jump-link[data-jump-mach]') : null;
+      if(jumpMach){ jumpToMachine(jumpMach.getAttribute('data-jump-mach')); return; }
     });
     var bAdd = el('btn-add-segment');
     if(bAdd) bAdd.addEventListener('click', addSegment);
