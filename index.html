@@ -235,7 +235,7 @@ details.machine .body h4:first-child{margin-top:0}
 
   <div class="card"><h2>Drilling Depth &amp; Options</h2>
     <div class="grid c4">
-      <label class="f">Total Depth (m)<input type="number" id="in_depth" data-save="p_depth" value="150" min="1" step="1"></label>
+      <label class="f">Total Depth (m)<input type="number" id="in_depth" data-save="p_depth" value="120" min="1" step="1"></label>
       <label class="f">Include 3rd reaming (22½")?
         <select id="in_r3" data-save="p_r3"><option value="0">No</option><option value="1">Yes</option></select>
       </label>
@@ -291,10 +291,12 @@ details.machine .body h4:first-child{margin-top:0}
   </div>
 
   <div class="card"><h2>Well Assembly Quantities</h2>
+    <div class="hint">The pipe assembly lowered into the well — housing pipe (2.1) + riser pipe (2.2) + screen (2.3) — must total the drilling depth. Set these from the actual borehole design / logging data, not by guesswork.</div>
     <div class="table-wrap"><table>
       <thead><tr><th>Material</th><th style="width:70px">Unit</th><th class="num" style="width:180px">Quantity</th></tr></thead>
       <tbody id="tbl-wellqty"></tbody>
     </table></div>
+    <div class="hint" id="wellqty-summary" style="margin-top:8px"></div>
   </div>
 </section>
 
@@ -446,8 +448,8 @@ var state = defaultState();
 
 function defaultSegments(){
   return [
-    {start: 0,  end: 100, soil:'medium', method:'rotary'},
-    {start: 100, end: 150, soil:'hard',   method:'dth'}
+    {start: 0,  end: 90, soil:'medium', method:'rotary'},
+    {start: 90, end: 120, soil:'hard',   method:'dth'}
   ];
 }
 
@@ -457,7 +459,7 @@ function defaultState(){
   for(var i=0;i<MACHINE_DEFS.length;i++) s.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
   for(var j=0;j<LABOUR_DEFS.length;j++) s.labour[LABOUR_DEFS[j].id] = LABOUR_DEFS[j].rate;
   for(var l=0;l<MATERIAL_DEFS.length;l++) s.material[MATERIAL_DEFS[l].id] = {rate:MATERIAL_DEFS[l].rate, transport:0};
-  s.wellQty = {pipe250:48, pipe200:78, slot200:24, plug200:1, plate:1, guide250:2, guide200:4};
+  s.wellQty = {pipe250:35, pipe200:30, slot200:55, plug200:1, plate:1, guide250:2, guide200:4};
   return s;
 }
 
@@ -761,6 +763,22 @@ function renderWellQtyTable(){
     h += '<tr><td>'+esc(m.name)+'</td><td class="unit-col">'+esc(m.unit)+'</td><td class="num">'+attrInput({type:'number',step:'0.01',min:'0','data-wq':id,'data-save':'wq:'+id,value:getWellQty(id),'class':'c'})+'</td></tr>';
   }
   t.innerHTML = h;
+  updateWellQtySummary();
+}
+var PIPE_ASSEMBLY_IDS = ['pipe250','pipe200','slot200'];
+function updateWellQtySummary(){
+  var summary = el('wellqty-summary');
+  if(!summary) return;
+  var total = 0;
+  for(var i=0;i<PIPE_ASSEMBLY_IDS.length;i++) total += getWellQty(PIPE_ASSEMBLY_IDS[i]);
+  var depth = val('in_depth', 0);
+  var html = 'Pipe assembly (2.1 + 2.2 + 2.3): <b>' + nf(total) + ' m</b> against a drilling depth of <b>' + nf(depth) + ' m</b>. ';
+  if(Math.abs(total - depth) < 0.01){
+    html += '<span class="seg-ok">&#10003; Pipe assembly length matches the total depth.</span>';
+  } else {
+    html += '<span class="seg-warn">&#9888; Mismatch of ' + nf(Math.abs(total - depth)) + ' m &mdash; adjust pipe250 / pipe200 / slot200 (or the total depth) so items 2.1, 2.2 and 2.3 sum to the drilling depth.</span>';
+  }
+  summary.innerHTML = html;
 }
 
 /* ============ BUILD BOQ — now driven by segments ============ */
@@ -861,6 +879,7 @@ function buildBOQ(){
   add3('Time drawdown pump test (aquifer test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
   add3('Step drawdown pump test (well test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
   add3('Recovery test','well',wells,opRate(RECOVERY,machines),'Per well');
+  add3('Insurance of construction works','job',1,{rate:40000, base:40000, L:{}, M:{}, X:{}},'Lump-sum item; premium for insurance cover of the construction works');
 
   var tot1=0, tot2=0, tot3=0;
   for(var a=0;a<sec1.length;a++) tot1 += sec1[a].amount;
@@ -1697,7 +1716,7 @@ function boot(){
     var bAdd = el('btn-add-segment');
     if(bAdd) bAdd.addEventListener('click', addSegment);
     var bReset = el('btn-reset-segments');
-    if(bReset) bReset.addEventListener('click', function(){ if(confirm('Reset to the default 0-100 m Medium-Rotary and 100-150 m Hard-DTH segments?')) resetSegmentsToDefault(); });
+    if(bReset) bReset.addEventListener('click', function(){ if(confirm('Reset to the default 0-90 m Medium-Rotary and 90-120 m Hard-DTH segments?')) resetSegmentsToDefault(); });
 
     /* Input handler */
     document.addEventListener('input', function(e){
