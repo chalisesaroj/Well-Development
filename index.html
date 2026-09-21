@@ -289,12 +289,21 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
       <label class="f">Include reconditioning?
         <select id="in_recond" data-save="p_recond"><option value="1">Yes</option><option value="0">No</option></select>
       </label>
-      <label class="f">Well development
+      <label class="f">Well development — costing method
+        <select id="in_devmode" data-save="p_devmode">
+          <option value="norms">DoWR Norms (computed)</option>
+          <option value="ls">Lump Sum (L.S.)</option>
+        </select>
+      </label>
+      <label class="f" id="devmode-norms-wrap">Well development
         <select id="in_dev" data-save="p_dev">
           <option value="compressor">By compressor machine</option>
           <option value="pump">By pump</option>
           <option value="both">Both</option>
         </select>
+      </label>
+      <label class="f" id="devmode-ls-wrap">Well development — L.S. Price (Rs.)
+        <input type="number" id="in_devls" data-save="p_devls" value="0" min="0" step="1000">
       </label>
     </div>
     <div class="hint" style="margin-top:8px">1st reaming (13¾") is always included as the base pass. 2nd reaming (17½") and 3rd reaming (22½") are each optional, sequential enlargement passes — 3rd reaming is only meaningful if 2nd reaming is also included.</div>
@@ -831,6 +840,8 @@ function buildBOQ(){
   var gravel = strVal('in_gravel','0')==='1', recond = strVal('in_recond','0')==='1';
   var strainerType = strVal('in_strainer','ss');
   var dev = strVal('in_dev','compressor');
+  var devMode = strVal('in_devmode','norms');
+  var devLS = val('in_devls', 0);
   var vatPct = val('in_vat', 13);
   var mob = val('in_mob', 150000);
   var machines = getAllMachineRates();
@@ -840,7 +851,12 @@ function buildBOQ(){
   var R1MAP = {soft:[R1_SOFT_B,R1_SOFT_I], medium:[R1_MED_B,R1_MED_I], hard:[R1_HARD_B,R1_HARD_I]};
   var R2MAP = {soft:[R2_SOFT_B,R2_SOFT_I], medium:[R2_MED_B,R2_MED_I], hard:[R2_HARD_B,R2_HARD_I]};
 
-  var sec1 = [{no:'1.1', desc:'Mobilization and demobilization of drilling equipment including site clearance, camp setting, rig setting up and preparation of mud pit', unit:'job', qty:1, rate:mob, amount:mob, ri:null}];
+  var sec1 = [
+    {no:'1.1', desc:'Mobilization and demobilization of drilling equipment including site clearance, camp setting, rig setting up and preparation of mud pit', unit:'job', qty:1, rate:mob, amount:mob, ri:null,
+     notes:'This is a lump-sum allowance covering all costs of moving the rig to site, setting up the camp, and preparing the mud pit.'},
+    {no:'1.2', desc:'Insurance of construction works', unit:'job', qty:1, rate:40000, amount:40000, ri:null,
+     notes:'This is a fixed lump-sum provision for insurance cover of the construction works (e.g. Contractor\'s All Risk insurance) for the duration of the contract. It is not derived from the DWSS Rate Analysis Norms (2073) coefficient tables and is entered directly as a project-specific lump sum.'}
+  ];
 
   var sec2 = []; var sn2 = 1;
   for(var i=0;i<WELL_MATERIAL_IDS.length;i++){
@@ -930,24 +946,25 @@ function buildBOQ(){
   if(gravel) add3('Back washing, inner washing and gravel packing','m',depth,opRate(GRAVEL,machines),'Rate independent of depth');
   if(jet) add3('Water jetting of strainer','m',depth,opRate(JETTING,machines),'Rate independent of depth');
   add3('Sealing of the borehole with cement grouting including supply and installation of 2 x 3 m long 65 mm dia. medium class GI pipe','5 m',1,opRate(SEALING,machines),'Normally applied for a 5-metre segment at the top');
-  if(dev==='compressor' || dev==='both') add3('Well development by compressor machine (48 hours)','well',wells,opRate(DEV_COMP,machines),'Per well');
-  if(dev==='pump' || dev==='both') add3('Well development by pump','well',wells,opRate(DEV_PUMP,machines),'Per well');
+  if(devMode === 'ls'){
+    add3('Well development (Lump Sum)','L.S.',1,{rate:devLS, base:devLS, L:{}, M:{}, X:{}},'Lump-sum item — price entered directly, not computed from DoWR norms');
+  } else {
+    if(dev==='compressor' || dev==='both') add3('Well development by compressor machine (48 hours)','well',wells,opRate(DEV_COMP,machines),'Per well');
+    if(dev==='pump' || dev==='both') add3('Well development by pump','well',wells,opRate(DEV_PUMP,machines),'Per well');
+  }
   add3('Time drawdown pump test (aquifer test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
   add3('Step drawdown pump test (well test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
   add3('Recovery test','well',wells,opRate(RECOVERY,machines),'Per well');
 
-  var sec4 = [{no:'4.1', desc:'Insurance of construction works', unit:'job', qty:1, rate:40000, amount:40000, ri:null}];
-
-  var tot1=0, tot2=0, tot3=0, tot4=0;
+  var tot1=0, tot2=0, tot3=0;
   for(var a=0;a<sec1.length;a++) tot1 += sec1[a].amount;
   for(var b=0;b<sec2.length;b++) tot2 += sec2[b].amount;
   for(var c=0;c<sec3.length;c++) tot3 += sec3[c].amount;
-  for(var d=0;d<sec4.length;d++) tot4 += sec4[d].amount;
-  var sub = tot1 + tot2 + tot3 + tot4;
+  var sub = tot1 + tot2 + tot3;
   var vat = sub * vatPct/100;
   var grand = sub + vat;
 
-  return {sec1:sec1, sec2:sec2, sec3:sec3, sec4:sec4, tot1:tot1, tot2:tot2, tot3:tot3, tot4:tot4,
+  return {sec1:sec1, sec2:sec2, sec3:sec3, tot1:tot1, tot2:tot2, tot3:tot3,
           sub:sub, vatPct:vatPct, vat:vat, grand:grand,
           depth:depth, wells:wells,
           formation: buildSoilSummary(segments),
@@ -1019,7 +1036,7 @@ function renderEstimate(){
     h += '<div class="row"><span class="lbl">No. of Wells :</span><span class="val">'+data.wells+'</span></div>';
     h += '</div>';
     h += '<table><thead><tr><th style="width:6%">S.No.</th><th>Description of Work</th><th style="width:6%">Unit</th><th style="width:9%" class="amt-col">Quantity</th><th style="width:11%" class="amt-col">Rate (Rs.)</th><th style="width:13%" class="amt-col">Amount (Rs.)</th><th style="width:8%">Remarks</th></tr></thead><tbody>';
-    h += '<tr class="sec-head"><td>1.</td><td colspan="6">Mobilization, Demobilization and Site Preparation</td></tr>';
+    h += '<tr class="sec-head"><td>1.</td><td colspan="6">Provisional Sum</td></tr>';
     for(var i=0;i<data.sec1.length;i++){ var it = data.sec1[i]; h += '<tr data-jump="'+esc(it.no)+'"><td>'+esc(it.no)+'</td><td class="desc">'+esc(it.desc)+'</td><td class="unit-col">'+esc(it.unit)+'</td><td class="amt-col">'+nf(it.qty)+'</td><td class="amt-col">'+nf2(it.rate)+'</td><td class="amt-col">'+nf2(it.amount)+'</td><td></td></tr>'; }
     h += '<tr class="tot-row"><td colspan="5">Total of Section 1</td><td class="amt-col">'+nf2(data.tot1)+'</td><td></td></tr>';
     h += '<tr class="sec-head"><td>2.</td><td colspan="6">Supply of Well Materials</td></tr>';
@@ -1028,11 +1045,8 @@ function renderEstimate(){
     h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
     for(var k=0;k<data.sec3.length;k++){ var it3 = data.sec3[k]; h += '<tr data-jump="'+esc(it3.no)+'"><td>'+esc(it3.no)+'</td><td class="desc">'+esc(it3.desc)+'</td><td class="unit-col">'+esc(it3.unit)+'</td><td class="amt-col">'+nf(it3.qty)+'</td><td class="amt-col">'+nf2(it3.rate)+'</td><td class="amt-col">'+nf2(it3.amount)+'</td><td></td></tr>'; }
     h += '<tr class="tot-row"><td colspan="5">Total of Section 3</td><td class="amt-col">'+nf2(data.tot3)+'</td><td></td></tr>';
-    h += '<tr class="sec-head"><td>4.</td><td colspan="6">Insurance of Construction Works</td></tr>';
-    for(var l=0;l<data.sec4.length;l++){ var it4 = data.sec4[l]; h += '<tr data-jump="'+esc(it4.no)+'"><td>'+esc(it4.no)+'</td><td class="desc">'+esc(it4.desc)+'</td><td class="unit-col">'+esc(it4.unit)+'</td><td class="amt-col">'+nf(it4.qty)+'</td><td class="amt-col">'+nf2(it4.rate)+'</td><td class="amt-col">'+nf2(it4.amount)+'</td><td></td></tr>'; }
-    h += '<tr class="tot-row"><td colspan="5">Total of Section 4</td><td class="amt-col">'+nf2(data.tot4)+'</td><td></td></tr>';
     h += '<tr><td colspan="7" style="border:none;height:6px"></td></tr>';
-    h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3 + 4)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
+    h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
     h += '<tr class="tot-row"><td colspan="5">VAT @ '+data.vatPct.toFixed(2)+'%</td><td class="amt-col">'+nf2(data.vat)+'</td><td></td></tr>';
     h += '<tr class="tot-row"><td colspan="5"><b>Grand Total</b></td><td class="amt-col"><b>'+nf2(data.grand)+'</b></td><td></td></tr>';
     h += '</tbody></table>';
@@ -1061,16 +1075,14 @@ function renderBlankBOQ(){
     h += '<div class="row"><span class="lbl">No. of Wells :</span><span class="val">'+data.wells+'</span></div>';
     h += '</div>';
     h += '<table><thead><tr><th style="width:7%">S.No.</th><th>Description of Work</th><th style="width:7%">Unit</th><th style="width:10%">Quantity</th><th style="width:13%">Rate (Rs.)</th><th style="width:15%">Amount (Rs.)</th><th style="width:9%">Remarks</th></tr></thead><tbody>';
-    h += '<tr class="sec-head"><td>1.</td><td colspan="6">Mobilization, Demobilization and Site Preparation</td></tr>';
+    h += '<tr class="sec-head"><td>1.</td><td colspan="6">Provisional Sum</td></tr>';
     for(var i=0;i<data.sec1.length;i++){ var it = data.sec1[i]; h += '<tr data-jump="'+esc(it.no)+'"><td>'+esc(it.no)+'</td><td class="desc">'+esc(it.desc)+'</td><td class="unit-col">'+esc(it.unit)+'</td><td class="qty-col">'+nf(it.qty)+'</td><td></td><td></td><td></td></tr>'; }
     h += '<tr class="sec-head"><td>2.</td><td colspan="6">Supply of Well Materials</td></tr>';
     for(var j=0;j<data.sec2.length;j++){ var it2 = data.sec2[j]; h += '<tr data-jump="'+esc(it2.no)+'"><td>'+esc(it2.no)+'</td><td class="desc">'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="qty-col">'+nf(it2.qty)+'</td><td></td><td></td><td></td></tr>'; }
     h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
     for(var k=0;k<data.sec3.length;k++){ var it3 = data.sec3[k]; h += '<tr data-jump="'+esc(it3.no)+'"><td>'+esc(it3.no)+'</td><td class="desc">'+esc(it3.desc)+'</td><td class="unit-col">'+esc(it3.unit)+'</td><td class="qty-col">'+nf(it3.qty)+'</td><td></td><td></td><td></td></tr>'; }
-    h += '<tr class="sec-head"><td>4.</td><td colspan="6">Insurance of Construction Works</td></tr>';
-    for(var l=0;l<data.sec4.length;l++){ var it4 = data.sec4[l]; h += '<tr data-jump="'+esc(it4.no)+'"><td>'+esc(it4.no)+'</td><td class="desc">'+esc(it4.desc)+'</td><td class="unit-col">'+esc(it4.unit)+'</td><td class="qty-col">'+nf(it4.qty)+'</td><td></td><td></td><td></td></tr>'; }
     h += '<tr><td colspan="7" style="border:none;height:8px"></td></tr>';
-    h += '<tr><td colspan="5" style="text-align:right;font-weight:700">Sub-Total (1 + 2 + 3 + 4) Rs.</td><td></td><td></td></tr>';
+    h += '<tr><td colspan="5" style="text-align:right;font-weight:700">Sub-Total (1 + 2 + 3) Rs.</td><td></td><td></td></tr>';
     h += '<tr><td colspan="5" style="text-align:right;font-weight:700">VAT @ '+data.vatPct.toFixed(2)+'% Rs.</td><td></td><td></td></tr>';
     h += '<tr><td colspan="5" style="text-align:right;font-weight:700">Grand Total Rs.</td><td></td><td></td></tr>';
     h += '</tbody></table>';
@@ -1391,12 +1403,12 @@ function renderDetailed(){
     h += docSectionOpen('Item-wise Rate Analysis', false);
     h += '<div class="sec-title">7. Item-wise Rate Analysis</div>';
     h += '<p class="para">This section presents the rate analysis of each item of the Bill of Quantity. Each item is presented with the item number and description, the quantity, the derived unit rate, the resource-wise breakdown, sub-totals of the labour, machinery and material components, and the final unit rate and total amount.</p>';
-    h += '<div class="sub-title">7.1 Section 1 &mdash; Mobilization, Demobilization and Site Preparation</div>';
+    h += '<div class="sub-title">7.1 Section 1 &mdash; Provisional Sum</div>';
     for(var a=0;a<data.sec1.length;a++){
       var it1 = data.sec1[a];
       h += '<div class="ra-block" id="detail-'+esc(it1.no)+'"><div class="ra-hdr">'+esc(it1.no)+'. '+esc(it1.desc)+'</div>';
       h += '<div class="ra-meta"><b>Quantity:</b> 1 job &nbsp; | &nbsp; <b>Amount:</b> Rs '+nf2(it1.amount)+'</div>';
-      h += '<p class="para" style="font-size:11px">This is a lump-sum allowance covering all costs of moving the rig to site, setting up the camp, and preparing the mud pit.</p>';
+      h += '<p class="para" style="font-size:11px">'+esc(it1.notes||'')+'</p>';
       h += '</div>';
     }
     h += '<div class="sub-title">7.2 Section 2 &mdash; Supply of Well Materials</div>';
@@ -1409,19 +1421,6 @@ function renderDetailed(){
     h += '<div class="sub-title">7.3 Section 3 &mdash; Execution of Works</div>';
     for(var c=0;c<data.sec3.length;c++){
       h += buildRateAnalysisHTML(data.sec3[c]);
-    }
-    h += '<div class="sub-title">7.4 Section 4 &mdash; Insurance of Construction Works</div>';
-    for(var c4=0;c4<data.sec4.length;c4++){
-      var it4d = data.sec4[c4];
-      h += '<div class="ra-block" id="detail-'+esc(it4d.no)+'"><div class="ra-hdr">'+esc(it4d.no)+'. '+esc(it4d.desc)+'</div>';
-      h += '<table><tbody>';
-      h += '<tr><td style="width:60%">Unit</td><td class="amt-col">'+esc(it4d.unit)+'</td></tr>';
-      h += '<tr><td>Quantity</td><td class="amt-col">'+nf(it4d.qty)+'</td></tr>';
-      h += '<tr><td>Rate (Rs.)</td><td class="amt-col">'+nf2(it4d.rate)+'</td></tr>';
-      h += '<tr><td><b>Amount (Rs.)</b></td><td class="amt-col"><b>'+nf2(it4d.amount)+'</b></td></tr>';
-      h += '</tbody></table>';
-      h += '<p class="para" style="font-size:11px">This is a fixed lump-sum provision for insurance cover of the construction works (e.g. Contractor\'s All Risk insurance) for the duration of the contract. It is not derived from the DWSS Rate Analysis Norms (2073) coefficient tables and is entered directly as a project-specific lump sum.</p>';
-      h += '</div>';
     }
     h += docSectionClose();
 
@@ -1472,7 +1471,7 @@ function renderDetailed(){
     h += docSectionOpen('Abstract of Cost', false);
     h += '<div class="sec-title">9. Abstract of Cost</div>';
     h += '<table><thead><tr><th style="width:6%">S.No.</th><th>Description of Work</th><th style="width:6%">Unit</th><th class="amt-col" style="width:9%">Qty</th><th class="amt-col" style="width:11%">Rate (Rs.)</th><th class="amt-col" style="width:13%">Amount (Rs.)</th><th style="width:8%">Remarks</th></tr></thead><tbody>';
-    h += '<tr class="sec-head"><td>1.</td><td colspan="6">Mobilization, Demobilization and Site Preparation</td></tr>';
+    h += '<tr class="sec-head"><td>1.</td><td colspan="6">Provisional Sum</td></tr>';
     for(var p1=0;p1<data.sec1.length;p1++){ var s1 = data.sec1[p1]; h += '<tr><td>'+esc(s1.no)+'</td><td class="desc">'+esc(s1.desc)+'</td><td class="unit-col">'+esc(s1.unit)+'</td><td class="amt-col">'+nf(s1.qty)+'</td><td class="amt-col">'+nf2(s1.rate)+'</td><td class="amt-col">'+nf2(s1.amount)+'</td><td></td></tr>'; }
     h += '<tr class="tot-row"><td colspan="5">Total of Section 1</td><td class="amt-col">'+nf2(data.tot1)+'</td><td></td></tr>';
     h += '<tr class="sec-head"><td>2.</td><td colspan="6">Supply of Well Materials</td></tr>';
@@ -1481,11 +1480,8 @@ function renderDetailed(){
     h += '<tr class="sec-head"><td>3.</td><td colspan="6">Execution of Works</td></tr>';
     for(var p3=0;p3<data.sec3.length;p3++){ var s3 = data.sec3[p3]; h += '<tr><td>'+esc(s3.no)+'</td><td class="desc">'+esc(s3.desc)+'</td><td class="unit-col">'+esc(s3.unit)+'</td><td class="amt-col">'+nf(s3.qty)+'</td><td class="amt-col">'+nf2(s3.rate)+'</td><td class="amt-col">'+nf2(s3.amount)+'</td><td></td></tr>'; }
     h += '<tr class="tot-row"><td colspan="5">Total of Section 3</td><td class="amt-col">'+nf2(data.tot3)+'</td><td></td></tr>';
-    h += '<tr class="sec-head"><td>4.</td><td colspan="6">Insurance of Construction Works</td></tr>';
-    for(var p4=0;p4<data.sec4.length;p4++){ var s4 = data.sec4[p4]; h += '<tr><td>'+esc(s4.no)+'</td><td class="desc">'+esc(s4.desc)+'</td><td class="unit-col">'+esc(s4.unit)+'</td><td class="amt-col">'+nf(s4.qty)+'</td><td class="amt-col">'+nf2(s4.rate)+'</td><td class="amt-col">'+nf2(s4.amount)+'</td><td></td></tr>'; }
-    h += '<tr class="tot-row"><td colspan="5">Total of Section 4</td><td class="amt-col">'+nf2(data.tot4)+'</td><td></td></tr>';
     h += '<tr><td colspan="7" style="border:none;height:6px"></td></tr>';
-    h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3 + 4)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
+    h += '<tr class="tot-row"><td colspan="5">Sub-Total (1 + 2 + 3)</td><td class="amt-col">'+nf2(data.sub)+'</td><td></td></tr>';
     h += '<tr class="tot-row"><td colspan="5">VAT @ '+data.vatPct.toFixed(2)+'%</td><td class="amt-col">'+nf2(data.vat)+'</td><td></td></tr>';
     h += '<tr class="tot-row"><td colspan="5"><b>Grand Total</b></td><td class="amt-col"><b>'+nf2(data.grand)+'</b></td><td></td></tr>';
     h += '</tbody></table>';
@@ -1598,6 +1594,13 @@ function updateMachineRateTags(){
     tag.innerHTML = 'Working: Rs '+nf2(r.working)+'/hr' + (r.isFixed ? '' : ' | Idle: Rs '+nf2(r.idle)+'/hr');
   }
 }
+function updateDevModeVisibility(){
+  var mode = strVal('in_devmode','norms');
+  var normsWrap = el('devmode-norms-wrap');
+  var lsWrap = el('devmode-ls-wrap');
+  if(normsWrap) normsWrap.classList.toggle('hidden', mode === 'ls');
+  if(lsWrap) lsWrap.classList.toggle('hidden', mode !== 'ls');
+}
 function recalc(opts){
   opts = opts || {};
   var skipMachineRebuild = !!opts.skipMachineRebuild;
@@ -1610,6 +1613,7 @@ function recalc(opts){
       syncLabourInputs();
       renderWellQtyTable();
       updateSegmentSummary();
+      updateDevModeVisibility();
       if(!skipDocs){
         if(heavyTimer) clearTimeout(heavyTimer);
         heavyTimer = setTimeout(function(){
@@ -1822,6 +1826,7 @@ function boot(){
 
     renderFuel(); renderMachines(); renderLabour(); renderMaterial();
     renderSegments(); renderWellQtyTable();
+    updateDevModeVisibility();
 
     var tabsNav = el('tabs');
     if(tabsNav){
