@@ -558,24 +558,32 @@ function opRate(norm, mr){
   var base = L+M+X;
   return {L:norm.L, M:norm.M, X:norm.X, costL:L, costM:M, costX:X, base:base, rate:base*profitFactor()};
 }
-function normForBand(baseN, band2N, bandIdx){
-  if(bandIdx === 0) return baseN;
-  if(bandIdx === 1) return band2N;
-  var n = bandIdx;
+function normForBand(baseN, incN, bandIdx){
+  /* DWSS Rate Analysis Norms (2073) rule (see note under every banded
+     table, e.g. "2.1.1 / 2.1.2"): coefficients for the n-th 100-m band
+     (n = 1 for 0-100m, 2 for 101-200m, ...) are cumulative —
+       Band n = Base + (n-1) x Increment
+     bandIdx here is 0-indexed (0 = first 100m), so:
+       Band coefficient = Base + bandIdx x Increment                */
   var r = {L:{}, M:{}, X:{}};
   var kinds = ['L','M','X'];
   for(var ki=0; ki<kinds.length; ki++){
     var k = kinds[ki];
     var ids = {};
     for(var id in baseN[k]) ids[id] = 1;
-    for(var id2 in band2N[k]) ids[id2] = 1;
+    for(var id2 in incN[k]) ids[id2] = 1;
     for(var id3 in ids){
       var b = baseN[k][id3] || 0;
-      var b2 = band2N[k][id3] || 0;
-      r[k][id3] = n * b2 - (n - 1) * b;
+      var inc = incN[k][id3] || 0;
+      r[k][id3] = b + bandIdx * inc;
     }
   }
   return r;
+}
+function bandMathNote(bandIdx){
+  if(bandIdx === 0) return 'Uses the Base (0-100 m) norm coefficients (X.Y.1) only.';
+  var times = bandIdx===1 ? 'once' : (bandIdx+'\u00d7');
+  return 'Per the DWSS Rate Analysis Norms (2073) note under this table, coefficients beyond 100 m are cumulative: this is 100-m band '+(bandIdx+1)+', so Coefficient = Base (X.Y.1) + Increment (X.Y.2) applied '+times+' = Base + '+bandIdx+'\u00d7Increment.';
 }
 function getWellQty(id){
   if(state.wellQty && state.wellQty[id] !== undefined && state.wellQty[id] !== null && state.wellQty[id] !== ''){
@@ -896,12 +904,12 @@ function buildBOQ(){
         var nrm = normForBand(P[0], P[1], band.bandIdx);
         add3('Drilling of pilot hole by Rotary method (7-5/8" to 9-7/8" bit) in ' + seg.soil + ' formation, ' + segLabel,
              'm', bandQty, opRate(nrm, machines),
-             'Rotary — ' + seg.soil + ' formation, ' + bandLabel);
+             'Rotary — ' + seg.soil + ' formation, ' + bandLabel + '. ' + bandMathNote(band.bandIdx));
       } else {
         var nrmd = normForBand(DTH_PILOT_HARD_B, DTH_PILOT_HARD_I, band.bandIdx);
         add3('Drilling of pilot hole by DTH method (7-5/8" to 9-7/8" bit) in hard formation, ' + segLabel,
              'm', bandQty, opRate(nrmd, machines),
-             'DTH — hard formation, ' + bandLabel + ', single pass (no reaming)');
+             'DTH — hard formation, ' + bandLabel + ', single pass (no reaming). ' + bandMathNote(band.bandIdx));
       }
     }
   }
@@ -925,18 +933,18 @@ function buildBOQ(){
       var n1 = normForBand(R1[0], R1[1], bR.bandIdx);
       add3('1st reaming (13-3/4" bit) in ' + segR.soil + ' formation, ' + segLabelR,
            'm', qR, opRate(n1, machines),
-           'Applied only to the Rotary-drilled portion — ' + bandLabelR);
+           'Applied only to the Rotary-drilled portion — ' + bandLabelR + '. ' + bandMathNote(bR.bandIdx));
       if(r2){
         var n2 = normForBand(R2[0], R2[1], bR.bandIdx);
         add3('2nd reaming (17-1/2" bit) in ' + segR.soil + ' formation, ' + segLabelR,
              'm', qR, opRate(n2, machines),
-             'Applied only to the Rotary-drilled portion — ' + bandLabelR);
+             'Applied only to the Rotary-drilled portion — ' + bandLabelR + '. ' + bandMathNote(bR.bandIdx));
       }
       if(r2 && r3){
         var n3 = normForBand(R2[0], R2[1], bR.bandIdx);
         add3('3rd reaming (22-1/2" bit) in ' + segR.soil + ' formation, ' + segLabelR,
              'm', qR, opRate(n3, machines),
-             'Applied only to the Rotary-drilled portion — ' + bandLabelR);
+             'Applied only to the Rotary-drilled portion — ' + bandLabelR + '. ' + bandMathNote(bR.bandIdx));
       }
     }
   }
