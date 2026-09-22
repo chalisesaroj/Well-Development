@@ -159,7 +159,6 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
     @bottom-center{ content:""; border-top:1px solid #000; vertical-align:top; }
     @bottom-right{ content:"Page " counter(page); font-family:"Times New Roman",Times,Georgia,serif; font-size:9pt; border-top:1px solid #000; padding-top:4pt; vertical-align:top; }
   }
-  /* Only chapter pages (not the cover page) get the detailedPage footer, so the cover stays clean. */
   body.print-detailed .doc-section{ page:detailedPage; }
   .consultant-marker{ string-set: consultantLine content(); font-size:1px; line-height:0; height:0; overflow:hidden; }
   body{background:#fff;font-size:11pt;font-family:"Times New Roman",Times,Georgia,serif}
@@ -239,6 +238,10 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
       <tbody id="tbl-material"></tbody>
     </table></div>
   </div>
+  <div class="card"><h2>MS Pipe Pricing by Weight</h2>
+    <div class="hint">For MS ERW casing pipes priced by weight, enter the outer diameter (OD), wall thickness (t), steel density (ρ) and the prevailing rate per kg. The price per metre is computed as π × (OD − t) × t × ρ / 10⁶ × (rate per kg). Untick &ldquo;price by weight&rdquo; to enter a direct per-metre market rate in the table above instead.</div>
+    <div id="pipe-specs-container"></div>
+  </div>
 </section>
 
 <section id="tab-scope" class="tab-panel">
@@ -305,6 +308,13 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
       <label class="f" id="devmode-ls-wrap">Well development — L.S. Price (Rs.)
         <input type="number" id="in_devls" data-save="p_devls" value="0" min="0" step="1000">
       </label>
+      <label class="f">Pump Test
+        <select id="in_pumptest" data-save="p_pumptest">
+          <option value="step">Step Drawdown Test</option>
+          <option value="time">Time Drawdown Test</option>
+          <option value="both">Both</option>
+        </select>
+      </label>
     </div>
     <div class="hint" style="margin-top:8px">1st reaming (13¾") is always included as the base pass. 2nd reaming (17½") and 3rd reaming (22½") are each optional, sequential enlargement passes — 3rd reaming is only meaningful if 2nd reaming is also included.</div>
   </div>
@@ -342,7 +352,11 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
   </div>
 
   <div class="card"><h2>Well Assembly Quantities</h2>
-    <div class="hint">The pipe assembly lowered into the well — housing pipe (2.1) + riser pipe (2.2) + screen (2.3) — must total the drilling depth. Set these from the actual borehole design / logging data, not by guesswork.</div>
+    <div class="hint">The pipe assembly lowered into the well — 250 mm housing (2.1) + reducer (2.2) + 200 mm riser (2.3) + screen (2.4) — must total the drilling depth. The bottom plug, well-head plate and centralizer guides are counted separately. Set these from the actual borehole design / logging data, not by guesswork.</div>
+    <div class="grid c3" style="margin-bottom:10px">
+      <label class="f">Centralizer spacing (m)<input type="number" id="in_guide_spacing" data-save="p_guide_spacing" value="12" min="1" step="1"></label>
+      <label class="f">&nbsp;<button type="button" id="btn-autofill-guides" class="mini" style="align-self:flex-start">Auto-fill centralizer quantities from spacing</button></label>
+    </div>
     <div class="table-wrap"><table>
       <thead><tr><th>Material</th><th style="width:70px">Unit</th><th class="num" style="width:180px">Quantity</th></tr></thead>
       <tbody id="tbl-wellqty"></tbody>
@@ -440,15 +454,25 @@ var MATERIAL_DEFS = [
   {id:'gipipe65', name:'65 mm GI Pipe (Medium Class)', unit:'m', rate:605},
   {id:'cicap65', name:'65 mm CI Cap', unit:'no.', rate:197},
   {id:'cement', name:'Cement', unit:'bag', rate:710},
-  {id:'pipe250', name:'NB 250 mm MS ERW Casing (blind) Pipe, 7 mm thick', unit:'m', rate:5424.36},
-  {id:'pipe200', name:'NB 200 mm MS ERW Casing (blind) Pipe, 7 mm thick', unit:'m', rate:3826.02},
+  {id:'pipe250', name:'NB 250 mm MS ERW Casing (blind) Pipe, 7 mm thick', unit:'m', rate:5424.36, pipeSpec:true},
+  {id:'reducer', name:'250 mm × 200 mm MS Reducer (fabricated from 7 mm MS plate)', unit:'no.', rate:4500},
+  {id:'pipe200', name:'NB 200 mm MS ERW Casing (blind) Pipe, 7 mm thick', unit:'m', rate:3826.02, pipeSpec:true},
   {id:'slot200', name:'200 mm dia. SS304 Continuous Slotted Pipe (strainer)', unit:'m', rate:22000},
   {id:'plug200', name:'200 mm Bottom Plug', unit:'no.', rate:2500},
   {id:'plate', name:'14 mm thick 45 cm dia. Surface Plate with Ventilator Holes', unit:'no.', rate:8000},
   {id:'guide250', name:'250 mm Centering Guide', unit:'no.', rate:2001},
   {id:'guide200', name:'200 mm Centering Guide', unit:'no.', rate:1651}
 ];
-var WELL_MATERIAL_IDS = ['pipe250','pipe200','slot200','plug200','plate','guide250','guide200'];
+var WELL_MATERIAL_IDS = ['pipe250','reducer','pipe200','slot200','plug200','plate','guide250','guide200'];
+var PIPE_WEIGHT_IDS = ['pipe250','pipe200'];
+var WELL_QTY_DEFAULTS = {pipe250:35, reducer:1, pipe200:30, slot200:55, plug200:1, plate:1, guide250:3, guide200:8};
+
+function defaultPipeSpecs(){
+  return {
+    pipe250: {useKg:true, od:273, thickness:7, density:7850, kgRate:118.15},
+    pipe200: {useKg:true, od:219.1, thickness:7, density:7850, kgRate:104.50}
+  };
+}
 
 function N(L,M,X){ return {L:L||{},M:M||{},X:X||{}}; }
 
@@ -494,7 +518,7 @@ var RECOVERY = N({hg:1.5,pumpasst:1.5,pumphelp:4.5,wm:1.5,cw:1.5},{wli:12},{});
 var SEALING  = N({skilled:.25,semisk:.25,unsk:1.25},{cempump:2},{gipipe65:6,cicap65:2,cement:15.75});
 
 /* ============ STATE ============ */
-var SAVE_KEY = 'dtw_estimate_v14';
+var SAVE_KEY = 'dtw_estimate_v15';
 var state = defaultState();
 
 function defaultSegments(){
@@ -505,12 +529,12 @@ function defaultSegments(){
 }
 
 function defaultState(){
-  var s = {fuel:{}, machines:{}, labour:{}, material:{}, qty:{}, wellQty:{}, segments: defaultSegments()};
+  var s = {fuel:{}, machines:{}, labour:{}, material:{}, qty:{}, wellQty:{}, segments: defaultSegments(), pipeSpecs: defaultPipeSpecs()};
   for(var k in FUEL_DEFAULTS) s.fuel[k] = FUEL_DEFAULTS[k];
   for(var i=0;i<MACHINE_DEFS.length;i++) s.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
   for(var j=0;j<LABOUR_DEFS.length;j++) s.labour[LABOUR_DEFS[j].id] = LABOUR_DEFS[j].rate;
   for(var l=0;l<MATERIAL_DEFS.length;l++) s.material[MATERIAL_DEFS[l].id] = {rate:MATERIAL_DEFS[l].rate, transport:0};
-  s.wellQty = {pipe250:35, pipe200:30, slot200:55, plug200:1, plate:1, guide250:2, guide200:4};
+  s.wellQty = JSON.parse(JSON.stringify(WELL_QTY_DEFAULTS));
   return s;
 }
 
@@ -548,7 +572,29 @@ function getAllMachineRates(){
   for(var i=0;i<MACHINE_DEFS.length;i++) r[MACHINE_DEFS[i].id] = calcMachineRate(state.machines[MACHINE_DEFS[i].id], state.fuel);
   return r;
 }
-function getMaterialRate(id){ var m = state.material[id]; if(!m) return 0; return (Number(m.rate)||0) + (Number(m.transport)||0); }
+function getPipeSpec(id){ return state.pipeSpecs && state.pipeSpecs[id]; }
+function isPipeByWeight(id){ var s = getPipeSpec(id); return !!(s && s.useKg); }
+function getPipeWeightPerM(id){
+  var s = getPipeSpec(id); if(!s) return 0;
+  var od = Number(s.od)||0, t = Number(s.thickness)||0, rho = Number(s.density)||7850;
+  if(od <= t) return 0;
+  return Math.PI * (od - t) * t * rho / 1e6;
+}
+function getPipeRatePerM(id){
+  var s = getPipeSpec(id); if(!s) return 0;
+  return getPipeWeightPerM(id) * (Number(s.kgRate)||0);
+}
+function getMaterialRate(id){
+  var m = state.material[id];
+  if(!m) return 0;
+  var baseRate;
+  if(isPipeByWeight(id)){
+    baseRate = getPipeRatePerM(id);
+  } else {
+    baseRate = Number(m.rate)||0;
+  }
+  return baseRate + (Number(m.transport)||0);
+}
 function profitFactor(){ return 1 + val('in_profit', 15)/100; }
 function opRate(norm, mr){
   var L=0,M=0,X=0,rid,mid,xid;
@@ -559,12 +605,6 @@ function opRate(norm, mr){
   return {L:norm.L, M:norm.M, X:norm.X, costL:L, costM:M, costX:X, base:base, rate:base*profitFactor()};
 }
 function normForBand(baseN, incN, bandIdx){
-  /* DWSS Rate Analysis Norms (2073) rule (see note under every banded
-     table, e.g. "2.1.1 / 2.1.2"): coefficients for the n-th 100-m band
-     (n = 1 for 0-100m, 2 for 101-200m, ...) are cumulative —
-       Band n = Base + (n-1) x Increment
-     bandIdx here is 0-indexed (0 = first 100m), so:
-       Band coefficient = Base + bandIdx x Increment                */
   var r = {L:{}, M:{}, X:{}};
   var kinds = ['L','M','X'];
   for(var ki=0; ki<kinds.length; ki++){
@@ -790,6 +830,79 @@ function renderMachines(){
     if(f){ f.focus(); try{ f.setSelectionRange(selStart, selEnd); }catch(e){} }
   }
 }
+
+/* ---- Pipe specs card ---- */
+function buildPipeSpecCardHTML(id){
+  var spec = state.pipeSpecs[id]; if(!spec) return '';
+  var mdef = null;
+  for(var j=0;j<MATERIAL_DEFS.length;j++) if(MATERIAL_DEFS[j].id===id){ mdef = MATERIAL_DEFS[j]; break; }
+  if(!mdef) return '';
+  var wpm = getPipeWeightPerM(id);
+  var rpm = getPipeRatePerM(id);
+  var h = '<details class="machine" data-pipecard="'+esc(id)+'"'+(spec.useKg?' open':'')+'>';
+  h += '<summary>'+esc(mdef.name)+'<span class="rate-tag" data-pipetag="'+esc(id)+'">Rs '+nf2(rpm)+'/m'+(spec.useKg?' (by weight)':' (direct)')+'</span></summary>';
+  h += '<div class="body">';
+  h += '<label class="f" style="flex-direction:row;align-items:center;gap:8px;margin-bottom:10px"><input type="checkbox" data-pipe="'+id+':useKg"'+(spec.useKg?' checked':'')+'> Price by weight (section weight × rate per kg)</label>';
+  if(spec.useKg){
+    h += '<div class="grid c4">';
+    h += '<label class="f">Outer Diameter OD (mm)'+attrInput({type:'number',step:'0.1',min:'1','data-pipe':id+':od',value:spec.od})+'</label>';
+    h += '<label class="f">Wall Thickness t (mm)'+attrInput({type:'number',step:'0.1',min:'0.1','data-pipe':id+':thickness',value:spec.thickness})+'</label>';
+    h += '<label class="f">Density &rho; (kg/m&sup3;)'+attrInput({type:'number',step:'10',min:'1','data-pipe':id+':density',value:spec.density})+'</label>';
+    h += '<label class="f">Rate per kg (Rs./kg)'+attrInput({type:'number',step:'0.01',min:'0','data-pipe':id+':kgRate',value:spec.kgRate})+'</label>';
+    h += '</div>';
+    h += '<table style="margin-top:10px"><tbody>';
+    h += '<tr><td>Section weight</td><td class="num">&pi; × ('+nf(spec.od)+' &minus; '+nf(spec.thickness)+') × '+nf(spec.thickness)+' × '+nf(spec.density)+' / 10&sup6; = <b><span data-pipewpm="'+esc(id)+'">'+nf2(wpm)+'</span> kg/m</b></td></tr>';
+    h += '<tr><td>Rate per metre</td><td class="num"><span data-pipewpm2="'+esc(id)+'">'+nf2(wpm)+'</span> kg/m × Rs '+nf2(spec.kgRate)+'/kg = <b>Rs <span data-piperm="'+esc(id)+'">'+nf2(rpm)+'</span> /m</b></td></tr>';
+    h += '</tbody></table>';
+    h += '<p class="hint" style="margin-top:8px">Transport cost per metre is still added separately in the Material Rates table above.</p>';
+  } else {
+    h += '<p class="hint">Direct per-metre pricing is active. Enter the market rate per metre in the Material Rates table above.</p>';
+  }
+  h += '</div></details>';
+  return h;
+}
+function renderPipeSpecs(){
+  var container = el('pipe-specs-container'); if(!container) return;
+  var openCards = {};
+  var opened = container.querySelectorAll('details.machine[open]');
+  for(var i=0;i<opened.length;i++) openCards[opened[i].getAttribute('data-pipecard')] = 1;
+  var active = document.activeElement, focusKey = null, selStart = 0, selEnd = 0;
+  if(active && active.getAttribute){
+    focusKey = active.getAttribute('data-pipe');
+    try{ selStart = active.selectionStart||0; selEnd = active.selectionEnd||selStart; }catch(e){}
+  }
+  var h = '';
+  for(var j=0;j<PIPE_WEIGHT_IDS.length;j++) h += buildPipeSpecCardHTML(PIPE_WEIGHT_IDS[j]);
+  container.innerHTML = h;
+  var details = container.querySelectorAll('details.machine');
+  for(var k=0;k<details.length;k++){
+    var id = details[k].getAttribute('data-pipecard');
+    if(openCards[id]) details[k].open = true;
+  }
+  if(focusKey){
+    var f = container.querySelector('[data-pipe="'+cssEsc(focusKey)+'"]');
+    if(f){ f.focus(); try{ f.setSelectionRange(selStart, selEnd); }catch(e){} }
+  }
+}
+function updatePipeSpecDisplays(){
+  for(var i=0;i<PIPE_WEIGHT_IDS.length;i++){
+    var id = PIPE_WEIGHT_IDS[i];
+    var spec = state.pipeSpecs[id]; if(!spec) continue;
+    var wpm = getPipeWeightPerM(id);
+    var rpm = getPipeRatePerM(id);
+    var card = document.querySelector('[data-pipecard="'+cssEsc(id)+'"]');
+    if(!card) continue;
+    var tag = card.querySelector('[data-pipetag]');
+    if(tag) tag.textContent = 'Rs '+nf2(rpm)+'/m'+(spec.useKg?' (by weight)':' (direct)');
+    var wpmEl = card.querySelector('[data-pipewpm]');
+    if(wpmEl) wpmEl.textContent = nf2(wpm);
+    var wpmEl2 = card.querySelector('[data-pipewpm2]');
+    if(wpmEl2) wpmEl2.textContent = nf2(wpm);
+    var rpmEl = card.querySelector('[data-piperm]');
+    if(rpmEl) rpmEl.textContent = nf2(rpm);
+  }
+}
+
 function renderLabour(){
   var h = '';
   for(var i=0;i<LABOUR_DEFS.length;i++){
@@ -804,9 +917,15 @@ function renderMaterial(){
   for(var i=0;i<MATERIAL_DEFS.length;i++){
     var m = MATERIAL_DEFS[i];
     var s = state.material[m.id] || {rate:0, transport:0};
-    var total = (Number(s.rate)||0) + (Number(s.transport)||0);
+    var rateCell;
+    if(isPipeByWeight(m.id)){
+      rateCell = '<span data-matrate="'+esc(m.id)+'">'+nf2(getPipeRatePerM(m.id))+'</span><div style="font-size:10px;color:#555">from weight (kg &times; rate)</div>';
+    } else {
+      rateCell = attrInput({type:'number',step:'0.01','data-mat':m.id+':rate','data-save':'mat:'+m.id+':rate',value:s.rate,'class':'c'});
+    }
+    var total = getMaterialRate(m.id);
     h += '<tr><td>'+esc(m.id)+'</td><td>'+esc(m.name)+'</td><td class="unit-col">'+esc(m.unit)+'</td>';
-    h += '<td class="num">'+attrInput({type:'number',step:'0.01','data-mat':m.id+':rate','data-save':'mat:'+m.id+':rate',value:s.rate,'class':'c'})+'</td>';
+    h += '<td class="num">'+rateCell+'</td>';
     h += '<td class="num">'+attrInput({type:'number',step:'0.01','data-mat':m.id+':transport','data-save':'mat:'+m.id+':transport',value:s.transport,'class':'c'})+'</td>';
     h += '<td class="num" data-mattotal="'+esc(m.id)+'">'+nf2(total)+'</td></tr>';
   }
@@ -831,13 +950,28 @@ function updateWellQtySummary(){
   var total = 0;
   for(var i=0;i<PIPE_ASSEMBLY_IDS.length;i++) total += getWellQty(PIPE_ASSEMBLY_IDS[i]);
   var depth = val('in_depth', 0);
-  var html = 'Pipe assembly (2.1 + 2.2 + 2.3): <b>' + nf(total) + ' m</b> against a drilling depth of <b>' + nf(depth) + ' m</b>. ';
+  var html = 'Pipe assembly (2.1 + 2.3 + 2.4): <b>' + nf(total) + ' m</b> against a drilling depth of <b>' + nf(depth) + ' m</b>. ';
   if(Math.abs(total - depth) < 0.01){
     html += '<span class="seg-ok">&#10003; Pipe assembly length matches the total depth.</span>';
   } else {
-    html += '<span class="seg-warn">&#9888; Mismatch of ' + nf(Math.abs(total - depth)) + ' m &mdash; adjust pipe250 / pipe200 / slot200 (or the total depth) so items 2.1, 2.2 and 2.3 sum to the drilling depth.</span>';
+    html += '<span class="seg-warn">&#9888; Mismatch of ' + nf(Math.abs(total - depth)) + ' m &mdash; adjust pipe250 / pipe200 / slot200 (or the total depth) so items 2.1, 2.3 and 2.4 sum to the drilling depth.</span>';
   }
   summary.innerHTML = html;
+}
+
+function autoFillGuides(){
+  var spacing = val('in_guide_spacing', 12);
+  if(spacing <= 0) spacing = 12;
+  var p250 = getWellQty('pipe250');
+  var p200 = getWellQty('pipe200') + getWellQty('slot200');
+  var n250 = Math.max(1, Math.ceil(p250 / spacing));
+  var n200 = Math.max(1, Math.ceil(p200 / spacing));
+  if(!state.wellQty) state.wellQty = {};
+  state.wellQty.guide250 = n250;
+  state.wellQty.guide200 = n200;
+  renderWellQtyTable();
+  recalcNow();
+  toast('Centralizers set: '+n250+' × 250 mm, '+n200+' × 200 mm (spacing '+spacing+' m).');
 }
 
 /* ============ BUILD BOQ — now driven by segments ============ */
@@ -850,6 +984,7 @@ function buildBOQ(){
   var dev = strVal('in_dev','compressor');
   var devMode = strVal('in_devmode','norms');
   var devLS = val('in_devls', 0);
+  var pumpTest = strVal('in_pumptest','both');
   var vatPct = val('in_vat', 13);
   var mob = val('in_mob', 150000);
   var machines = getAllMachineRates();
@@ -871,7 +1006,7 @@ function buildBOQ(){
     var id = WELL_MATERIAL_IDS[i];
     var m = null; for(var j=0;j<MATERIAL_DEFS.length;j++) if(MATERIAL_DEFS[j].id===id){ m = MATERIAL_DEFS[j]; break; }
     if(!m) continue;
-    var q = getWellQty(id);
+    var q = getWellQty(id) * wells;
     var rt, mdesc;
     if(id === 'slot200' && strainerType === 'ms'){
       rt = getMaterialRate('pipe200');
@@ -889,7 +1024,7 @@ function buildBOQ(){
   var sec3 = []; var sn3 = 1;
   function add3(desc, unit, qty, ri, notes){ sec3.push({no:'3.'+(sn3++), desc:desc, unit:unit, qty:qty, rate:ri.rate, amount:ri.rate*qty, ri:ri, notes:notes||''}); }
 
-  /* ---- PILOT HOLE — one line per 100-m norm band per segment ---- */
+  /* ---- PILOT HOLE ---- */
   for(var si=0; si<segments.length; si++){
     var seg = segments[si];
     var bands = splitSegmentByNormBands(seg);
@@ -960,8 +1095,8 @@ function buildBOQ(){
     if(dev==='compressor' || dev==='both') add3('Well development by compressor machine (48 hours)','well',wells,opRate(DEV_COMP,machines),'Per well');
     if(dev==='pump' || dev==='both') add3('Well development by pump','well',wells,opRate(DEV_PUMP,machines),'Per well');
   }
-  add3('Time drawdown pump test (aquifer test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
-  add3('Step drawdown pump test (well test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
+  if(pumpTest==='time' || pumpTest==='both') add3('Time drawdown pump test (aquifer test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
+  if(pumpTest==='step' || pumpTest==='both') add3('Step drawdown pump test (well test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
   add3('Recovery test','well',wells,opRate(RECOVERY,machines),'Per well');
 
   var tot1=0, tot2=0, tot3=0;
@@ -1184,6 +1319,38 @@ function buildMachineReportHTML(m, mr, fuel, numberPrefix){
   return h;
 }
 
+/* ============ PIPE SPEC REPORT ============ */
+function buildPipeSpecReportHTML(){
+  var anyWeight = false;
+  for(var i=0;i<PIPE_WEIGHT_IDS.length;i++) if(isPipeByWeight(PIPE_WEIGHT_IDS[i])) anyWeight = true;
+  if(!anyWeight) return '';
+  var h = '';
+  h += '<div class="sub-title">6.1 Computation of Pipe Prices by Weight</div>';
+  h += '<p class="para">The MS ERW casing pipes used in the well assembly are priced by weight rather than by a fixed rate per metre. The section weight per metre of a circular hollow section is computed from its outer diameter (OD), wall thickness (t) and the density of steel (&rho;) using the standard formula:</p>';
+  h += '<div class="ma-calc" style="margin-left:20px">';
+  h += '<div class="ma-calc-line" style="font-size:12px">Weight per metre = <span class="frac"><span class="num">&pi; × (OD &minus; t) × t × &rho;</span><span class="den">10&sup6;</span></span> &nbsp; kg/m</div>';
+  h += '<div class="ma-calc-line" style="font-size:11px;color:#555;padding-left:12px">(with OD and t in millimetres, and &rho; in kg/m&sup3;)</div>';
+  h += '</div>';
+  h += '<p class="para">The price per metre is then obtained by multiplying the section weight by the prevailing rate per kilogram of MS pipe:</p>';
+  h += '<div class="ma-calc" style="margin-left:20px">';
+  h += '<div class="ma-calc-line" style="font-size:12px">Rate per metre = Weight per metre × Rate per kg</div>';
+  h += '</div>';
+  h += '<table><thead><tr><th>Pipe</th><th class="amt-col">OD (mm)</th><th class="amt-col">t (mm)</th><th class="amt-col">&rho; (kg/m&sup3;)</th><th class="amt-col">Section weight (kg/m)</th><th class="amt-col">Rate (Rs./kg)</th><th class="amt-col">Rate (Rs./m)</th></tr></thead><tbody>';
+  for(var j=0;j<PIPE_WEIGHT_IDS.length;j++){
+    var id = PIPE_WEIGHT_IDS[j];
+    if(!isPipeByWeight(id)) continue;
+    var spec = state.pipeSpecs[id];
+    var mdef = null;
+    for(var k=0;k<MATERIAL_DEFS.length;k++) if(MATERIAL_DEFS[k].id===id){ mdef = MATERIAL_DEFS[k]; break; }
+    var wpm = getPipeWeightPerM(id);
+    var rpm = getPipeRatePerM(id);
+    h += '<tr><td>'+esc(mdef?mdef.name:id)+'</td><td class="amt-col">'+nf(spec.od)+'</td><td class="amt-col">'+nf(spec.thickness)+'</td><td class="amt-col">'+nf(spec.density)+'</td><td class="amt-col">'+nf2(wpm)+'</td><td class="amt-col">'+nf2(spec.kgRate)+'</td><td class="amt-col"><b>'+nf2(rpm)+'</b></td></tr>';
+  }
+  h += '</tbody></table>';
+  h += '<p class="para" style="font-size:11px;font-style:italic">The rate per metre computed above is used directly in the Bill of Quantity (Section 2 &mdash; Supply of Well Materials) and in the Abstract of Cost (Section 9). Transport cost per metre, if any, is added separately in the Material Analysis (Section 6).</p>';
+  return h;
+}
+
 /* ============ RATE ANALYSIS BLOCK ============ */
 function buildRateAnalysisHTML(item){
   if(!item.ri) return '';
@@ -1313,9 +1480,9 @@ function renderDetailed(){
     h += '<p class="para">The estimate has been prepared on the following basis:</p>';
     h += '<ol>';
     h += '<li><b>Norms.</b> The coefficient tables of the DWSS Rate Analysis Norms (2073) have been strictly applied, including the depth-band convention whereby, for every additional 100 m of depth beyond the first, the increment shown in the corresponding row is added to the base coefficient set.</li>';
-    h += '<li><b>Depth Segments.</b> The well is divided into one or more depth segments. Each segment has a specific soil type (Soft, Medium or Hard) and a specific drilling method (Rotary or DTH). The applicable coefficient set for each segment is chosen by (soil type) x (drilling method). For DTH segments, the DWSS Rate Analysis Norms (2073) provide only the hard-formation coefficient table — the same table is used regardless of soil selection, and no reaming operations are billed for DTH segments because DTH produces the final-diameter bore in a single pass.</li>';
+    h += '<li><b>Depth Segments.</b> The well is divided into one or more depth segments. Each segment has a specific soil type (Soft, Medium or Hard) and a specific drilling method (Rotary or DTH). The applicable coefficient set for each segment is chosen by (soil type) &times; (drilling method). For DTH segments, the DWSS Rate Analysis Norms (2073) provide only the hard-formation coefficient table &mdash; the same table is used regardless of soil selection, and no reaming operations are billed for DTH segments because DTH produces the final-diameter bore in a single pass.</li>';
     h += '<li><b>Labour Rates.</b> District labour rates for Fiscal Year '+esc(pfy)+' for Kaski District have been adopted and are listed in Section 5.</li>';
-    h += '<li><b>Material Rates.</b> Prevailing market rates of materials have been adopted, with transport cost added per unit where applicable, and are listed in Section 6.</li>';
+    h += '<li><b>Material Rates.</b> Prevailing market rates of materials have been adopted, with transport cost added per unit where applicable, and are listed in Section 6. MS ERW casing pipes are priced by weight &mdash; see Section 6.1.</li>';
     h += '<li><b>Machinery Rates.</b> Machinery working and idle rates are derived from first principles. Each derivation is presented in Section 4.</li>';
     h += '<li><b>Contractor\'s Profit.</b> A profit margin of '+(val('in_profit',15)).toFixed(2)+'% on the base rate has been applied to each item.</li>';
     h += '<li><b>VAT.</b> Value Added Tax at '+val('in_vat',13).toFixed(2)+'% has been applied on the sub-total of the Abstract of Cost.</li>';
@@ -1353,20 +1520,20 @@ function renderDetailed(){
     h += '<p class="para">The DWSS Rate Analysis Norms (2073) give, for each drilling and reaming operation, a base coefficient set applicable to the first 100 m of depth and a separate increment coefficient set applicable to each additional 100 m. The rate applicable to a borehole segment between 100 m and 200 m is the sum of the base and one increment; the rate for a segment between 200 m and 300 m is the sum of the base and two increments; and so on. This is applied per depth segment defined by the user.</p>';
     h += '<div class="sub-title">3.3 Rate Build-Up Formula</div>';
     h += '<table style="width:auto;margin-left:20px"><tbody>';
-    h += '<tr><td style="border:none;padding:2px 8px">Labour cost</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Sum of (coefficient x labour rate)</td></tr>';
-    h += '<tr><td style="border:none;padding:2px 8px">Machinery cost</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Sum of (hours x machine working rate)</td></tr>';
-    h += '<tr><td style="border:none;padding:2px 8px">Material cost</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Sum of (quantity x material rate at site)</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Labour cost</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Sum of (coefficient &times; labour rate)</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Machinery cost</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Sum of (hours &times; machine working rate)</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Material cost</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Sum of (quantity &times; material rate at site)</td></tr>';
     h += '<tr><td style="border:none;padding:2px 8px">Base rate</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Labour + Machinery + Material</td></tr>';
-    h += '<tr><td style="border:none;padding:2px 8px">Unit rate</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Base rate x (1 + Profit percent)</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Unit rate</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Base rate &times; (1 + Profit percent)</td></tr>';
     h += '</tbody></table>';
     h += '<div class="sub-title">3.4 Machinery Working and Idle Rates</div>';
     h += '<table style="width:auto;margin-left:20px"><tbody>';
     h += '<tr><td style="border:none;padding:2px 8px">Depreciation / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost / Economical life (hrs)</td></tr>';
-    h += '<tr><td style="border:none;padding:2px 8px">Insurance / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost x 2% / Yearly working hours</td></tr>';
-    h += '<tr><td style="border:none;padding:2px 8px">Interest / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost x 1% / Yearly working hours</td></tr>';
-    h += '<tr><td style="border:none;padding:2px 8px">Overhaul / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost x Overhaul % / Economical life</td></tr>';
-    h += '<tr><td style="border:none;padding:2px 8px">Maintenance / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost x Maintenance % / Economical life</td></tr>';
-    h += '<tr><td style="border:none;padding:2px 8px">Supervision / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost x 5% / Yearly working hours</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Insurance / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost &times; 2% / Yearly working hours</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Interest / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost &times; 1% / Yearly working hours</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Overhaul / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost &times; Overhaul % / Economical life</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Maintenance / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost &times; Maintenance % / Economical life</td></tr>';
+    h += '<tr><td style="border:none;padding:2px 8px">Supervision / hr</td><td style="border:none;padding:2px 8px">=</td><td style="border:none;padding:2px 8px">Cost &times; 5% / Yearly working hours</td></tr>';
     h += '</tbody></table>';
     h += '<p class="para" style="margin-top:8px"><b>Working rate</b> = Capital Recovery + O &amp; M + Running + Supervision. <b>Idle rate</b> = Capital Recovery + O &amp; M + Supervision.</p>';
     h += '<div class="sub-title">3.5 Contractor\'s Profit</div>';
@@ -1397,15 +1564,18 @@ function renderDetailed(){
 
     h += docSectionOpen('Material Analysis', false);
     h += '<div class="sec-title">6. Material Analysis</div>';
-    h += '<p class="para">The rate at site for each material is the sum of its market rate and the transport cost per unit to the project site.</p>';
+    h += '<p class="para">The rate at site for each material is the sum of its market rate and the transport cost per unit to the project site. For MS ERW casing pipes priced by weight, the market rate is itself derived from the section weight &mdash; see Section 6.1 below.</p>';
     h += '<table><thead><tr><th style="width:6%">#</th><th>Material</th><th style="width:8%">Unit</th><th class="amt-col" style="width:14%">Market (Rs.)</th><th class="amt-col" style="width:14%">Transport (Rs.)</th><th class="amt-col" style="width:14%">Total at Site (Rs.)</th></tr></thead><tbody>';
     for(var m=0;m<MATERIAL_DEFS.length;m++){
       var md = MATERIAL_DEFS[m];
       var ms = state.material[md.id] || {rate:0, transport:0};
-      var tot = (Number(ms.rate)||0) + (Number(ms.transport)||0);
-      h += '<tr><td>'+(m+1)+'</td><td>'+esc(md.name)+'</td><td class="amt-col">'+esc(md.unit)+'</td><td class="amt-col">'+nf2(ms.rate)+'</td><td class="amt-col">'+nf2(ms.transport)+'</td><td class="amt-col"><b>'+nf2(tot)+'</b></td></tr>';
+      var mktRate = isPipeByWeight(md.id) ? getPipeRatePerM(md.id) : (Number(ms.rate)||0);
+      var tot = mktRate + (Number(ms.transport)||0);
+      var mktLabel = isPipeByWeight(md.id) ? nf2(mktRate) + ' <i style="font-size:9px;color:#555">(by wt.)</i>' : nf2(mktRate);
+      h += '<tr><td>'+(m+1)+'</td><td>'+esc(md.name)+'</td><td class="amt-col">'+esc(md.unit)+'</td><td class="amt-col">'+mktLabel+'</td><td class="amt-col">'+nf2(ms.transport)+'</td><td class="amt-col"><b>'+nf2(tot)+'</b></td></tr>';
     }
     h += '</tbody></table>';
+    h += buildPipeSpecReportHTML();
     h += docSectionClose();
 
     h += docSectionOpen('Item-wise Rate Analysis', false);
@@ -1470,8 +1640,10 @@ function renderDetailed(){
     for(var m2=0;m2<MATERIAL_DEFS.length;m2++){
       var md2 = MATERIAL_DEFS[m2];
       var ms2 = state.material[md2.id] || {rate:0, transport:0};
-      var tot2 = (Number(ms2.rate)||0) + (Number(ms2.transport)||0);
-      h += '<tr><td>'+(m2+1)+'</td><td>'+esc(md2.name)+'</td><td class="amt-col">'+esc(md2.unit)+'</td><td class="amt-col">'+nf2(ms2.rate)+'</td><td class="amt-col">'+nf2(ms2.transport)+'</td><td class="amt-col">'+nf2(tot2)+'</td></tr>';
+      var mktRate2 = isPipeByWeight(md2.id) ? getPipeRatePerM(md2.id) : (Number(ms2.rate)||0);
+      var tot2 = mktRate2 + (Number(ms2.transport)||0);
+      var mktLabel2 = isPipeByWeight(md2.id) ? nf2(mktRate2) + ' <i style="font-size:9px;color:#555">(by wt.)</i>' : nf2(mktRate2);
+      h += '<tr><td>'+(m2+1)+'</td><td>'+esc(md2.name)+'</td><td class="amt-col">'+esc(md2.unit)+'</td><td class="amt-col">'+mktLabel2+'</td><td class="amt-col">'+nf2(ms2.transport)+'</td><td class="amt-col">'+nf2(tot2)+'</td></tr>';
     }
     h += '</tbody></table>';
     h += docSectionClose();
@@ -1545,7 +1717,15 @@ function renderDetailed(){
 function syncMaterialTotals(){
   for(var i=0;i<MATERIAL_DEFS.length;i++){
     var id = MATERIAL_DEFS[i].id, s = state.material[id]; if(!s) continue;
-    var tot = (Number(s.rate)||0) + (Number(s.transport)||0);
+    var computedRate;
+    if(isPipeByWeight(id)){
+      computedRate = getPipeRatePerM(id);
+      var rateCells = document.querySelectorAll('[data-matrate="'+cssEsc(id)+'"]');
+      for(var r=0;r<rateCells.length;r++) rateCells[r].textContent = nf2(computedRate);
+    } else {
+      computedRate = Number(s.rate)||0;
+    }
+    var tot = computedRate + (Number(s.transport)||0);
     var cells = document.querySelectorAll('[data-mattotal="'+cssEsc(id)+'"]');
     for(var j=0;j<cells.length;j++) cells[j].textContent = nf2(tot);
   }
@@ -1612,11 +1792,13 @@ function updateDevModeVisibility(){
 function recalc(opts){
   opts = opts || {};
   var skipMachineRebuild = !!opts.skipMachineRebuild;
+  var skipPipeSpecRebuild = !!opts.skipPipeSpecRebuild || skipMachineRebuild;
   var skipDocs = !!opts.skipDocs;
   if(rafId) cancelAnimationFrame(rafId);
   rafId = requestAnimationFrame(function(){
     try{
       if(skipMachineRebuild){ updateMachineRateTags(); } else { renderMachines(); }
+      if(skipPipeSpecRebuild){ updatePipeSpecDisplays(); } else { renderPipeSpecs(); }
       syncMaterialTotals();
       syncLabourInputs();
       renderWellQtyTable();
@@ -1667,6 +1849,21 @@ function syncStateFromInput(e){
     return true;
   }
 
+  /* Pipe specs */
+  var pipeKey = t.getAttribute('data-pipe');
+  if(pipeKey){
+    var pp = pipeKey.split(':');
+    var pid = pp[0], pfield = pp[1];
+    if(!state.pipeSpecs) state.pipeSpecs = defaultPipeSpecs();
+    if(!state.pipeSpecs[pid]) state.pipeSpecs[pid] = {};
+    if(pfield === 'useKg'){
+      state.pipeSpecs[pid].useKg = !!t.checked;
+    } else {
+      state.pipeSpecs[pid][pfield] = parseFloat(t.value)||0;
+    }
+    return true;
+  }
+
   var fuelKey = t.getAttribute('data-fuel'); if(fuelKey){ state.fuel[fuelKey] = v; return true; }
   var labKey = t.getAttribute('data-lab');
   if(labKey){
@@ -1706,6 +1903,31 @@ function applyFormState(d){
     if(e){ if(e.type==='checkbox') e.checked = d[k]; else e.value = d[k]; }
   }
 }
+function mergeStateDefaults(st){
+  if(!st) return st;
+  if(!st.qty) st.qty = {};
+  if(!st.wellQty) st.wellQty = {};
+  if(!st.fuel) st.fuel = {};
+  if(!st.labour) st.labour = {};
+  if(!st.material) st.material = {};
+  if(!st.machines) st.machines = {};
+  if(!st.segments || !st.segments.length) st.segments = defaultSegments();
+  for(var i=0;i<MACHINE_DEFS.length;i++){
+    if(!st.machines[MACHINE_DEFS[i].id]) st.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
+  }
+  for(var wqk in WELL_QTY_DEFAULTS) if(st.wellQty[wqk] === undefined) st.wellQty[wqk] = WELL_QTY_DEFAULTS[wqk];
+  if(!st.pipeSpecs){ st.pipeSpecs = defaultPipeSpecs(); }
+  else {
+    var psd = defaultPipeSpecs();
+    for(var pk in psd){
+      if(!st.pipeSpecs[pk]){ st.pipeSpecs[pk] = psd[pk]; }
+      else {
+        for(var f2 in psd[pk]) if(st.pipeSpecs[pk][f2] === undefined) st.pipeSpecs[pk][f2] = psd[pk][f2];
+      }
+    }
+  }
+  return st;
+}
 function saveState(){
   try{
     localStorage.setItem(SAVE_KEY, JSON.stringify({form:collectFormState(), state:state}));
@@ -1716,21 +1938,9 @@ function loadState(){
   try{
     var raw = localStorage.getItem(SAVE_KEY); if(!raw){ toast('No saved estimate.'); return; }
     var d = JSON.parse(raw);
-    if(d.state){
-      state = d.state;
-      if(!state.qty) state.qty = {};
-      if(!state.wellQty) state.wellQty = {};
-      if(!state.fuel) state.fuel = {};
-      if(!state.labour) state.labour = {};
-      if(!state.material) state.material = {};
-      if(!state.machines) state.machines = {};
-      if(!state.segments || !state.segments.length) state.segments = defaultSegments();
-      for(var i=0;i<MACHINE_DEFS.length;i++){
-        if(!state.machines[MACHINE_DEFS[i].id]) state.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
-      }
-    }
+    if(d.state) state = mergeStateDefaults(d.state);
     if(d.form) applyFormState(d.form);
-    renderFuel(); renderMachines(); renderLabour(); renderMaterial();
+    renderFuel(); renderMachines(); renderLabour(); renderMaterial(); renderPipeSpecs();
     renderSegments(); renderWellQtyTable();
     recalcNow();
     toast('Restored.');
@@ -1747,7 +1957,7 @@ function toast(msg){
   t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:8px 16px;font-size:12px;z-index:9999;opacity:0;transition:.2s';
   document.body.appendChild(t);
   requestAnimationFrame(function(){ t.style.opacity='1'; });
-  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); }, 250); }, 2200);
+  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); }, 250); }, 2400);
 }
 function numberToWords(n){
   n = Math.round(n); if(n===0) return 'Zero rupees only';
@@ -1797,8 +2007,6 @@ function jumpToDetail(no){
 
 function jumpToMachine(mid){
   if(!mid) return;
-  /* The machinery rate-analysis link only appears within the Detailed Report tab itself,
-     so no tab switch is needed here — just scroll within the same document. */
   switchTab('detailed');
   setTimeout(function(){
     var target = document.getElementById('machine-'+mid);
@@ -1815,24 +2023,12 @@ function boot(){
       var raw = localStorage.getItem(SAVE_KEY);
       if(raw){
         var d = JSON.parse(raw);
-        if(d.state){
-          state = d.state;
-          if(!state.qty) state.qty = {};
-          if(!state.wellQty) state.wellQty = {};
-          if(!state.fuel) state.fuel = {};
-          if(!state.labour) state.labour = {};
-          if(!state.material) state.material = {};
-          if(!state.machines) state.machines = {};
-          if(!state.segments || !state.segments.length) state.segments = defaultSegments();
-          for(var i=0;i<MACHINE_DEFS.length;i++){
-            if(!state.machines[MACHINE_DEFS[i].id]) state.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
-          }
-        }
+        if(d.state) state = mergeStateDefaults(d.state);
         if(d.form) setTimeout(function(){ applyFormState(d.form); }, 0);
       }
     }catch(e){ console.warn('Autosave restore failed:', e); }
 
-    renderFuel(); renderMachines(); renderLabour(); renderMaterial();
+    renderFuel(); renderMachines(); renderLabour(); renderMaterial(); renderPipeSpecs();
     renderSegments(); renderWellQtyTable();
     updateDevModeVisibility();
 
@@ -1846,7 +2042,6 @@ function boot(){
       });
     }
 
-    /* Add / Remove / Reset segment buttons via delegation, plus estimate/BOQ row -> detailed report jump */
     document.addEventListener('click', function(ev){
       var t = ev.target;
       if(!t || !t.getAttribute) return;
@@ -1864,6 +2059,8 @@ function boot(){
     if(bAdd) bAdd.addEventListener('click', addSegment);
     var bReset = el('btn-reset-segments');
     if(bReset) bReset.addEventListener('click', function(){ if(confirm('Reset to the default 0-90 m Medium-Rotary and 90-120 m Hard-DTH segments?')) resetSegmentsToDefault(); });
+    var bAuto = el('btn-autofill-guides');
+    if(bAuto) bAuto.addEventListener('click', autoFillGuides);
 
     /* Input handler */
     document.addEventListener('input', function(e){
@@ -1872,19 +2069,35 @@ function boot(){
       if(!syncStateFromInput(e)) return;
       var isSeg = !!(e.target.getAttribute && e.target.getAttribute('data-seg'));
       var isMachineInput = !!(e.target.getAttribute && e.target.getAttribute('data-mach'));
+      var isPipeInput = !!(e.target.getAttribute && e.target.getAttribute('data-pipe'));
+      var isPipeCheckbox = isPipeInput && e.target.type === 'checkbox';
       if(isSeg){
-        /* For segments, re-render and full recalc immediately */
         renderSegments();
         recalcNow();
         return;
       }
-      recalcDebounced(isMachineInput);
+      if(isPipeCheckbox){
+        recalcNow();
+        return;
+      }
+      recalcDebounced(isMachineInput || isPipeInput);
     });
 
     document.addEventListener('change', function(e){
-      if(!e.target.matches || !e.target.matches('select')) return;
+      if(!e.target || !e.target.matches) return;
+      /* Guide spacing auto-fill */
+      if(e.target.id === 'in_guide_spacing'){
+        autoFillGuides();
+        return;
+      }
+      /* Pipe checkbox */
+      if(e.target.matches('input[type="checkbox"][data-pipe]')){
+        syncStateFromInput(e);
+        recalcNow();
+        return;
+      }
+      if(!e.target.matches('select')) return;
       if(e.target.getAttribute && e.target.getAttribute('data-seg')){
-        /* Segment soil/method change — full recalc */
         renderSegments();
         recalcNow();
         return;
