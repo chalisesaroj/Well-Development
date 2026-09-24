@@ -242,14 +242,14 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
     </table></div>
   </div>
   <div class="card"><h2>Material Rates (non-pipe)</h2>
-    <div class="hint">Fittings, consumables and other supply materials. Pipe pricing is handled separately in the <b>Pipe Material Pricing</b> section below.</div>
+    <div class="hint">Fittings, consumables and other supply materials. Pipe pricing is handled separately in the <b>Pipe Material Pricing</b> section below. Auxiliary items (bottom plug, top cap, centralizer, reducer) are auto-included; their descriptions adapt to the pipe sizes actually in the design.</div>
     <div class="table-wrap"><table>
       <thead><tr><th style="width:70px">Code</th><th>Material</th><th style="width:70px">Unit</th><th class="num" style="width:150px">Market Rate</th><th class="num" style="width:150px">Transport / unit</th><th class="num" style="width:150px">Total at Site</th></tr></thead>
       <tbody id="tbl-material"></tbody>
     </table></div>
   </div>
   <div class="card"><h2>Pipe Material Pricing</h2>
-    <div class="hint">Pipes are priced by weight. Section weight per metre = π × (OD − t) × t × ρ / 10⁶ kg/m, and rate per metre = weight × rate per kg. Un-tick &ldquo;Price by weight&rdquo; to enter a direct per-metre market rate instead. <b>Blind and slotted (strainer) pipes of the same material and diameter share the same per-metre rate</b>; when a slotted pipe is used in the design, a separate lump-sum slotting item of Rs 40,000 is added under Section 2. Only combinations actually selected in the Pipe Design table appear as items in Section 2, the BOQ and the Detailed Report.</div>
+    <div class="hint">Pipes are priced by weight. Section weight per metre = π × (OD − t) × t × ρ / 10⁶ kg/m, and rate per metre = weight × rate per kg. <b>Default rate is Rs 150/kg for all pipes.</b> Un-tick &ldquo;Price by weight&rdquo; to enter a direct per-metre market rate instead. <b>Blind and slotted (strainer) pipes of the same material and diameter share the same per-metre rate</b>; when a slotted pipe is used in the design, a separate lump-sum slotting item of Rs 40,000 is added under Section 2. Only combinations actually selected in the Pipe Design table appear as items in Section 2, the BOQ and the Detailed Report.</div>
     <div id="pipe-pricing-container"></div>
   </div>
 </section>
@@ -430,7 +430,7 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
   </div>
 
   <div class="card"><h2>Pipe Design</h2>
-    <div class="hint">Define each pipe section of the well assembly by selecting the <b>pipe material</b> (MS or SS), the <b>nominal diameter</b> (NB 150 / 200 / 250), the <b>pipe type</b> (Blind or Slotted) and typing the <b>length</b>. <b>Blind and slotted pipes of the same material and diameter share the same rate per metre.</b> If any slotted pipe is used, a lump-sum slotting item (Rs 40,000) is added under Section 2. Each row becomes its own item under Section 2 of the Estimate &amp; BOQ, and is analysed individually in the Detailed Report.</div>
+    <div class="hint">Define each pipe section of the well assembly by selecting the <b>pipe material</b> (MS or SS), the <b>nominal diameter</b> (NB 150 / 200 / 250), the <b>pipe type</b> (Blind or Slotted) and typing the <b>length</b>. <b>Blind and slotted pipes of the same material and diameter share the same rate per metre.</b> If any slotted pipe is used, a lump-sum slotting item (Rs 40,000) is added under Section 2. Auxiliary items — <b>bottom plug, top cap, centralizer and reducer</b> — are always included; their descriptions adapt to the sizes actually used in this design.</div>
     <div style="margin-bottom:10px">
       <button id="btn-add-pipedesign" type="button">+ Add Pipe Segment</button>
       <button id="btn-reset-pipedesign" type="button" class="mini">Reset to Default Segments</button>
@@ -452,7 +452,7 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
   </div>
 
   <div class="card"><h2>Well Fittings &amp; Ancillaries</h2>
-    <div class="hint">Fittings are <b>auto-derived</b> from the Pipe Design above: reducers appear only where the diameter changes between adjacent pipe segments, the bottom plug matches the smallest diameter, and centering guides are emitted only for diameters actually used. Enter or adjust quantities where relevant.</div>
+    <div class="hint">Auxiliary items are <b>always included</b>. Their descriptions adapt to the pipe sizes in the design: the <b>bottom plug</b> matches the smallest diameter, the <b>top cap</b> matches the largest, the <b>reducer</b> is derived from diameter transitions, and the <b>centralizer</b> is shown generically when multiple diameters are in use. Enter or adjust quantities where relevant.</div>
     <div class="grid c3" style="margin-bottom:10px">
       <label class="f">Centralizer spacing (m)<input type="number" id="in_guide_spacing" data-save="p_guide_spacing" value="12" min="1" step="1"></label>
       <label class="f">&nbsp;<button type="button" id="btn-autofill-guides" class="mini" style="align-self:flex-start">Auto-fill centralizer quantities from spacing</button></label>
@@ -517,7 +517,7 @@ var MACHINE_DEFS = [
   {id:'generator', name:'Electric Generator', cost:600000, life:10000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.23,
    fuel:{hsd:9, mobil:0.1}, spareType:'ls', spareMisc:5, spareExtra:0, driverSalary:0, helperSalary:0, minorRepair:0},
   {id:'compressor', name:'Air Compressor', cost:3500000, life:10000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.23,
-   fuel:{hsd:14, mobil:0.208, gear:0.227}, spareType:'ls', spareMisc:0, spareExtra:0, driverSalary:0, helperSalary:0, minorRepair:15},
+   fuel:{hsd:14, mobil:0.208, gear:0.227, compoil:0.15}, spareType:'ls', spareMisc:0, spareExtra:0, driverSalary:0, helperSalary:0, minorRepair:15},
   {id:'wpump', name:'Water Pump', cost:30000, life:5000, yearlyHrs:1000, overhaulPct:0.55, maintPct:0.23,
    fuel:{hsd:1.25, mobil:0.03}, spareType:'ls', spareMisc:5, spareExtra:0, driverSalary:0, helperSalary:0, minorRepair:5},
   {id:'spump', name:'Submersible Pump Set', cost:400000, life:10000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.15,
@@ -528,49 +528,81 @@ var MACHINE_DEFS = [
   {id:'tripod', name:'Tripod Set', fixedRate:50},
   {id:'cempump', name:'Cementation Pump', fixedRate:300}
 ];
-var FUEL_DEFAULTS = {hsd:197.5, mobil:850, gear:850, hyd:650, brake:750, grease:650};
-var FUEL_LABELS = {hsd:'HSD (Rs/L)',mobil:'Mobil (Rs/L)',gear:'Gear Oil (Rs/L)',hyd:'Hydraulic Oil (Rs/L)',brake:'Brake Oil (Rs/L)',grease:'Grease (Rs/kg)'};
-var FUEL_SHORT  = {hsd:'HSD',mobil:'Mobil',gear:'Gear Oil',hyd:'Hyd. Oil',brake:'Brake Oil',grease:'Grease'};
+var FUEL_DEFAULTS = {hsd:135.39, mobil:850, gear:825, hyd:550, brake:750, grease:750, compoil:750};
+var FUEL_LABELS = {hsd:'HSD (Rs/L)',mobil:'Mobil (Rs/L)',gear:'Gear Oil (Rs/L)',hyd:'Hydraulic Oil (Rs/L)',brake:'Brake Oil (Rs/L)',grease:'Grease (Rs/kg)',compoil:'Compressor Oil (Rs/L)'};
+var FUEL_SHORT  = {hsd:'HSD',mobil:'Mobil',gear:'Gear Oil',hyd:'Hyd. Oil',brake:'Brake Oil',grease:'Grease',compoil:'Comp. Oil'};
 
+/* ============================================================================
+   LABOUR RATES — Kaski District Rate Schedule, FY 2083/84
+   ============================================================================ */
 var LABOUR_DEFS = [
-  {id:'hg',name:'Hydro geologist',rate:2670},{id:'ahg',name:'Asst. Hydro geologist',rate:1030},
-  {id:'driller',name:'Driller / Operator',rate:1000},{id:'srmech',name:'Sr. Mechanic',rate:1000},
-  {id:'asstdr',name:'Asst. Driller',rate:775},{id:'dh',name:'Driller Helper',rate:775},
-  {id:'mh',name:'Mechanical Helper',rate:775},{id:'wm',name:'Watchman',rate:700},
-  {id:'cw',name:'Camp Worker',rate:700},{id:'welder',name:'Welder',rate:775},
-  {id:'pumptech',name:'Pump Test Technician',rate:1000},{id:'pumpasst',name:'Pump Test Assistant',rate:775},
-  {id:'pumphelp',name:'Pump Helper',rate:550},{id:'mecheng',name:'Mechanical Engineer',rate:2800},
-  {id:'skilled',name:'Skilled Labourer',rate:1000},{id:'semisk',name:'Semi-skilled Labourer',rate:775},
-  {id:'unsk',name:'Unskilled Labourer',rate:700}
+  {id:'hg',        name:'Hydro geologist (Resource Person — above officer level)', rate:2670},
+  {id:'ahg',       name:'Asst. Hydro geologist (Resource Person — below officer level)', rate:1020},
+  {id:'driller',   name:'Driller / Operator (skilled — डकर्मी/सिकर्मी/अपरेटर)', rate:1335},
+  {id:'srmech',    name:'Sr. Mechanic (सिनियर अपरेटर)', rate:1022},
+  {id:'asstdr',    name:'Asst. Driller (ज्यामी/भरिया, unskilled)', rate:970},
+  {id:'dh',        name:'Driller Helper (ज्यामी/भरिया, unskilled)', rate:970},
+  {id:'mh',        name:'Mechanical Helper (ज्यामी/भरिया, unskilled)', rate:970},
+  {id:'wm',        name:'Watchman (अन्य कामदार, unskilled)', rate:950},
+  {id:'cw',        name:'Camp Worker (क्याम्प बर्कर, unskilled)', rate:950},
+  {id:'welder',    name:'Welder (रक बिलर/बेल्डर, skilled)', rate:1335},
+  {id:'pumptech',  name:'Pump Test Technician (हेमी इक्युपमेन्ट डाइमर)', rate:1022},
+  {id:'pumpasst',  name:'Pump Test Assistant (अ-दक्ष)', rate:970},
+  {id:'pumphelp',  name:'Pump Helper (साधारण हेल्पर, unskilled)', rate:950},
+  {id:'mecheng',   name:'Mechanical Engineer (Resource Person — above officer level)', rate:2670},
+  {id:'skilled',   name:'Skilled Labourer (डकर्मी/सिकर्मी, skilled)', rate:1335},
+  {id:'semisk',    name:'Semi-skilled Labourer (सिनियर सब इन्जिनियर, semi-skilled)', rate:1020},
+  {id:'unsk',      name:'Unskilled Labourer (ज्यामी/भरिया, unskilled)', rate:970}
 ];
 
-/* Non-pipe materials only */
+/* ============================================================================
+   MATERIAL RATES
+   Auxiliary items (plug, topcap, guide, reducer, plate) are generic.
+   Their descriptions in Section 2 / BOQ / Detailed Report adapt to the sizes
+   derived from the Pipe Design table.
+   ============================================================================ */
 var MATERIAL_DEFS = [
-  {id:'bentonite', name:'Bentonite', unit:'kg', rate:11.109},
-  {id:'barite', name:'Barite (CMC)', unit:'kg', rate:13.225},
-  {id:'drillbit', name:'Drill Bit', unit:'no.', rate:420000},
-  {id:'oxygen', name:'Oxygen Gas', unit:'cyl', rate:446.25},
-  {id:'acetylene', name:'Acetylene Gas', unit:'cyl', rate:3060.75},
-  {id:'wrod', name:'Welding Rod', unit:'pkt', rate:499.1},
-  {id:'gravel', name:'Pea Gravel', unit:'cum', rate:3000},
-  {id:'gipipe65', name:'65 mm GI Pipe (Medium Class)', unit:'m', rate:605},
-  {id:'cicap65', name:'65 mm CI Cap', unit:'no.', rate:197},
-  {id:'cement', name:'Cement', unit:'bag', rate:710},
-  {id:'reducer', name:'MS Reducer (fabricated from 7 mm MS plate)', unit:'no.', rate:4500},
-  {id:'plug250', name:'250 mm Bottom Plug', unit:'no.', rate:3000},
-  {id:'plug200', name:'200 mm Bottom Plug', unit:'no.', rate:2500},
-  {id:'plug150', name:'150 mm Bottom Plug', unit:'no.', rate:2000},
-  {id:'plate', name:'14 mm thick 45 cm dia. Surface Plate with Ventilator Holes', unit:'no.', rate:8000},
-  {id:'guide250', name:'250 mm Centering Guide', unit:'no.', rate:2001},
-  {id:'guide200', name:'200 mm Centering Guide', unit:'no.', rate:1651},
-  {id:'guide150', name:'150 mm Centering Guide', unit:'no.', rate:1350}
+  {id:'bentonite', name:'Bentonite', unit:'kg', rate:26.00},
+  {id:'barite', name:'Barite (CMC)', unit:'kg', rate:27.00},
+  {id:'drillbit', name:'Drill Bit (9 inch to 17.5 inch)', unit:'no.', rate:73500.00},
+  {id:'oxygen', name:'Oxygen Gas', unit:'cyl', rate:425.00},
+  {id:'acetylene', name:'Acetylene Gas', unit:'cyl', rate:2915.00},
+  {id:'wrod', name:'Welding Rod', unit:'pkt', rate:850.00},
+  {id:'gravel', name:'Pea Gravel', unit:'cum', rate:2520.00},
+  {id:'gipipe65', name:'65 mm GI Pipe (Medium Class)', unit:'m', rate:646.00},
+  {id:'cicap65', name:'65 mm CI Cap', unit:'no.', rate:197.00},
+  {id:'cement', name:'Cement', unit:'bag', rate:710.00},
+  /* ---- Auxiliary pipe fittings (generic; description adapts to pipe design) ---- */
+  {id:'reducer', name:'Reducer', unit:'no.', rate:3725.00},
+  {id:'plug', name:'Bottom Plug', unit:'no.', rate:2500.00},
+  {id:'topcap', name:'Top Cap / Well Head Cover', unit:'set', rate:5915.00},
+  {id:'plate', name:'Surface Plate with Ventilator Holes', unit:'no.', rate:8000.00},
+  {id:'guide', name:'Centralizer / Centering Guide', unit:'no.', rate:1651.00},
+  /* ---- Other consumables ---- */
+  {id:'bucket', name:'Bucket', unit:'no.', rate:500.00},
+  {id:'liner', name:'Liner', unit:'no.', rate:750.00},
+  {id:'pistonrod', name:'Piston Rod', unit:'no.', rate:3000.00},
+  {id:'glandpack', name:'Gland Packing', unit:'set', rate:790.00},
+  {id:'swivelpack', name:'Swivel Packing', unit:'set', rate:700.00},
+  {id:'vpack', name:'V-Packing', unit:'set', rate:1750.00},
+  {id:'valveball', name:'Valve / Steel Ball', unit:'no.', rate:2500.00},
+  {id:'valveseat', name:'Valve Seat', unit:'no.', rate:1500.00},
+  {id:'valvepack', name:'Valve Packing', unit:'no.', rate:562.00},
+  {id:'nipple2', name:'2" Nipple', unit:'no.', rate:118.00},
+  {id:'gasket8', name:'8" Gasket', unit:'kg', rate:46.00},
+  {id:'shmp', name:'Sodium Hexametaphosphate', unit:'kg', rate:450.00},
+  {id:'battery', name:'Batteries (Logging Machine)', unit:'no.', rate:80.00},
+  {id:'screenmake', name:'Screen Making Charge', unit:'m', rate:2310.00}
 ];
 
-var FITTING_ID_POOL = ['reducer','plug250','plug200','plug150','plate','guide250','guide200','guide150'];
-var WELL_QTY_DEFAULTS = {reducer:1, plug250:0, plug200:1, plug150:0, plate:1, guide250:3, guide200:8, guide150:0};
+/* Auxiliary fitting IDs — always emitted under Section 2 */
+var AUX_FITTING_IDS = ['plug','topcap','guide','reducer','plate'];
+var FITTING_ID_POOL = AUX_FITTING_IDS.slice();
+var WELL_QTY_DEFAULTS = {reducer:1, plug:1, topcap:1, plate:1, guide:8};
 
-/* ============ PIPE CATALOGUE (mat+diameter only; blind & slotted share rate) ============ */
+/* ============ PIPE CATALOGUE ============ */
 var PIPE_OD = {150: 168.3, 200: 219.1, 250: 273.0};
+var PIPE_DEFAULT_KG_RATE = 150;
 var SLOTTING_LS_RATE = 40000;
 
 function pipePriceKey(mat, dia){ return mat + '_' + dia; }
@@ -580,13 +612,12 @@ function getDefaultPipeSpec(mat, dia){
   var isSS = (mat === 'SS');
   var thick = isSS ? 6 : 7;
   var rho = isSS ? 8000 : 7850;
-  var kgRate = isSS ? 400 : (dia === 150 ? 92 : dia === 200 ? 104.5 : 118.15);
   return {
     useKg: true,
     od: od,
     thickness: thick,
     density: rho,
-    kgRate: kgRate,
+    kgRate: PIPE_DEFAULT_KG_RATE,
     directRate: 0,
     transport: 0
   };
@@ -667,7 +698,7 @@ var RECOVERY = N({hg:1.5,pumpasst:1.5,pumphelp:4.5,wm:1.5,cw:1.5},{wli:12},{});
 var SEALING  = N({skilled:.25,semisk:.25,unsk:1.25},{cempump:2},{gipipe65:6,cicap65:2,cement:15.75});
 
 /* ============ STATE ============ */
-var SAVE_KEY = 'dtw_estimate_v22';
+var SAVE_KEY = 'dtw_estimate_v26';
 var state = defaultState();
 
 function defaultSegments(){
@@ -747,7 +778,6 @@ function getPipeTotalRatePerM(mat, dia){
   var s = getPipeSpec(mat, dia); if(!s) return 0;
   return getPipeRatePerM(mat, dia) + (Number(s.transport)||0);
 }
-function getPipeDesignRate(row){ return getPipeTotalRatePerM(row.mat, row.dia); }
 
 function profitFactor(){ return 1 + val('in_profit', 15)/100; }
 function opRate(norm, mr){
@@ -785,7 +815,9 @@ function getWellQty(id){
   }
   if(id === 'plate') return 1;
   if(id === 'reducer') return 1;
-  if(id.indexOf('plug') === 0) return 1;
+  if(id === 'plug') return 1;
+  if(id === 'topcap') return 1;
+  if(id === 'guide') return 8;
   return 0;
 }
 
@@ -898,6 +930,10 @@ function getSmallestDiameter(){
   for(var i=1;i<diams.length;i++) if(diams[i] < min) min = diams[i];
   return min;
 }
+function getLargestDiameter(){
+  var diams = getUsedDiameters();  /* descending */
+  return diams.length ? diams[0] : 0;
+}
 function deriveReducers(){
   var rows = state.pipeDesign || [];
   var counts = {};
@@ -922,30 +958,40 @@ function deriveReducers(){
   }
   return out;
 }
+
+/* Always-active auxiliary fitting IDs — never excluded */
 function getActiveFittingIds(){
-  var ids = [];
-  if(deriveReducers().length > 0) ids.push('reducer');
-  var smallest = getSmallestDiameter();
-  if(smallest === 250) ids.push('plug250');
-  else if(smallest === 200) ids.push('plug200');
-  else if(smallest === 150) ids.push('plug150');
-  ids.push('plate');
-  var diams = getUsedDiameters();
-  for(var i=0;i<diams.length;i++){
-    var gid = 'guide' + diams[i];
-    if(FITTING_ID_POOL.indexOf(gid) !== -1) ids.push(gid);
+  return AUX_FITTING_IDS.slice();
+}
+
+/* Generic auxiliary display name — adapts to pipe design; simple name if unsure */
+function getAuxiliaryDisplayName(id){
+  var diams = getUsedDiameters();  /* descending */
+  var smallest = diams.length ? diams[diams.length - 1] : 0;
+  var largest  = diams.length ? diams[0] : 0;
+
+  if(id === 'plug'){
+    return smallest ? ('Bottom Plug (' + smallest + ' mm)') : 'Bottom Plug';
   }
-  return ids;
-}
-function formatReducerName(bigD, smallD){
-  return bigD + ' mm \u00d7 ' + smallD + ' mm MS Reducer (fabricated from 7 mm MS plate)';
-}
-function getReducerSummaryText(){
-  var rds = deriveReducers();
-  if(!rds.length) return 'No reducer required (single diameter used throughout).';
-  var parts = [];
-  for(var i=0;i<rds.length;i++) parts.push(rds[i].bigD + ' \u00d7 ' + rds[i].smallD + ' mm (qty ' + rds[i].qty + ')');
-  return 'Reducer(s) derived from pipe design: <b>' + parts.join(', ') + '</b>.';
+  if(id === 'topcap'){
+    return largest ? ('Top Cap / Well Head Cover (' + largest + ' mm)') : 'Top Cap / Well Head Cover';
+  }
+  if(id === 'guide'){
+    if(diams.length === 0) return 'Centralizer / Centering Guide';
+    if(diams.length === 1) return 'Centralizer / Centering Guide (' + diams[0] + ' mm)';
+    return 'Centralizer / Centering Guide';  /* multiple sizes → simple name */
+  }
+  if(id === 'reducer'){
+    var rds = deriveReducers();
+    if(!rds.length) return 'Reducer';
+    var parts = [];
+    for(var i=0;i<rds.length;i++) parts.push(rds[i].bigD + ' \u00d7 ' + rds[i].smallD + ' mm');
+    return 'Reducer (' + parts.join(', ') + ')';
+  }
+  if(id === 'plate'){
+    return 'Surface Plate with Ventilator Holes';
+  }
+  return id;
 }
 function getUsedPipePriceKeys(){
   var rows = state.pipeDesign || [];
@@ -1088,7 +1134,7 @@ function resetPipeDesign(){
   renderPipeDesign(); recalcNow();
 }
 
-/* ============ PIPE PRICING CARDS (mat+diameter only) ============ */
+/* ============ PIPE PRICING CARDS ============ */
 function renderPipePricing(){
   var container = el('pipe-pricing-container'); if(!container) return;
 
@@ -1305,20 +1351,15 @@ function renderWellQtyTable(){
     var id = ids[i];
     var m = null; for(var j=0;j<MATERIAL_DEFS.length;j++) if(MATERIAL_DEFS[j].id===id){ m = MATERIAL_DEFS[j]; break; }
     if(!m) continue;
-    var desc = m.name;
-    var isReducer = (id === 'reducer');
-    if(isReducer){
-      var rds = deriveReducers();
-      var parts = [];
-      for(var r=0;r<rds.length;r++) parts.push(formatReducerName(rds[r].bigD, rds[r].smallD));
-      desc = parts.join(', ');
-    }
+    /* description derived from pipe design; fall back to simple name if unsure */
+    var desc = getAuxiliaryDisplayName(id);
     var qtyVal = getWellQty(id);
     var qtyCell;
-    if(isReducer){
+    if(id === 'reducer'){
       var total = 0;
-      var rds2 = deriveReducers();
-      for(var r2=0;r2<rds2.length;r2++) total += rds2[r2].qty;
+      var rds = deriveReducers();
+      for(var r=0;r<rds.length;r++) total += rds[r].qty;
+      if(total <= 0) total = 1;
       qtyCell = '<input type="text" readonly value="' + total + '">';
     } else {
       qtyCell = attrInput({type:'number',step:'0.01',min:'0','data-wq':id,'data-save':'wq:'+id,value:qtyVal,'class':'c'});
@@ -1332,34 +1373,35 @@ function updateWellQtySummary(){
   var summary = el('wellqty-summary'); if(!summary) return;
   var usedD = getUsedDiameters();
   var diamsText = usedD.length ? usedD.join(', ') + ' mm' : '—';
-  var rInfo = getReducerSummaryText();
   var smallest = getSmallestDiameter();
+  var largest = getLargestDiameter();
+  var rds = deriveReducers();
+  var rInfo;
+  if(!rds.length){
+    rInfo = 'No reducer required (single diameter used throughout).';
+  } else {
+    var rParts = [];
+    for(var i=0;i<rds.length;i++) rParts.push(rds[i].bigD + ' \u00d7 ' + rds[i].smallD + ' mm (qty ' + rds[i].qty + ')');
+    rInfo = 'Reducer(s) derived from pipe design: <b>' + rParts.join(', ') + '</b>.';
+  }
   var plugInfo = smallest ? 'Bottom plug: <b>' + smallest + ' mm</b>.' : 'Bottom plug: —';
-  summary.innerHTML = 'Diameters in use: <b>' + diamsText + '</b>. ' + plugInfo + ' ' + rInfo +
-    ' Centering guides are shown only for the diameters actually in use. Pipe/screen lengths are taken from the <b>Pipe Design</b> table above and are what must sum to the total drilling depth.';
+  var capInfo = largest ? 'Top cap: <b>' + largest + ' mm</b>.' : 'Top cap: —';
+  summary.innerHTML = 'Diameters in use: <b>' + diamsText + '</b>. ' + plugInfo + ' ' + capInfo + ' ' + rInfo +
+    ' Centering guides are always included. Pipe/screen lengths are taken from the <b>Pipe Design</b> table above and are what must sum to the total drilling depth.';
 }
 
 function autoFillGuides(){
   var spacing = val('in_guide_spacing', 12);
   if(spacing <= 0) spacing = 12;
   var rows = state.pipeDesign || [];
-  var lenByDiameter = {};
-  for(var i=0;i<rows.length;i++){
-    var d = Number(rows[i].dia)||0, len = Number(rows[i].length)||0;
-    if(d > 0) lenByDiameter[d] = (lenByDiameter[d] || 0) + len;
-  }
+  var totalLen = 0;
+  for(var i=0;i<rows.length;i++) totalLen += Number(rows[i].length)||0;
+  var n = totalLen > 0 ? Math.max(1, Math.ceil(totalLen / spacing)) : 1;
   if(!state.wellQty) state.wellQty = {};
-  var summary = [];
-  for(var dk in lenByDiameter){
-    var gid = 'guide' + dk;
-    if(FITTING_ID_POOL.indexOf(gid) === -1) continue;
-    var n = Math.max(1, Math.ceil(lenByDiameter[dk] / spacing));
-    state.wellQty[gid] = n;
-    summary.push(n + ' \u00d7 ' + dk + ' mm');
-  }
+  state.wellQty['guide'] = n;
   renderWellQtyTable();
   recalcNow();
-  toast('Centralizers set: ' + (summary.length ? summary.join(', ') : 'none') + ' (spacing ' + spacing + ' m).');
+  toast('Centralizers set: ' + n + ' (spacing ' + spacing + ' m over ' + nf(totalLen) + ' m of pipe).');
 }
 
 /* ============ BUILD BOQ ============ */
@@ -1427,28 +1469,29 @@ function buildBOQ(){
     });
   }
 
-  /* Reducers (derived) */
-  var reducers = deriveReducers();
+  /* Auxiliary items — always included; descriptions adapt to pipe design */
   var reducerRate = getMaterialRate('reducer');
-  for(var ri=0; ri<reducers.length; ri++){
-    var rd = reducers[ri];
-    var rQty = rd.qty * wells;
-    var rDesc = formatReducerName(rd.bigD, rd.smallD);
+  var reducers = deriveReducers();
+  if(reducers.length > 0){
+    var totalReducerQty = 0;
+    for(var rri=0; rri<reducers.length; rri++) totalReducerQty += reducers[rri].qty;
+    var rQty = totalReducerQty * wells;
+    var rDesc = getAuxiliaryDisplayName('reducer');
     sec2.push({no:'2.'+(sn2++), desc:rDesc, unit:'no.', qty:rQty, rate:reducerRate, amount:rQty*reducerRate, ri:null});
   }
 
-  /* Other fittings */
-  var fittingIds = getActiveFittingIds();
-  for(var fi=0; fi<fittingIds.length; fi++){
-    var fid = fittingIds[fi];
-    if(fid === 'reducer') continue;
-    var fm = null;
-    for(var jf=0;jf<MATERIAL_DEFS.length;jf++) if(MATERIAL_DEFS[jf].id===fid){ fm = MATERIAL_DEFS[jf]; break; }
-    if(!fm) continue;
-    var fq = getWellQty(fid) * wells;
-    if(fq <= 0) continue;
-    var fr = getMaterialRate(fid);
-    sec2.push({no:'2.'+(sn2++), desc:fm.name, unit:fm.unit, qty:fq, rate:fr, amount:fq*fr, ri:null});
+  /* Bottom plug, top cap, centralizer, surface plate — always included */
+  var auxOrder = ['plug','topcap','guide','plate'];
+  for(var ai=0; ai<auxOrder.length; ai++){
+    var aid = auxOrder[ai];
+    var am = null;
+    for(var aj=0; aj<MATERIAL_DEFS.length; aj++) if(MATERIAL_DEFS[aj].id === aid){ am = MATERIAL_DEFS[aj]; break; }
+    if(!am) continue;
+    var aq = getWellQty(aid) * wells;
+    if(aq <= 0) continue;
+    var ar = getMaterialRate(aid);
+    var aDesc = getAuxiliaryDisplayName(aid);
+    sec2.push({no:'2.'+(sn2++), desc:aDesc, unit:am.unit, qty:aq, rate:ar, amount:aq*ar, ri:null});
   }
 
   var sec3 = []; var sn3 = 1;
@@ -1789,7 +1832,7 @@ function buildPipeSpecReportHTML(){
   h += '<div class="ma-calc-line" style="font-size:12px">Weight per metre = <span class="frac"><span class="num">&pi; × (OD &minus; t) × t × &rho;</span><span class="den">10&sup6;</span></span> &nbsp; kg/m</div>';
   h += '<div class="ma-calc-line" style="font-size:11px;color:#555;padding-left:12px">(with OD and t in millimetres, and &rho; in kg/m&sup3;)</div>';
   h += '</div>';
-  h += '<p class="para">The price per metre is then obtained by multiplying the section weight by the prevailing rate per kilogram of pipe. <b>The same per-metre rate applies to blind and slotted (strainer) pipes of the same material and diameter</b>; when a slotted pipe is used, a separate lump-sum slotting item of Rs ' + nf2(SLOTTING_LS_RATE) + ' is added under Section 2.</p>';
+  h += '<p class="para">The price per metre is then obtained by multiplying the section weight by the prevailing rate per kilogram of pipe (default Rs ' + nf2(PIPE_DEFAULT_KG_RATE) + '/kg). <b>The same per-metre rate applies to blind and slotted (strainer) pipes of the same material and diameter</b>; when a slotted pipe is used, a separate lump-sum slotting item of Rs ' + nf2(SLOTTING_LS_RATE) + ' is added under Section 2.</p>';
   h += '<div class="ma-calc" style="margin-left:20px">';
   h += '<div class="ma-calc-line" style="font-size:12px">Rate per metre = Weight per metre × Rate per kg</div>';
   h += '</div>';
@@ -2031,41 +2074,46 @@ function renderDetailed(){
     h += '<tr class="tot-row"><td colspan="4">Total</td><td class="amt-col">'+nf(pdTotalLen)+' m</td><td></td><td class="amt-col">'+nf2(pdTotalAmt)+'</td></tr>';
     h += '</tbody></table>';
 
-    h += '<div class="sub-title">2.3.2 Derived Fittings &mdash; Reducers, Bottom Plug &amp; Centering Guides</div>';
-    h += '<p class="para">The following fittings are derived automatically from the pipe design in Section 2.3.1. Reducers appear only where the diameter changes between two adjacent pipe segments; the bottom plug matches the smallest diameter in the assembly; and centering guides appear only for diameters actually present.</p>';
-    h += '<table><thead><tr><th>#</th><th>Fitting</th><th style="width:8%">Unit</th><th class="amt-col" style="width:12%">Qty per well</th><th>Derivation</th></tr></thead><tbody>';
-    var derivedIds = getActiveFittingIds();
+    h += '<div class="sub-title">2.3.2 Auxiliary Items &mdash; Bottom Plug, Top Cap, Centralizer, Reducer &amp; Surface Plate</div>';
+    h += '<p class="para">The following auxiliary items are <b>always included</b> under Section 2. Their descriptions adapt to the pipe sizes actually present in the design: the <b>bottom plug</b> matches the smallest diameter; the <b>top cap</b> matches the largest; the <b>reducer</b> is derived from the diameter transitions between adjacent pipe segments; and the <b>centralizer</b> is shown generically when multiple diameters are in use.</p>';
+    h += '<table><thead><tr><th>#</th><th>Auxiliary Item</th><th style="width:8%">Unit</th><th class="amt-col" style="width:12%">Qty per well</th><th>Derivation</th></tr></thead><tbody>';
+    var auxIds = ['plug','topcap','guide','reducer','plate'];
     var dIdx = 1;
-    for(var dj=0; dj<derivedIds.length; dj++){
-      var did = derivedIds[dj];
-      var dm = null;
-      for(var dk=0; dk<MATERIAL_DEFS.length; dk++) if(MATERIAL_DEFS[dk].id===did){ dm = MATERIAL_DEFS[dk]; break; }
-      if(!dm) continue;
-      var dd, dq, dnote;
+    for(var dj=0; dj<auxIds.length; dj++){
+      var did = auxIds[dj];
+      var dm2 = null;
+      for(var dk=0; dk<MATERIAL_DEFS.length; dk++) if(MATERIAL_DEFS[dk].id===did){ dm2 = MATERIAL_DEFS[dk]; break; }
+      if(!dm2) continue;
+      var dd2, dq2, dnote2;
       if(did === 'reducer'){
         var rds = deriveReducers();
+        if(!rds.length) continue;
         var rnames = [];
         var totalQty = 0;
-        for(var rr=0; rr<rds.length; rr++){ rnames.push(formatReducerName(rds[rr].bigD, rds[rr].smallD)); totalQty += rds[rr].qty; }
-        dd = rnames.join('; ');
-        dq = totalQty;
-        dnote = 'One reducer per diameter transition in the pipe design (' + rds.length + ' unique size' + (rds.length>1?'s':'') + ', total transitions: ' + totalQty + ').';
-      } else if(did.indexOf('plug') === 0){
-        dd = dm.name;
-        dq = getWellQty(did);
-        dnote = 'Matched to the smallest diameter in the pipe assembly (' + getSmallestDiameter() + ' mm).';
+        for(var rr=0; rr<rds.length; rr++){ rnames.push(rds[rr].bigD + ' \u00d7 ' + rds[rr].smallD + ' mm'); totalQty += rds[rr].qty; }
+        dd2 = 'Reducer (' + rnames.join(', ') + ')';
+        dq2 = totalQty;
+        dnote2 = 'One reducer per diameter transition in the pipe design (' + rds.length + ' unique size' + (rds.length>1?'s':'') + ', total transitions: ' + totalQty + ').';
+      } else if(did === 'plug'){
+        dd2 = getAuxiliaryDisplayName('plug');
+        dq2 = getWellQty('plug');
+        dnote2 = 'Matched to the smallest diameter in the pipe assembly.';
+      } else if(did === 'topcap'){
+        dd2 = getAuxiliaryDisplayName('topcap');
+        dq2 = getWellQty('topcap');
+        dnote2 = 'Matched to the largest diameter in the pipe assembly (well-head).';
+      } else if(did === 'guide'){
+        dd2 = getAuxiliaryDisplayName('guide');
+        dq2 = getWellQty('guide');
+        dnote2 = 'Centralizer / centering guide — always included.';
       } else if(did === 'plate'){
-        dd = dm.name;
-        dq = getWellQty(did);
-        dnote = 'Well-head surface plate — always provided.';
-      } else if(did.indexOf('guide') === 0){
-        dd = dm.name;
-        dq = getWellQty(did);
-        dnote = 'Provided because a ' + did.replace('guide','') + ' mm diameter is present in the pipe design.';
+        dd2 = getAuxiliaryDisplayName('plate');
+        dq2 = getWellQty('plate');
+        dnote2 = 'Well-head surface plate — always provided.';
       } else {
-        dd = dm.name; dq = getWellQty(did); dnote = '';
+        dd2 = dm2.name; dq2 = getWellQty(did); dnote2 = '';
       }
-      h += '<tr><td>'+(dIdx++)+'</td><td>'+esc(dd)+'</td><td class="unit-col">'+esc(dm.unit)+'</td><td class="amt-col">'+nf(dq)+'</td><td class="desc">'+esc(dnote)+'</td></tr>';
+      h += '<tr><td>'+(dIdx++)+'</td><td>'+esc(dd2)+'</td><td class="unit-col">'+esc(dm2.unit)+'</td><td class="amt-col">'+nf(dq2)+'</td><td class="desc">'+esc(dnote2)+'</td></tr>';
     }
     h += '</tbody></table>';
 
@@ -2119,7 +2167,7 @@ function renderDetailed(){
 
     h += docSectionOpen('Labour Analysis', false);
     h += '<div class="sec-title">5. Labour Analysis</div>';
-    h += '<p class="para">Labour is engaged on a man-day basis. The district rates below have been adopted for Fiscal Year '+esc(pfy)+' for the district of Kaski.</p>';
+    h += '<p class="para">Labour is engaged on a man-day basis. The district rates below have been adopted for Fiscal Year '+esc(pfy)+' for the district of Kaski, in accordance with the published Kaski District Rate Schedule (जिल्ला दररेट आ.व. २०८३/०८४).</p>';
     h += '<table><thead><tr><th style="width:8%">Code</th><th>Description</th><th class="amt-col" style="width:20%">Rate (Rs./m.d.)</th></tr></thead><tbody>';
     for(var l=0;l<LABOUR_DEFS.length;l++){
       var lb = LABOUR_DEFS[l];
@@ -2155,7 +2203,7 @@ function renderDetailed(){
       h += '</div>';
     }
     h += '<div class="sub-title">7.2 Section 2 &mdash; Supply of Well Materials</div>';
-    h += '<p class="para">Pipe items are priced from the <b>Pipe Design</b> and the <b>Pipe Material Pricing</b> on the Rates tab; reducers, bottom plug and centering guides are auto-derived from the pipe design; and if a slotted pipe is used, a lump-sum slotting item is added.</p>';
+    h += '<p class="para">Pipe items are priced from the <b>Pipe Design</b> and the <b>Pipe Material Pricing</b> on the Rates tab. Auxiliary items (bottom plug, top cap, centralizer, reducer, surface plate) are always included, with descriptions that adapt to the sizes actually present in the pipe design. If a slotted pipe is used, a lump-sum slotting item is added.</p>';
     h += '<table><thead><tr><th>S.No.</th><th>Description</th><th>Unit</th><th class="amt-col">Quantity</th><th class="amt-col">Rate (Rs.)</th><th class="amt-col">Amount (Rs.)</th></tr></thead><tbody>';
     for(var b=0;b<data.sec2.length;b++){
       var it2 = data.sec2[b];
@@ -2248,7 +2296,7 @@ function renderDetailed(){
     h += '<div class="sec-title">10. References</div>';
     h += '<ol>';
     h += '<li><b>Water Well Drilling, Rate Analysis Norms (2073)</b> - Government of Nepal, Ministry of Water Supply &amp; Sanitation, Department of Water Supply &amp; Sewerage. (Referred to throughout this report in short form as the "DWSS Rate Analysis Norms (2073)".)</li>';
-    h += '<li><b>District Rate Schedule for Fiscal Year '+esc(pfy)+'</b> - Gandaki Province, Kaski District.</li>';
+    h += '<li><b>District Rate Schedule for Fiscal Year '+esc(pfy)+'</b> - Gandaki Province, Kaski District (जिल्ला दररेट आ.व. २०८३/०८४).</li>';
     h += '<li><b>Nepal Oil Corporation Fuel Price Circular</b> - prevailing prices for HSD, Mobil, Gear Oil, Hydraulic Oil, Brake Oil and Grease.</li>';
     h += '<li><b>Manufacturer Specification Sheets</b> - for machinery cost, life, working hours, overhaul and maintenance percentages, fuel consumption and spare part schedules.</li>';
     h += '<li><b>Prevailing Market Rates</b> - for MS ERW casing pipe, SS304 slotted (strainer) pipe, GI pipe, cement, bentonite, barite, drill bits and other consumables.</li>';
@@ -2499,7 +2547,6 @@ function applyFormState(d){
 }
 function migrateOldState(st){
   if(!st) return st;
-  /* Migrate pipeDesign from various old formats to {mat, type, dia, length} */
   if(st.pipeDesign && st.pipeDesign.length){
     for(var i=0;i<st.pipeDesign.length;i++){
       var row = st.pipeDesign[i];
@@ -2523,7 +2570,6 @@ function migrateOldState(st){
       if(!isFinite(Number(row.length))) row.length = 0;
     }
   }
-  /* Reset pipeSpecs to the new 6-combo catalogue (old formats incompatible) */
   if(!st.pipeSpecs || !st.pipeSpecs['MS_200'] || st.pipeSpecs['MS_blind_200']){
     st.pipeSpecs = defaultPipeSpecs();
   }
@@ -2538,6 +2584,7 @@ function mergeStateDefaults(st){
   if(!st.material) st.material = {};
   if(!st.machines) st.machines = {};
   if(!st.segments || !st.segments.length) st.segments = defaultSegments();
+  for(var fk in FUEL_DEFAULTS) if(st.fuel[fk] === undefined) st.fuel[fk] = FUEL_DEFAULTS[fk];
   for(var i=0;i<MACHINE_DEFS.length;i++){
     if(!st.machines[MACHINE_DEFS[i].id]) st.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
   }
@@ -2722,7 +2769,6 @@ function boot(){
         return;
       }
       if(isPipeSpec){
-        /* Re-render the pipe pricing cards so weight/rate displays refresh */
         recalc({skipMachineRebuild: true, skipDocs: false});
         return;
       }
