@@ -124,6 +124,13 @@ details.machine .body h4:first-child{margin-top:0}
 .ra-block .ra-tbl tr.grp td{font-weight:700;background:#f0f0f0}
 .ra-block .ra-tbl tr.sub td{font-weight:700}
 .ra-block .ra-tbl tr.final td{font-weight:700;font-size:11.5px;background:#e8e8e8}
+table.inc-table td{vertical-align:top}
+.inc-radios{white-space:nowrap}
+.inc-radios label{display:inline-flex;align-items:center;gap:4px;font-weight:400;cursor:pointer;margin-right:12px}
+.inc-radios input[type="radio"]{cursor:pointer;margin:0}
+.inc-config{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end}
+.inc-config.hidden{display:none!important}
+.inc-config label.f{min-width:150px;flex:1 1 150px}
 .info{border:1px solid #bbb;padding:8px 12px;font-size:11.5px;margin-bottom:12px;color:#333;background:#fff}
 .hidden{display:none!important}
 .err{font-family:Menlo,Consolas,monospace;font-size:11px;border:1px solid #000;padding:8px 12px;margin:12px 18px;white-space:pre-wrap;background:#fff}
@@ -150,6 +157,8 @@ details.machine .body h4:first-child{margin-top:0}
 .ra-block.jump-highlight{animation:jumpFlash 1.6s ease}
 .ma-block.jump-highlight{animation:jumpFlash 1.6s ease}
 tr.jump-highlight td{animation:jumpFlash 1.6s ease}
+.pipe-tag-inuse{font-size:10px;color:#0e7a5f;font-weight:700;margin-left:4px}
+.pipe-tag-notused{font-size:10px;color:#888;font-weight:400;margin-left:4px}
 @media (max-width:720px){.top-bar{flex-direction:column;align-items:flex-start}main{padding:10px}.tabs{overflow-x:auto;white-space:nowrap;padding:0 8px}.doc .doc-section{padding:12px}.doc .cover-page{padding:14px;min-height:auto}.doc .meta .lbl{width:130px}}
 @media print{
   @page { size:A4; margin:18mm 14mm 18mm 28mm; }
@@ -232,15 +241,16 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
       <tbody id="tbl-labour"></tbody>
     </table></div>
   </div>
-  <div class="card"><h2>Material Rates</h2>
+  <div class="card"><h2>Material Rates (non-pipe)</h2>
+    <div class="hint">Fittings, consumables and other supply materials. Pipe pricing is handled separately in the <b>Pipe Material Pricing</b> section below.</div>
     <div class="table-wrap"><table>
       <thead><tr><th style="width:70px">Code</th><th>Material</th><th style="width:70px">Unit</th><th class="num" style="width:150px">Market Rate</th><th class="num" style="width:150px">Transport / unit</th><th class="num" style="width:150px">Total at Site</th></tr></thead>
       <tbody id="tbl-material"></tbody>
     </table></div>
   </div>
-  <div class="card"><h2>MS Pipe Pricing by Weight</h2>
-    <div class="hint">For MS ERW casing pipes priced by weight, enter the outer diameter (OD), wall thickness (t), steel density (ρ) and the prevailing rate per kg. The price per metre is computed as π × (OD − t) × t × ρ / 10⁶ × (rate per kg). Untick &ldquo;price by weight&rdquo; to enter a direct per-metre market rate in the table above instead.</div>
-    <div id="pipe-specs-container"></div>
+  <div class="card"><h2>Pipe Material Pricing</h2>
+    <div class="hint">Pipes are priced by weight. Section weight per metre = π × (OD − t) × t × ρ / 10⁶ kg/m, and rate per metre = weight × rate per kg. Un-tick &ldquo;Price by weight&rdquo; to enter a direct per-metre market rate instead. <b>Blind and slotted (strainer) pipes of the same material and diameter share the same per-metre rate</b>; when a slotted pipe is used in the design, a separate lump-sum slotting item of Rs 40,000 is added under Section 2. Only combinations actually selected in the Pipe Design table appear as items in Section 2, the BOQ and the Detailed Report.</div>
+    <div id="pipe-pricing-container"></div>
   </div>
 </section>
 
@@ -271,52 +281,119 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
     </div>
   </div>
 
-  <div class="card"><h2>Drilling Depth &amp; Options</h2>
+  <div class="card"><h2>Drilling Depth</h2>
     <div class="grid c4">
       <label class="f">Total Depth (m)<input type="number" id="in_depth" data-save="p_depth" value="120" min="1" step="1"></label>
-      <label class="f">Include 2nd reaming (17½")?
-        <select id="in_r2" data-save="p_r2"><option value="1">Yes</option><option value="0">No</option></select>
-      </label>
-      <label class="f">Include 3rd reaming (22½")?
-        <select id="in_r3" data-save="p_r3"><option value="0">No</option><option value="1">Yes</option></select>
-      </label>
-      <label class="f">Strainer (screen) pipe type
-        <select id="in_strainer" data-save="p_strainer"><option value="ss">SS304 Slotted</option><option value="ms">MS Slotted (blind pipe rate + Rs 25,000 lump-sum slotting)</option></select>
-      </label>
-      <label class="f">Include water jetting?
-        <select id="in_jet" data-save="p_jet"><option value="1">Yes</option><option value="0">No</option></select>
-      </label>
-      <label class="f">Include gravel packing?
-        <select id="in_gravel" data-save="p_gravel"><option value="1">Yes</option><option value="0">No</option></select>
-      </label>
-      <label class="f">Include reconditioning?
-        <select id="in_recond" data-save="p_recond"><option value="1">Yes</option><option value="0">No</option></select>
-      </label>
-      <label class="f">Well development — costing method
-        <select id="in_devmode" data-save="p_devmode">
-          <option value="norms">DoWR Norms (computed)</option>
-          <option value="ls">Lump Sum (L.S.)</option>
-        </select>
-      </label>
-      <label class="f" id="devmode-norms-wrap">Well development
-        <select id="in_dev" data-save="p_dev">
-          <option value="compressor">By compressor machine</option>
-          <option value="pump">By pump</option>
-          <option value="both">Both</option>
-        </select>
-      </label>
-      <label class="f" id="devmode-ls-wrap">Well development — L.S. Price (Rs.)
-        <input type="number" id="in_devls" data-save="p_devls" value="0" min="0" step="1000">
-      </label>
-      <label class="f">Pump Test
-        <select id="in_pumptest" data-save="p_pumptest">
-          <option value="step">Step Drawdown Test</option>
-          <option value="time">Time Drawdown Test</option>
-          <option value="both">Both</option>
-        </select>
-      </label>
     </div>
-    <div class="hint" style="margin-top:8px">1st reaming (13¾") is always included as the base pass. 2nd reaming (17½") and 3rd reaming (22½") are each optional, sequential enlargement passes — 3rd reaming is only meaningful if 2nd reaming is also included.</div>
+    <div class="hint">The strainer / screen type and casing material are determined by the Pipe Design table below, not by a separate selection.</div>
+  </div>
+
+  <div class="card"><h2>Section 3 — Item Selection &amp; Configuration</h2>
+    <div class="hint">Every item of <b>Section 3 · Execution of Works</b> can be individually switched <b>Include</b> / <b>Exclude</b> below. An excluded item is left out of the Estimate, the BOQ and the Detailed Report entirely. Where an item offers a choice of method or costing basis, those controls appear in the Configuration column once it is included — for example, choose <i>how</i> Well Development is to be carried out (by compressor, by pump, or both) and whether it is priced from the DoWR Norms or as a Lump Sum.</div>
+    <div class="table-wrap"><table class="inc-table">
+      <thead><tr><th style="width:32%">Item</th><th style="width:15%">Status</th><th>Configuration (shown when included)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>3.1 &nbsp;Drilling of Pilot Hole <span style="display:block;font-weight:400;color:#555;font-size:10.5px">per Depth Segment, soil type &amp; method as defined below</span></td>
+          <td class="inc-radios"><label><input type="radio" name="inc_pilot" data-save="p_inc_pilot" value="1" checked> Include</label><label><input type="radio" name="inc_pilot" data-save="p_inc_pilot" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.2 &nbsp;Electrical Logging of Borehole</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_logging" data-save="p_inc_logging" value="1" checked> Include</label><label><input type="radio" name="inc_logging" data-save="p_inc_logging" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.3 &nbsp;Tubewell Design, Water Quality Analysis &amp; Report</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_design" data-save="p_inc_design" value="1" checked> Include</label><label><input type="radio" name="inc_design" data-save="p_inc_design" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.4 &nbsp;1st Reaming (13&frac34;&Prime; bit — base pass)</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_ream1" data-save="p_inc_ream1" value="1" checked> Include</label><label><input type="radio" name="inc_ream1" data-save="p_inc_ream1" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.5 &nbsp;2nd Reaming (17&frac12;&Prime; bit)</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_ream2" data-save="p_inc_ream2" value="1" checked> Include</label><label><input type="radio" name="inc_ream2" data-save="p_inc_ream2" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.6 &nbsp;3rd Reaming (22&frac12;&Prime; bit) <span style="display:block;font-weight:400;color:#555;font-size:10.5px">only meaningful if 2nd reaming is also included</span></td>
+          <td class="inc-radios"><label><input type="radio" name="inc_ream3" data-save="p_inc_ream3" value="1"> Include</label><label><input type="radio" name="inc_ream3" data-save="p_inc_ream3" value="0" checked> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.7 &nbsp;Reconditioning of Borehole</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_recond" data-save="p_inc_recond" value="1" checked> Include</label><label><input type="radio" name="inc_recond" data-save="p_inc_recond" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.8 &nbsp;Lowering of Pipe Assembly</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_lowering" data-save="p_inc_lowering" value="1" checked> Include</label><label><input type="radio" name="inc_lowering" data-save="p_inc_lowering" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.9 &nbsp;Gravel Packing (back washing &amp; inner washing)</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_gravel" data-save="p_inc_gravel" value="1" checked> Include</label><label><input type="radio" name="inc_gravel" data-save="p_inc_gravel" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.10 &nbsp;Water Jetting of Strainer</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_jet" data-save="p_inc_jet" value="1" checked> Include</label><label><input type="radio" name="inc_jet" data-save="p_inc_jet" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.11 &nbsp;Sealing of Borehole (cement grouting)</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_sealing" data-save="p_inc_sealing" value="1" checked> Include</label><label><input type="radio" name="inc_sealing" data-save="p_inc_sealing" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3.12 &nbsp;Well Development</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_devel" data-save="p_inc_devel" value="1" checked> Include</label><label><input type="radio" name="inc_devel" data-save="p_inc_devel" value="0"> Exclude</label></td>
+          <td>
+            <div class="inc-config" id="devel-config">
+              <label class="f">Costing method
+                <select id="in_devmode" data-save="p_devmode">
+                  <option value="norms">DoWR Norms (computed)</option>
+                  <option value="ls">Lump Sum (L.S.)</option>
+                </select>
+              </label>
+              <label class="f" id="devmode-norms-wrap">Method
+                <select id="in_dev" data-save="p_dev">
+                  <option value="compressor">By compressor machine</option>
+                  <option value="pump">By pump</option>
+                  <option value="both">Both</option>
+                </select>
+              </label>
+              <label class="f" id="devmode-ls-wrap">L.S. Price (Rs.)
+                <input type="number" id="in_devls" data-save="p_devls" value="0" min="0" step="1000">
+              </label>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>3.13 &nbsp;Pump Test</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_pumptest" data-save="p_inc_pumptest" value="1" checked> Include</label><label><input type="radio" name="inc_pumptest" data-save="p_inc_pumptest" value="0"> Exclude</label></td>
+          <td>
+            <div class="inc-config" id="pumptest-config">
+              <label class="f">Type
+                <select id="in_pumptest" data-save="p_pumptest">
+                  <option value="step">Step Drawdown Test</option>
+                  <option value="time">Time Drawdown Test</option>
+                  <option value="both">Both</option>
+                </select>
+              </label>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>3.14 &nbsp;Recovery Test</td>
+          <td class="inc-radios"><label><input type="radio" name="inc_recovery" data-save="p_inc_recovery" value="1" checked> Include</label><label><input type="radio" name="inc_recovery" data-save="p_inc_recovery" value="0"> Exclude</label></td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table></div>
   </div>
 
   <div class="card"><h2>Depth Segments — Soil Type &amp; Drilling Method</h2>
@@ -324,6 +401,7 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
       Define the well as one or more depth segments. For each segment, choose the <b>soil type</b> (Soft / Medium / Hard) and the <b>drilling method</b> (Rotary / DTH).
       The DWSS Rate Analysis Norms (2073) are then applied segment by segment, using the appropriate coefficient tables for each combination.
       Rotary is used for Soft, Medium and Hard formations; DTH is used for Hard rock only, and produces the final-diameter bore in a single pass, so no reaming is applied for DTH segments.
+      <br><br><b>Note:</b> The drilling method selected here drives the internal rate analysis only. Item descriptions in the Estimate / BOQ remain method-neutral; the method is disclosed only in the Detailed Report rate-analysis notes. The soil type selected here is carried through verbatim into the item description.
     </div>
     <div style="margin-bottom:10px">
       <button id="btn-add-segment" type="button">+ Add Segment</button>
@@ -351,8 +429,30 @@ tr.jump-highlight td{animation:jumpFlash 1.6s ease}
     </div>
   </div>
 
-  <div class="card"><h2>Well Assembly Quantities</h2>
-    <div class="hint">The pipe assembly lowered into the well — 250 mm housing (2.1) + reducer (2.2) + 200 mm riser (2.3) + screen (2.4) — must total the drilling depth. The bottom plug, well-head plate and centralizer guides are counted separately. Set these from the actual borehole design / logging data, not by guesswork.</div>
+  <div class="card"><h2>Pipe Design</h2>
+    <div class="hint">Define each pipe section of the well assembly by selecting the <b>pipe material</b> (MS or SS), the <b>nominal diameter</b> (NB 150 / 200 / 250), the <b>pipe type</b> (Blind or Slotted) and typing the <b>length</b>. <b>Blind and slotted pipes of the same material and diameter share the same rate per metre.</b> If any slotted pipe is used, a lump-sum slotting item (Rs 40,000) is added under Section 2. Each row becomes its own item under Section 2 of the Estimate &amp; BOQ, and is analysed individually in the Detailed Report.</div>
+    <div style="margin-bottom:10px">
+      <button id="btn-add-pipedesign" type="button">+ Add Pipe Segment</button>
+      <button id="btn-reset-pipedesign" type="button" class="mini">Reset to Default Segments</button>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th style="width:36px">#</th>
+        <th style="width:90px">Material</th>
+        <th style="width:110px">Diameter</th>
+        <th style="width:110px">Type</th>
+        <th style="width:110px">Length (m)</th>
+        <th class="num" style="width:130px">Rate (Rs./m)</th>
+        <th class="num" style="width:150px">Amount (Rs.)</th>
+        <th style="width:70px">Action</th>
+      </tr></thead>
+      <tbody id="tbl-pipedesign"></tbody>
+    </table></div>
+    <div class="hint" id="pipedesign-summary" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card"><h2>Well Fittings &amp; Ancillaries</h2>
+    <div class="hint">Fittings are <b>auto-derived</b> from the Pipe Design above: reducers appear only where the diameter changes between adjacent pipe segments, the bottom plug matches the smallest diameter, and centering guides are emitted only for diameters actually used. Enter or adjust quantities where relevant.</div>
     <div class="grid c3" style="margin-bottom:10px">
       <label class="f">Centralizer spacing (m)<input type="number" id="in_guide_spacing" data-save="p_guide_spacing" value="12" min="1" step="1"></label>
       <label class="f">&nbsp;<button type="button" id="btn-autofill-guides" class="mini" style="align-self:flex-start">Auto-fill centralizer quantities from spacing</button></label>
@@ -392,6 +492,7 @@ window.onerror = function(msg, src, line, col, err){
 function el(id){ return document.getElementById(id); }
 function val(id, def){ var e = document.getElementById(id); if(!e) return def; var v = parseFloat(e.value); return isFinite(v) ? v : def; }
 function strVal(id, def){ var e = document.getElementById(id); if(!e) return def; return e.value; }
+function radioVal(name, def){ var e = document.querySelector('input[name="'+cssEsc(name)+'"]:checked'); return e ? e.value : def; }
 function savedVal(key, def){ var e = document.querySelector('[data-save="'+cssEsc(key)+'"]'); if(!e) return def; return e.value; }
 function nf2(n){ n = Number(n); if(!isFinite(n)) n = 0; return n.toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2}); }
 function nf(n){ n = Number(n); if(!isFinite(n)) n = 0; return n.toLocaleString('en-IN',{maximumFractionDigits:2}); }
@@ -399,7 +500,7 @@ function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,
 function cssEsc(s){ return String(s==null?'':s).replace(/["\\]/g, '\\$&'); }
 function attrInput(attrs){ var s = '<input '; for(var k in attrs) s += k+'="'+esc(attrs[k])+'" '; return s + '>'; }
 
-/* ============ DATA ============ */
+/* ============ MACHINE DATA ============ */
 var MACHINE_DEFS = [
   {id:'rig', name:'Drilling Rig Machine', cost:20000000, life:30000, yearlyHrs:2000, overhaulPct:0.55, maintPct:0.23,
    fuel:{hsd:15, mobil:0.15, gear:0.11, hyd:0.1, brake:0.012, grease:0.05},
@@ -443,6 +544,7 @@ var LABOUR_DEFS = [
   {id:'unsk',name:'Unskilled Labourer',rate:700}
 ];
 
+/* Non-pipe materials only */
 var MATERIAL_DEFS = [
   {id:'bentonite', name:'Bentonite', unit:'kg', rate:11.109},
   {id:'barite', name:'Barite (CMC)', unit:'kg', rate:13.225},
@@ -454,24 +556,72 @@ var MATERIAL_DEFS = [
   {id:'gipipe65', name:'65 mm GI Pipe (Medium Class)', unit:'m', rate:605},
   {id:'cicap65', name:'65 mm CI Cap', unit:'no.', rate:197},
   {id:'cement', name:'Cement', unit:'bag', rate:710},
-  {id:'pipe250', name:'NB 250 mm MS ERW Casing (blind) Pipe, 7 mm thick', unit:'m', rate:5424.36, pipeSpec:true},
-  {id:'reducer', name:'250 mm × 200 mm MS Reducer (fabricated from 7 mm MS plate)', unit:'no.', rate:4500},
-  {id:'pipe200', name:'NB 200 mm MS ERW Casing (blind) Pipe, 7 mm thick', unit:'m', rate:3826.02, pipeSpec:true},
-  {id:'slot200', name:'200 mm dia. SS304 Continuous Slotted Pipe (strainer)', unit:'m', rate:22000},
+  {id:'reducer', name:'MS Reducer (fabricated from 7 mm MS plate)', unit:'no.', rate:4500},
+  {id:'plug250', name:'250 mm Bottom Plug', unit:'no.', rate:3000},
   {id:'plug200', name:'200 mm Bottom Plug', unit:'no.', rate:2500},
+  {id:'plug150', name:'150 mm Bottom Plug', unit:'no.', rate:2000},
   {id:'plate', name:'14 mm thick 45 cm dia. Surface Plate with Ventilator Holes', unit:'no.', rate:8000},
   {id:'guide250', name:'250 mm Centering Guide', unit:'no.', rate:2001},
-  {id:'guide200', name:'200 mm Centering Guide', unit:'no.', rate:1651}
+  {id:'guide200', name:'200 mm Centering Guide', unit:'no.', rate:1651},
+  {id:'guide150', name:'150 mm Centering Guide', unit:'no.', rate:1350}
 ];
-var WELL_MATERIAL_IDS = ['pipe250','reducer','pipe200','slot200','plug200','plate','guide250','guide200'];
-var PIPE_WEIGHT_IDS = ['pipe250','pipe200'];
-var WELL_QTY_DEFAULTS = {pipe250:35, reducer:1, pipe200:30, slot200:55, plug200:1, plate:1, guide250:3, guide200:8};
+
+var FITTING_ID_POOL = ['reducer','plug250','plug200','plug150','plate','guide250','guide200','guide150'];
+var WELL_QTY_DEFAULTS = {reducer:1, plug250:0, plug200:1, plug150:0, plate:1, guide250:3, guide200:8, guide150:0};
+
+/* ============ PIPE CATALOGUE (mat+diameter only; blind & slotted share rate) ============ */
+var PIPE_OD = {150: 168.3, 200: 219.1, 250: 273.0};
+var SLOTTING_LS_RATE = 40000;
+
+function pipePriceKey(mat, dia){ return mat + '_' + dia; }
+
+function getDefaultPipeSpec(mat, dia){
+  var od = PIPE_OD[dia] || 200;
+  var isSS = (mat === 'SS');
+  var thick = isSS ? 6 : 7;
+  var rho = isSS ? 8000 : 7850;
+  var kgRate = isSS ? 400 : (dia === 150 ? 92 : dia === 200 ? 104.5 : 118.15);
+  return {
+    useKg: true,
+    od: od,
+    thickness: thick,
+    density: rho,
+    kgRate: kgRate,
+    directRate: 0,
+    transport: 0
+  };
+}
 
 function defaultPipeSpecs(){
-  return {
-    pipe250: {useKg:true, od:273, thickness:7, density:7850, kgRate:118.15},
-    pipe200: {useKg:true, od:219.1, thickness:7, density:7850, kgRate:104.50}
-  };
+  var s = {};
+  var combos = [['MS',150],['MS',200],['MS',250],['SS',150],['SS',200],['SS',250]];
+  for(var i=0;i<combos.length;i++){
+    s[pipePriceKey(combos[i][0], combos[i][1])] = getDefaultPipeSpec(combos[i][0], combos[i][1]);
+  }
+  return s;
+}
+
+function pipeDisplayName(mat, type, dia){
+  var matFull = mat === 'MS' ? 'MS ERW' : 'SS304';
+  var thick = mat === 'MS' ? '7 mm thick' : '6 mm thick';
+  if(type === 'blind'){
+    return 'NB ' + dia + ' mm ' + matFull + ' Casing (blind) Pipe, ' + thick;
+  } else {
+    return 'NB ' + dia + ' mm ' + matFull + ' Continuous Slotted (strainer) Pipe, ' + thick;
+  }
+}
+function pipeShortName(mat, type, dia){
+  var matShort = mat === 'MS' ? 'MS ERW' : 'SS304';
+  var typeShort = type === 'blind' ? 'casing' : 'slotted (strainer)';
+  return dia + ' mm dia. ' + matShort + ' ' + typeShort + ' pipe';
+}
+
+function defaultPipeDesign(){
+  return [
+    {mat:'MS', type:'blind',   dia:250, length:35},
+    {mat:'MS', type:'blind',   dia:200, length:30},
+    {mat:'SS', type:'slotted', dia:200, length:55}
+  ];
 }
 
 function N(L,M,X){ return {L:L||{},M:M||{},X:X||{}}; }
@@ -496,7 +646,6 @@ var R2_MED_I  = N({hg:.001,ahg:.001,driller:.004,srmech:.002,asstdr:.006,dh:.04,
 var R2_HARD_B = N({hg:.013,ahg:.013,driller:.055,srmech:.027,asstdr:.055,dh:.55,mh:.11,wm:.055,cw:.055},{rig:.22,tanker:.2,wpump:.4,pickup:.2},{bentonite:1.25,barite:.25,drillbit:.333});
 var R2_HARD_I = N({hg:.001,ahg:.001,driller:.005,srmech:.002,asstdr:.008,dh:.05,mh:.01,wm:.005,cw:.005},{rig:.22,tanker:.2,wpump:.4,pickup:.2},{bentonite:.12,barite:.02,drillbit:.0033});
 
-/* --- DTH NORMS (only hard formation provided in norms) --- */
 var DTH_PILOT_HARD_B = N(
   {hg:.015, ahg:.015, driller:.031, srmech:.031, asstdr:.062, dh:.31, mh:.062, wm:.031, cw:.031},
   {rig:.25, pickup:.1},
@@ -518,7 +667,7 @@ var RECOVERY = N({hg:1.5,pumpasst:1.5,pumphelp:4.5,wm:1.5,cw:1.5},{wli:12},{});
 var SEALING  = N({skilled:.25,semisk:.25,unsk:1.25},{cempump:2},{gipipe65:6,cicap65:2,cement:15.75});
 
 /* ============ STATE ============ */
-var SAVE_KEY = 'dtw_estimate_v15';
+var SAVE_KEY = 'dtw_estimate_v22';
 var state = defaultState();
 
 function defaultSegments(){
@@ -529,7 +678,12 @@ function defaultSegments(){
 }
 
 function defaultState(){
-  var s = {fuel:{}, machines:{}, labour:{}, material:{}, qty:{}, wellQty:{}, segments: defaultSegments(), pipeSpecs: defaultPipeSpecs()};
+  var s = {
+    fuel:{}, machines:{}, labour:{}, material:{}, qty:{}, wellQty:{},
+    segments: defaultSegments(),
+    pipeSpecs: defaultPipeSpecs(),
+    pipeDesign: defaultPipeDesign()
+  };
   for(var k in FUEL_DEFAULTS) s.fuel[k] = FUEL_DEFAULTS[k];
   for(var i=0;i<MACHINE_DEFS.length;i++) s.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
   for(var j=0;j<LABOUR_DEFS.length;j++) s.labour[LABOUR_DEFS[j].id] = LABOUR_DEFS[j].rate;
@@ -572,29 +726,29 @@ function getAllMachineRates(){
   for(var i=0;i<MACHINE_DEFS.length;i++) r[MACHINE_DEFS[i].id] = calcMachineRate(state.machines[MACHINE_DEFS[i].id], state.fuel);
   return r;
 }
-function getPipeSpec(id){ return state.pipeSpecs && state.pipeSpecs[id]; }
-function isPipeByWeight(id){ var s = getPipeSpec(id); return !!(s && s.useKg); }
-function getPipeWeightPerM(id){
-  var s = getPipeSpec(id); if(!s) return 0;
+function getMaterialRate(id){
+  var m = state.material[id];
+  if(!m) return 0;
+  return (Number(m.rate)||0) + (Number(m.transport)||0);
+}
+function getPipeSpec(mat, dia){ return state.pipeSpecs && state.pipeSpecs[pipePriceKey(mat, dia)]; }
+function getPipeWeightPerM(mat, dia){
+  var s = getPipeSpec(mat, dia); if(!s) return 0;
   var od = Number(s.od)||0, t = Number(s.thickness)||0, rho = Number(s.density)||7850;
   if(od <= t) return 0;
   return Math.PI * (od - t) * t * rho / 1e6;
 }
-function getPipeRatePerM(id){
-  var s = getPipeSpec(id); if(!s) return 0;
-  return getPipeWeightPerM(id) * (Number(s.kgRate)||0);
+function getPipeRatePerM(mat, dia){
+  var s = getPipeSpec(mat, dia); if(!s) return 0;
+  if(s.useKg){ return getPipeWeightPerM(mat, dia) * (Number(s.kgRate)||0); }
+  return Number(s.directRate)||0;
 }
-function getMaterialRate(id){
-  var m = state.material[id];
-  if(!m) return 0;
-  var baseRate;
-  if(isPipeByWeight(id)){
-    baseRate = getPipeRatePerM(id);
-  } else {
-    baseRate = Number(m.rate)||0;
-  }
-  return baseRate + (Number(m.transport)||0);
+function getPipeTotalRatePerM(mat, dia){
+  var s = getPipeSpec(mat, dia); if(!s) return 0;
+  return getPipeRatePerM(mat, dia) + (Number(s.transport)||0);
 }
+function getPipeDesignRate(row){ return getPipeTotalRatePerM(row.mat, row.dia); }
+
 function profitFactor(){ return 1 + val('in_profit', 15)/100; }
 function opRate(norm, mr){
   var L=0,M=0,X=0,rid,mid,xid;
@@ -629,16 +783,16 @@ function getWellQty(id){
   if(state.wellQty && state.wellQty[id] !== undefined && state.wellQty[id] !== null && state.wellQty[id] !== ''){
     var v = parseFloat(state.wellQty[id]); return isFinite(v) ? v : 0;
   }
+  if(id === 'plate') return 1;
+  if(id === 'reducer') return 1;
+  if(id.indexOf('plug') === 0) return 1;
   return 0;
 }
 
 /* ---- Segment helpers ---- */
 function getSegments(){
   var segs = state.segments;
-  if(!segs || !segs.length){
-    segs = defaultSegments();
-    state.segments = segs;
-  }
+  if(!segs || !segs.length){ segs = defaultSegments(); state.segments = segs; }
   var copy = segs.slice();
   copy.sort(function(a,b){ return a.start - b.start; });
   return copy;
@@ -662,9 +816,7 @@ function buildMethodSummary(segments){
   var list = [];
   for(var k in methods) list.push(k);
   if(list.length === 0) return 'Rotary Only';
-  if(list.length === 1){
-    return list[0] === 'rotary' ? 'Rotary Only' : 'DTH Only';
-  }
+  if(list.length === 1) return list[0] === 'rotary' ? 'Rotary Only' : 'DTH Only';
   var parts = [];
   for(var j=0;j<list.length;j++) parts.push(list[j] === 'rotary' ? 'Rotary' : 'DTH');
   return 'Mixed (' + parts.join(' + ') + ')';
@@ -675,10 +827,135 @@ function buildSoilSummary(segments){
   var list = [];
   for(var k in soils) list.push(k);
   if(list.length === 0) return 'Medium';
-  if(list.length === 1) return list[0].charAt(0).toUpperCase() + list[0].slice(1);
+  if(list.length === 1) return soilLabel(list[0]);
   var parts = [];
-  for(var j=0;j<list.length;j++) parts.push(list[j].charAt(0).toUpperCase() + list[j].slice(1));
+  for(var j=0;j<list.length;j++) parts.push(soilLabel(list[j]));
   return 'Multiple (' + parts.join(' + ') + ')';
+}
+
+/* ---- Text helpers ---- */
+function soilLabel(s){
+  if(s == null) return '';
+  s = String(s);
+  if(!s.length) return s;
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function joinWithAnd(parts){
+  if(!parts || parts.length === 0) return '';
+  if(parts.length === 1) return parts[0];
+  if(parts.length === 2) return parts[0] + ' and ' + parts[1];
+  return parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length-1];
+}
+function buildLoweringDescription(){
+  var rows = state.pipeDesign || [];
+  var seen = {};
+  var parts = [];
+  for(var i=0;i<rows.length;i++){
+    var k = rows[i].mat + '_' + rows[i].type + '_' + rows[i].dia;
+    if(seen[k]) continue;
+    seen[k] = 1;
+    parts.push(pipeShortName(rows[i].mat, rows[i].type, rows[i].dia));
+  }
+  var list = joinWithAnd(parts);
+  return 'Lowering of pipe assembly' + (list ? ' comprising ' + list : '') +
+         ' including all necessary cutting, welding and supply and packing of approved size pea gravel in a continuous operation';
+}
+function buildReconditioningDescription(){
+  var rows = state.pipeDesign || [];
+  var seen = {};
+  var parts = [];
+  for(var i=0;i<rows.length;i++){
+    var d = Number(rows[i].dia)||0;
+    if(seen[d]) continue;
+    seen[d] = 1;
+    parts.push(nf(d) + ' mm');
+  }
+  var list = joinWithAnd(parts);
+  return 'Reconditioning of borehole before lowering of pipe assembly' + (list ? ' of ' + list + ' dia.' : '');
+}
+function hasSlottedPipe(){
+  var rows = state.pipeDesign || [];
+  for(var i=0;i<rows.length;i++) if(rows[i].type === 'slotted') return true;
+  return false;
+}
+
+/* ---- Dynamic Section 2 helpers ---- */
+function getUsedDiameters(){
+  var rows = state.pipeDesign || [];
+  var seen = {};
+  var list = [];
+  for(var i=0;i<rows.length;i++){
+    var d = Number(rows[i].dia)||0;
+    if(d && !seen[d]){ seen[d] = 1; list.push(d); }
+  }
+  list.sort(function(a,b){ return b - a; });
+  return list;
+}
+function getSmallestDiameter(){
+  var diams = getUsedDiameters();
+  if(!diams.length) return 0;
+  var min = diams[0];
+  for(var i=1;i<diams.length;i++) if(diams[i] < min) min = diams[i];
+  return min;
+}
+function deriveReducers(){
+  var rows = state.pipeDesign || [];
+  var counts = {};
+  var order = [];
+  var prevD = null;
+  for(var i=0;i<rows.length;i++){
+    var d = Number(rows[i].dia)||0;
+    if(d <= 0) continue;
+    if(prevD !== null && d !== prevD){
+      var big = Math.max(prevD, d);
+      var small = Math.min(prevD, d);
+      var key = big + '_' + small;
+      if(!counts[key]){ counts[key] = 0; order.push(key); }
+      counts[key]++;
+    }
+    prevD = d;
+  }
+  var out = [];
+  for(var j=0;j<order.length;j++){
+    var parts = order[j].split('_');
+    out.push({bigD:Number(parts[0]), smallD:Number(parts[1]), qty:counts[order[j]]});
+  }
+  return out;
+}
+function getActiveFittingIds(){
+  var ids = [];
+  if(deriveReducers().length > 0) ids.push('reducer');
+  var smallest = getSmallestDiameter();
+  if(smallest === 250) ids.push('plug250');
+  else if(smallest === 200) ids.push('plug200');
+  else if(smallest === 150) ids.push('plug150');
+  ids.push('plate');
+  var diams = getUsedDiameters();
+  for(var i=0;i<diams.length;i++){
+    var gid = 'guide' + diams[i];
+    if(FITTING_ID_POOL.indexOf(gid) !== -1) ids.push(gid);
+  }
+  return ids;
+}
+function formatReducerName(bigD, smallD){
+  return bigD + ' mm \u00d7 ' + smallD + ' mm MS Reducer (fabricated from 7 mm MS plate)';
+}
+function getReducerSummaryText(){
+  var rds = deriveReducers();
+  if(!rds.length) return 'No reducer required (single diameter used throughout).';
+  var parts = [];
+  for(var i=0;i<rds.length;i++) parts.push(rds[i].bigD + ' \u00d7 ' + rds[i].smallD + ' mm (qty ' + rds[i].qty + ')');
+  return 'Reducer(s) derived from pipe design: <b>' + parts.join(', ') + '</b>.';
+}
+function getUsedPipePriceKeys(){
+  var rows = state.pipeDesign || [];
+  var seen = {};
+  var list = [];
+  for(var i=0;i<rows.length;i++){
+    var k = pipePriceKey(rows[i].mat, rows[i].dia);
+    if(!seen[k]){ seen[k] = 1; list.push(k); }
+  }
+  return list;
 }
 
 /* ============ RENDER — segments table ============ */
@@ -732,6 +1009,172 @@ function updateSegmentSummary(){
     html += '</span>';
   }
   summary.innerHTML = html;
+}
+
+/* ============ PIPE DESIGN TABLE ============ */
+function renderPipeDesign(){
+  var tbody = el('tbl-pipedesign'); if(!tbody) return;
+  var rows = state.pipeDesign || [];
+  var h = '';
+  for(var i=0;i<rows.length;i++){
+    var r = rows[i];
+    var rate = getPipeTotalRatePerM(r.mat, r.dia);
+    var amt = rate * (Number(r.length)||0);
+    h += '<tr>';
+    h += '<td>'+(i+1)+'</td>';
+    h += '<td><select class="c" data-pipedesign="'+i+':mat">'
+       + '<option value="MS"' + (r.mat==='MS'?' selected':'') + '>MS</option>'
+       + '<option value="SS"' + (r.mat==='SS'?' selected':'') + '>SS</option>'
+       + '</select></td>';
+    h += '<td><select class="c" data-pipedesign="'+i+':dia">'
+       + '<option value="150"' + (Number(r.dia)===150?' selected':'') + '>NB 150</option>'
+       + '<option value="200"' + (Number(r.dia)===200?' selected':'') + '>NB 200</option>'
+       + '<option value="250"' + (Number(r.dia)===250?' selected':'') + '>NB 250</option>'
+       + '</select></td>';
+    h += '<td><select class="c" data-pipedesign="'+i+':type">'
+       + '<option value="blind"' + (r.type==='blind'?' selected':'') + '>Blind</option>'
+       + '<option value="slotted"' + (r.type==='slotted'?' selected':'') + '>Slotted</option>'
+       + '</select></td>';
+    h += '<td class="num"><input class="c" type="number" step="0.01" min="0" data-pipedesign="'+i+':length" value="'+(Number(r.length)||0)+'"></td>';
+    h += '<td class="num" data-pdrate="'+i+'">'+nf2(rate)+'</td>';
+    h += '<td class="num" data-pdamt="'+i+'">'+nf2(amt)+'</td>';
+    h += '<td style="text-align:center"><button type="button" class="mini" data-remove-pipedesign="'+i+'">Remove</button></td>';
+    h += '</tr>';
+  }
+  tbody.innerHTML = h;
+  updatePipeDesignSummary();
+}
+function updatePipeDesignRowCells(){
+  var rows = state.pipeDesign || [];
+  for(var i=0;i<rows.length;i++){
+    var rate = getPipeTotalRatePerM(rows[i].mat, rows[i].dia);
+    var amt = rate * (Number(rows[i].length)||0);
+    var rc = document.querySelector('[data-pdrate="'+i+'"]'); if(rc) rc.textContent = nf2(rate);
+    var ac = document.querySelector('[data-pdamt="'+i+'"]');   if(ac) ac.textContent = nf2(amt);
+  }
+  updatePipeDesignSummary();
+}
+function updatePipeDesignSummary(){
+  var summary = el('pipedesign-summary'); if(!summary) return;
+  var rows = state.pipeDesign || [];
+  var totalLen = 0, totalAmt = 0;
+  for(var i=0;i<rows.length;i++){
+    totalLen += Number(rows[i].length)||0;
+    totalAmt += getPipeTotalRatePerM(rows[i].mat, rows[i].dia) * (Number(rows[i].length)||0);
+  }
+  var depth = val('in_depth', 0);
+  var html = 'Total pipe length: <b>' + nf(totalLen) + ' m</b> against a drilling depth of <b>' + nf(depth) + ' m</b>. ';
+  html += 'Section 2 pipe cost (per well): <b>Rs ' + nf2(totalAmt) + '</b>. ';
+  if(hasSlottedPipe()) html += '<b>Slotted pipe detected</b> &mdash; a lump-sum slotting item of Rs ' + nf2(SLOTTING_LS_RATE) + ' will be added under Section 2. ';
+  if(Math.abs(totalLen - depth) < 0.01){
+    html += '<span class="seg-ok">&#10003; Pipe design length matches the total depth.</span>';
+  } else {
+    html += '<span class="seg-warn">&#9888; Mismatch of ' + nf(Math.abs(totalLen - depth)) + ' m &mdash; adjust the pipe segment lengths (or the total depth) so the pipe design totals the drilling depth.</span>';
+  }
+  summary.innerHTML = html;
+}
+function addPipeDesignRow(){
+  if(!state.pipeDesign) state.pipeDesign = [];
+  state.pipeDesign.push({mat:'MS', type:'blind', dia:200, length:10});
+  renderPipeDesign(); recalcNow();
+}
+function removePipeDesignRow(idx){
+  if(!state.pipeDesign) return;
+  state.pipeDesign.splice(idx, 1);
+  renderPipeDesign(); recalcNow();
+}
+function resetPipeDesign(){
+  state.pipeDesign = defaultPipeDesign();
+  renderPipeDesign(); recalcNow();
+}
+
+/* ============ PIPE PRICING CARDS (mat+diameter only) ============ */
+function renderPipePricing(){
+  var container = el('pipe-pricing-container'); if(!container) return;
+
+  var openCards = {};
+  var opened = container.querySelectorAll('details.machine[open]');
+  for(var i=0;i<opened.length;i++) openCards[opened[i].getAttribute('data-pipespec')] = 1;
+
+  var usedKeys = getUsedPipePriceKeys();
+
+  var groups = [
+    {title: 'MS Pipes (blind and slotted share the same rate)', combos: ['MS_150','MS_200','MS_250']},
+    {title: 'SS304 Pipes (blind and slotted share the same rate)', combos: ['SS_150','SS_200','SS_250']}
+  ];
+
+  var h = '';
+  for(var g=0; g<groups.length; g++){
+    h += '<div style="margin:14px 0 6px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:#333;border-bottom:1px solid #999;padding-bottom:4px">' + esc(groups[g].title) + '</div>';
+    for(var j=0; j<groups[g].combos.length; j++){
+      h += buildPipePricingCardHTML(groups[g].combos[j], usedKeys.indexOf(groups[g].combos[j]) !== -1);
+    }
+  }
+  container.innerHTML = h;
+
+  var details = container.querySelectorAll('details.machine');
+  for(var k=0;k<details.length;k++){
+    var key = details[k].getAttribute('data-pipespec');
+    if(openCards[key] || usedKeys.indexOf(key) !== -1) details[k].open = true;
+  }
+}
+
+function buildPipePricingCardHTML(key, inUse){
+  var spec = state.pipeSpecs[key]; if(!spec) return '';
+  var pk = key.split('_');
+  var mat = pk[0], dia = parseInt(pk[1], 10);
+
+  var wpm = getPipeWeightPerM(mat, dia);
+  var rpm = getPipeRatePerM(mat, dia);
+  var transport = Number(spec.transport)||0;
+  var total = rpm + transport;
+
+  var title = 'NB ' + dia + ' mm ' + (mat === 'MS' ? 'MS ERW' : 'SS304') + ' Pipe (' + (mat==='MS'?'7 mm':'6 mm') + ' thick) — blind or slotted';
+
+  var h = '<details class="machine" data-pipespec="'+esc(key)+'">';
+  h += '<summary>' + esc(title);
+  if(inUse) h += ' <span class="pipe-tag-inuse">(in use)</span>';
+  else h += ' <span class="pipe-tag-notused">(not used)</span>';
+  h += '<span class="rate-tag" data-pipespec-rate="'+esc(key)+'">Rs ' + nf2(total) + '/m ' + (spec.useKg?'(by wt.)':'(direct)') + '</span></summary>';
+  h += '<div class="body">';
+  h += '<label class="f" style="flex-direction:row;align-items:center;gap:8px;margin-bottom:10px"><input type="checkbox" data-pipespec="'+esc(key)+'" data-pipefield="useKg"'+(spec.useKg?' checked':'')+'> Price by weight (section weight × rate per kg)</label>';
+  if(spec.useKg){
+    h += '<div class="grid c4">';
+    h += '<label class="f">Outer Diameter OD (mm)<input type="number" step="0.1" min="1" data-pipespec="'+esc(key)+'" data-pipefield="od" value="'+esc(spec.od)+'"></label>';
+    h += '<label class="f">Wall Thickness t (mm)<input type="number" step="0.1" min="0.1" data-pipespec="'+esc(key)+'" data-pipefield="thickness" value="'+esc(spec.thickness)+'"></label>';
+    h += '<label class="f">Density &rho; (kg/m&sup3;)<input type="number" step="10" min="1" data-pipespec="'+esc(key)+'" data-pipefield="density" value="'+esc(spec.density)+'"></label>';
+    h += '<label class="f">Rate per kg (Rs./kg)<input type="number" step="0.01" min="0" data-pipespec="'+esc(key)+'" data-pipefield="kgRate" value="'+esc(spec.kgRate)+'"></label>';
+    h += '</div>';
+    h += '<table style="margin-top:10px"><tbody>';
+    h += '<tr><td>Section weight</td><td class="num">&pi; × ('+nf(spec.od)+' &minus; '+nf(spec.thickness)+') × '+nf(spec.thickness)+' × '+nf(spec.density)+' / 10&sup6; = <b>'+nf2(wpm)+' kg/m</b></td></tr>';
+    h += '<tr><td>Rate per metre</td><td class="num">'+nf2(wpm)+' kg/m × Rs '+nf2(spec.kgRate)+'/kg = <b>Rs '+nf2(rpm)+' /m</b></td></tr>';
+    h += '</tbody></table>';
+  } else {
+    h += '<div class="grid c2">';
+    h += '<label class="f">Direct Rate per metre (Rs./m)<input type="number" step="0.01" min="0" data-pipespec="'+esc(key)+'" data-pipefield="directRate" value="'+esc(spec.directRate)+'"></label>';
+    h += '</div>';
+    h += '<p class="hint" style="margin-top:8px">Direct per-metre pricing is active. The rate entered above is used as the market rate.</p>';
+  }
+  h += '<div class="grid c2" style="margin-top:10px">';
+  h += '<label class="f">Transport per metre (Rs./m)<input type="number" step="0.01" min="0" data-pipespec="'+esc(key)+'" data-pipefield="transport" value="'+esc(transport)+'"></label>';
+  h += '<label class="f">Total at Site (Rs./m)<input type="text" readonly value="'+nf2(total)+'"></label>';
+  h += '</div>';
+  h += '<p class="hint" style="margin-top:8px">This per-metre rate applies equally to <b>blind</b> and <b>slotted</b> pipes of this material and diameter. When a slotted pipe is used in the design, a separate lump-sum slotting item of Rs ' + nf2(SLOTTING_LS_RATE) + ' is added under Section 2.</p>';
+  h += '</div></details>';
+  return h;
+}
+
+function updatePipePricingDisplays(){
+  for(var key in state.pipeSpecs){
+    var card = document.querySelector('[data-pipespec="'+cssEsc(key)+'"]');
+    if(!card) continue;
+    var tag = card.querySelector('[data-pipespec-rate]');
+    if(tag){
+      var total = getPipeTotalRatePerM(key.split('_')[0], parseInt(key.split('_')[1],10));
+      var spec = state.pipeSpecs[key];
+      tag.textContent = 'Rs ' + nf2(total) + '/m ' + (spec.useKg?'(by wt.)':'(direct)');
+    }
+  }
 }
 
 /* ============ INPUT TABLES ============ */
@@ -831,78 +1274,6 @@ function renderMachines(){
   }
 }
 
-/* ---- Pipe specs card ---- */
-function buildPipeSpecCardHTML(id){
-  var spec = state.pipeSpecs[id]; if(!spec) return '';
-  var mdef = null;
-  for(var j=0;j<MATERIAL_DEFS.length;j++) if(MATERIAL_DEFS[j].id===id){ mdef = MATERIAL_DEFS[j]; break; }
-  if(!mdef) return '';
-  var wpm = getPipeWeightPerM(id);
-  var rpm = getPipeRatePerM(id);
-  var h = '<details class="machine" data-pipecard="'+esc(id)+'"'+(spec.useKg?' open':'')+'>';
-  h += '<summary>'+esc(mdef.name)+'<span class="rate-tag" data-pipetag="'+esc(id)+'">Rs '+nf2(rpm)+'/m'+(spec.useKg?' (by weight)':' (direct)')+'</span></summary>';
-  h += '<div class="body">';
-  h += '<label class="f" style="flex-direction:row;align-items:center;gap:8px;margin-bottom:10px"><input type="checkbox" data-pipe="'+id+':useKg"'+(spec.useKg?' checked':'')+'> Price by weight (section weight × rate per kg)</label>';
-  if(spec.useKg){
-    h += '<div class="grid c4">';
-    h += '<label class="f">Outer Diameter OD (mm)'+attrInput({type:'number',step:'0.1',min:'1','data-pipe':id+':od',value:spec.od})+'</label>';
-    h += '<label class="f">Wall Thickness t (mm)'+attrInput({type:'number',step:'0.1',min:'0.1','data-pipe':id+':thickness',value:spec.thickness})+'</label>';
-    h += '<label class="f">Density &rho; (kg/m&sup3;)'+attrInput({type:'number',step:'10',min:'1','data-pipe':id+':density',value:spec.density})+'</label>';
-    h += '<label class="f">Rate per kg (Rs./kg)'+attrInput({type:'number',step:'0.01',min:'0','data-pipe':id+':kgRate',value:spec.kgRate})+'</label>';
-    h += '</div>';
-    h += '<table style="margin-top:10px"><tbody>';
-    h += '<tr><td>Section weight</td><td class="num">&pi; × ('+nf(spec.od)+' &minus; '+nf(spec.thickness)+') × '+nf(spec.thickness)+' × '+nf(spec.density)+' / 10&sup6; = <b><span data-pipewpm="'+esc(id)+'">'+nf2(wpm)+'</span> kg/m</b></td></tr>';
-    h += '<tr><td>Rate per metre</td><td class="num"><span data-pipewpm2="'+esc(id)+'">'+nf2(wpm)+'</span> kg/m × Rs '+nf2(spec.kgRate)+'/kg = <b>Rs <span data-piperm="'+esc(id)+'">'+nf2(rpm)+'</span> /m</b></td></tr>';
-    h += '</tbody></table>';
-    h += '<p class="hint" style="margin-top:8px">Transport cost per metre is still added separately in the Material Rates table above.</p>';
-  } else {
-    h += '<p class="hint">Direct per-metre pricing is active. Enter the market rate per metre in the Material Rates table above.</p>';
-  }
-  h += '</div></details>';
-  return h;
-}
-function renderPipeSpecs(){
-  var container = el('pipe-specs-container'); if(!container) return;
-  var openCards = {};
-  var opened = container.querySelectorAll('details.machine[open]');
-  for(var i=0;i<opened.length;i++) openCards[opened[i].getAttribute('data-pipecard')] = 1;
-  var active = document.activeElement, focusKey = null, selStart = 0, selEnd = 0;
-  if(active && active.getAttribute){
-    focusKey = active.getAttribute('data-pipe');
-    try{ selStart = active.selectionStart||0; selEnd = active.selectionEnd||selStart; }catch(e){}
-  }
-  var h = '';
-  for(var j=0;j<PIPE_WEIGHT_IDS.length;j++) h += buildPipeSpecCardHTML(PIPE_WEIGHT_IDS[j]);
-  container.innerHTML = h;
-  var details = container.querySelectorAll('details.machine');
-  for(var k=0;k<details.length;k++){
-    var id = details[k].getAttribute('data-pipecard');
-    if(openCards[id]) details[k].open = true;
-  }
-  if(focusKey){
-    var f = container.querySelector('[data-pipe="'+cssEsc(focusKey)+'"]');
-    if(f){ f.focus(); try{ f.setSelectionRange(selStart, selEnd); }catch(e){} }
-  }
-}
-function updatePipeSpecDisplays(){
-  for(var i=0;i<PIPE_WEIGHT_IDS.length;i++){
-    var id = PIPE_WEIGHT_IDS[i];
-    var spec = state.pipeSpecs[id]; if(!spec) continue;
-    var wpm = getPipeWeightPerM(id);
-    var rpm = getPipeRatePerM(id);
-    var card = document.querySelector('[data-pipecard="'+cssEsc(id)+'"]');
-    if(!card) continue;
-    var tag = card.querySelector('[data-pipetag]');
-    if(tag) tag.textContent = 'Rs '+nf2(rpm)+'/m'+(spec.useKg?' (by weight)':' (direct)');
-    var wpmEl = card.querySelector('[data-pipewpm]');
-    if(wpmEl) wpmEl.textContent = nf2(wpm);
-    var wpmEl2 = card.querySelector('[data-pipewpm2]');
-    if(wpmEl2) wpmEl2.textContent = nf2(wpm);
-    var rpmEl = card.querySelector('[data-piperm]');
-    if(rpmEl) rpmEl.textContent = nf2(rpm);
-  }
-}
-
 function renderLabour(){
   var h = '';
   for(var i=0;i<LABOUR_DEFS.length;i++){
@@ -917,12 +1288,7 @@ function renderMaterial(){
   for(var i=0;i<MATERIAL_DEFS.length;i++){
     var m = MATERIAL_DEFS[i];
     var s = state.material[m.id] || {rate:0, transport:0};
-    var rateCell;
-    if(isPipeByWeight(m.id)){
-      rateCell = '<span data-matrate="'+esc(m.id)+'">'+nf2(getPipeRatePerM(m.id))+'</span><div style="font-size:10px;color:#555">from weight (kg &times; rate)</div>';
-    } else {
-      rateCell = attrInput({type:'number',step:'0.01','data-mat':m.id+':rate','data-save':'mat:'+m.id+':rate',value:s.rate,'class':'c'});
-    }
+    var rateCell = attrInput({type:'number',step:'0.01','data-mat':m.id+':rate','data-save':'mat:'+m.id+':rate',value:s.rate,'class':'c'});
     var total = getMaterialRate(m.id);
     h += '<tr><td>'+esc(m.id)+'</td><td>'+esc(m.name)+'</td><td class="unit-col">'+esc(m.unit)+'</td>';
     h += '<td class="num">'+rateCell+'</td>';
@@ -933,54 +1299,86 @@ function renderMaterial(){
 }
 function renderWellQtyTable(){
   var t = el('tbl-wellqty'); if(!t) return;
+  var ids = getActiveFittingIds();
   var h = '';
-  for(var i=0;i<WELL_MATERIAL_IDS.length;i++){
-    var id = WELL_MATERIAL_IDS[i];
+  for(var i=0;i<ids.length;i++){
+    var id = ids[i];
     var m = null; for(var j=0;j<MATERIAL_DEFS.length;j++) if(MATERIAL_DEFS[j].id===id){ m = MATERIAL_DEFS[j]; break; }
     if(!m) continue;
-    h += '<tr><td>'+esc(m.name)+'</td><td class="unit-col">'+esc(m.unit)+'</td><td class="num">'+attrInput({type:'number',step:'0.01',min:'0','data-wq':id,'data-save':'wq:'+id,value:getWellQty(id),'class':'c'})+'</td></tr>';
+    var desc = m.name;
+    var isReducer = (id === 'reducer');
+    if(isReducer){
+      var rds = deriveReducers();
+      var parts = [];
+      for(var r=0;r<rds.length;r++) parts.push(formatReducerName(rds[r].bigD, rds[r].smallD));
+      desc = parts.join(', ');
+    }
+    var qtyVal = getWellQty(id);
+    var qtyCell;
+    if(isReducer){
+      var total = 0;
+      var rds2 = deriveReducers();
+      for(var r2=0;r2<rds2.length;r2++) total += rds2[r2].qty;
+      qtyCell = '<input type="text" readonly value="' + total + '">';
+    } else {
+      qtyCell = attrInput({type:'number',step:'0.01',min:'0','data-wq':id,'data-save':'wq:'+id,value:qtyVal,'class':'c'});
+    }
+    h += '<tr><td>'+esc(desc)+'</td><td class="unit-col">'+esc(m.unit)+'</td><td class="num">'+qtyCell+'</td></tr>';
   }
   t.innerHTML = h;
   updateWellQtySummary();
 }
-var PIPE_ASSEMBLY_IDS = ['pipe250','pipe200','slot200'];
 function updateWellQtySummary(){
-  var summary = el('wellqty-summary');
-  if(!summary) return;
-  var total = 0;
-  for(var i=0;i<PIPE_ASSEMBLY_IDS.length;i++) total += getWellQty(PIPE_ASSEMBLY_IDS[i]);
-  var depth = val('in_depth', 0);
-  var html = 'Pipe assembly (2.1 + 2.3 + 2.4): <b>' + nf(total) + ' m</b> against a drilling depth of <b>' + nf(depth) + ' m</b>. ';
-  if(Math.abs(total - depth) < 0.01){
-    html += '<span class="seg-ok">&#10003; Pipe assembly length matches the total depth.</span>';
-  } else {
-    html += '<span class="seg-warn">&#9888; Mismatch of ' + nf(Math.abs(total - depth)) + ' m &mdash; adjust pipe250 / pipe200 / slot200 (or the total depth) so items 2.1, 2.3 and 2.4 sum to the drilling depth.</span>';
-  }
-  summary.innerHTML = html;
+  var summary = el('wellqty-summary'); if(!summary) return;
+  var usedD = getUsedDiameters();
+  var diamsText = usedD.length ? usedD.join(', ') + ' mm' : '—';
+  var rInfo = getReducerSummaryText();
+  var smallest = getSmallestDiameter();
+  var plugInfo = smallest ? 'Bottom plug: <b>' + smallest + ' mm</b>.' : 'Bottom plug: —';
+  summary.innerHTML = 'Diameters in use: <b>' + diamsText + '</b>. ' + plugInfo + ' ' + rInfo +
+    ' Centering guides are shown only for the diameters actually in use. Pipe/screen lengths are taken from the <b>Pipe Design</b> table above and are what must sum to the total drilling depth.';
 }
 
 function autoFillGuides(){
   var spacing = val('in_guide_spacing', 12);
   if(spacing <= 0) spacing = 12;
-  var p250 = getWellQty('pipe250');
-  var p200 = getWellQty('pipe200') + getWellQty('slot200');
-  var n250 = Math.max(1, Math.ceil(p250 / spacing));
-  var n200 = Math.max(1, Math.ceil(p200 / spacing));
+  var rows = state.pipeDesign || [];
+  var lenByDiameter = {};
+  for(var i=0;i<rows.length;i++){
+    var d = Number(rows[i].dia)||0, len = Number(rows[i].length)||0;
+    if(d > 0) lenByDiameter[d] = (lenByDiameter[d] || 0) + len;
+  }
   if(!state.wellQty) state.wellQty = {};
-  state.wellQty.guide250 = n250;
-  state.wellQty.guide200 = n200;
+  var summary = [];
+  for(var dk in lenByDiameter){
+    var gid = 'guide' + dk;
+    if(FITTING_ID_POOL.indexOf(gid) === -1) continue;
+    var n = Math.max(1, Math.ceil(lenByDiameter[dk] / spacing));
+    state.wellQty[gid] = n;
+    summary.push(n + ' \u00d7 ' + dk + ' mm');
+  }
   renderWellQtyTable();
   recalcNow();
-  toast('Centralizers set: '+n250+' × 250 mm, '+n200+' × 200 mm (spacing '+spacing+' m).');
+  toast('Centralizers set: ' + (summary.length ? summary.join(', ') : 'none') + ' (spacing ' + spacing + ' m).');
 }
 
-/* ============ BUILD BOQ — now driven by segments ============ */
+/* ============ BUILD BOQ ============ */
 function buildBOQ(){
   var depth = val('in_depth', 0);
   var wells = Math.max(1, Math.round(val('in_wells', 1)));
-  var r2 = strVal('in_r2','1')==='1', r3 = strVal('in_r3','0')==='1', jet = strVal('in_jet','0')==='1';
-  var gravel = strVal('in_gravel','0')==='1', recond = strVal('in_recond','0')==='1';
-  var strainerType = strVal('in_strainer','ss');
+  var incPilot = radioVal('inc_pilot','1')==='1';
+  var incLogging = radioVal('inc_logging','1')==='1';
+  var incDesign = radioVal('inc_design','1')==='1';
+  var incReam1 = radioVal('inc_ream1','1')==='1';
+  var r2 = radioVal('inc_ream2','1')==='1', r3 = radioVal('inc_ream3','0')==='1';
+  var incRecond = radioVal('inc_recond','1')==='1';
+  var incLowering = radioVal('inc_lowering','1')==='1';
+  var gravel = radioVal('inc_gravel','1')==='1';
+  var jet = radioVal('inc_jet','1')==='1';
+  var incSealing = radioVal('inc_sealing','1')==='1';
+  var incDevel = radioVal('inc_devel','1')==='1';
+  var incPumpTest = radioVal('inc_pumptest','1')==='1';
+  var incRecovery = radioVal('inc_recovery','1')==='1';
   var dev = strVal('in_dev','compressor');
   var devMode = strVal('in_devmode','norms');
   var devLS = val('in_devls', 0);
@@ -1002,102 +1400,145 @@ function buildBOQ(){
   ];
 
   var sec2 = []; var sn2 = 1;
-  for(var i=0;i<WELL_MATERIAL_IDS.length;i++){
-    var id = WELL_MATERIAL_IDS[i];
-    var m = null; for(var j=0;j<MATERIAL_DEFS.length;j++) if(MATERIAL_DEFS[j].id===id){ m = MATERIAL_DEFS[j]; break; }
-    if(!m) continue;
-    var q = getWellQty(id) * wells;
-    var rt, mdesc;
-    if(id === 'slot200' && strainerType === 'ms'){
-      rt = getMaterialRate('pipe200');
-      mdesc = '200 mm dia. MS ERW Slotted (strainer) Pipe, 7 mm thick (supply at same rate as MS blind casing pipe; slotting works billed separately below)';
-    } else {
-      rt = getMaterialRate(id);
-      mdesc = m.name;
-    }
-    sec2.push({no:'2.'+(sn2++), desc:mdesc, unit:m.unit, qty:q, rate:rt, amount:q*rt, ri:null});
-    if(id === 'slot200' && strainerType === 'ms'){
-      sec2.push({no:'2.'+(sn2++), desc:'Slotting works for MS strainer (screen) pipe', unit:'job', qty:1, rate:25000, amount:25000, ri:null});
-    }
+
+  /* Pipe rows — one line per design row */
+  var pipeDesign = state.pipeDesign || [];
+  var slottedUsed = false;
+  for(var pdi=0; pdi<pipeDesign.length; pdi++){
+    var pd = pipeDesign[pdi];
+    var pRate = getPipeTotalRatePerM(pd.mat, pd.dia);
+    var pLen = Number(pd.length)||0;
+    var pQty = pLen * wells;
+    var pDesc = pipeDisplayName(pd.mat, pd.type, pd.dia);
+    sec2.push({
+      no:'2.'+(sn2++),
+      desc:pDesc, unit:'m', qty:pQty, rate:pRate, amount:pQty*pRate, ri:null,
+      pipeDesign:{index:pdi, mat:pd.mat, type:pd.type, dia:Number(pd.dia)||0, length:pLen, displayName:pDesc}
+    });
+    if(pd.type === 'slotted') slottedUsed = true;
+  }
+
+  /* Slotting L.S. — added if any slotted pipe is present */
+  if(slottedUsed){
+    sec2.push({
+      no:'2.'+(sn2++),
+      desc:'Slotting of holes in pipes (lump sum)',
+      unit:'L.S.', qty:1, rate:SLOTTING_LS_RATE, amount:SLOTTING_LS_RATE, ri:null
+    });
+  }
+
+  /* Reducers (derived) */
+  var reducers = deriveReducers();
+  var reducerRate = getMaterialRate('reducer');
+  for(var ri=0; ri<reducers.length; ri++){
+    var rd = reducers[ri];
+    var rQty = rd.qty * wells;
+    var rDesc = formatReducerName(rd.bigD, rd.smallD);
+    sec2.push({no:'2.'+(sn2++), desc:rDesc, unit:'no.', qty:rQty, rate:reducerRate, amount:rQty*reducerRate, ri:null});
+  }
+
+  /* Other fittings */
+  var fittingIds = getActiveFittingIds();
+  for(var fi=0; fi<fittingIds.length; fi++){
+    var fid = fittingIds[fi];
+    if(fid === 'reducer') continue;
+    var fm = null;
+    for(var jf=0;jf<MATERIAL_DEFS.length;jf++) if(MATERIAL_DEFS[jf].id===fid){ fm = MATERIAL_DEFS[jf]; break; }
+    if(!fm) continue;
+    var fq = getWellQty(fid) * wells;
+    if(fq <= 0) continue;
+    var fr = getMaterialRate(fid);
+    sec2.push({no:'2.'+(sn2++), desc:fm.name, unit:fm.unit, qty:fq, rate:fr, amount:fq*fr, ri:null});
   }
 
   var sec3 = []; var sn3 = 1;
   function add3(desc, unit, qty, ri, notes){ sec3.push({no:'3.'+(sn3++), desc:desc, unit:unit, qty:qty, rate:ri.rate, amount:ri.rate*qty, ri:ri, notes:notes||''}); }
 
-  /* ---- PILOT HOLE ---- */
-  for(var si=0; si<segments.length; si++){
-    var seg = segments[si];
-    var bands = splitSegmentByNormBands(seg);
-    for(var bi=0; bi<bands.length; bi++){
-      var band = bands[bi];
-      var bandQty = band.end - band.start;
-      if(bandQty <= 0) continue;
-      var segLabel = 'depth ' + nf(band.start) + ' to ' + nf(band.end) + ' m';
-      var bandLabel = '100-m norm band ' + (band.bandIdx + 1);
-      if(seg.method === 'rotary'){
-        var P = PMAP[seg.soil] || PMAP.medium;
-        var nrm = normForBand(P[0], P[1], band.bandIdx);
-        add3('Drilling of pilot hole by Rotary method (7-5/8" to 9-7/8" bit) in ' + seg.soil + ' formation, ' + segLabel,
-             'm', bandQty, opRate(nrm, machines),
-             'Rotary — ' + seg.soil + ' formation, ' + bandLabel + '. ' + bandMathNote(band.bandIdx));
-      } else {
-        var nrmd = normForBand(DTH_PILOT_HARD_B, DTH_PILOT_HARD_I, band.bandIdx);
-        add3('Drilling of pilot hole by DTH method (7-5/8" to 9-7/8" bit) in hard formation, ' + segLabel,
-             'm', bandQty, opRate(nrmd, machines),
-             'DTH — hard formation, ' + bandLabel + ', single pass (no reaming). ' + bandMathNote(band.bandIdx));
+  if(incPilot){
+    for(var si=0; si<segments.length; si++){
+      var seg = segments[si];
+      var bands = splitSegmentByNormBands(seg);
+      var soilName = soilLabel(seg.soil);
+      for(var bi=0; bi<bands.length; bi++){
+        var band = bands[bi];
+        var bandQty = band.end - band.start;
+        if(bandQty <= 0) continue;
+        var segLabel = 'depth ' + nf(band.start) + ' to ' + nf(band.end) + ' m';
+        var bandLabel = '100-m norm band ' + (band.bandIdx + 1);
+        if(seg.method === 'rotary'){
+          var P = PMAP[seg.soil] || PMAP.medium;
+          var nrm = normForBand(P[0], P[1], band.bandIdx);
+          add3('Drilling of pilot hole (7-5/8" to 9-7/8" bit) in ' + soilName + ' formation, ' + segLabel,
+               'm', bandQty, opRate(nrm, machines),
+               'Drilling method: Rotary. Formation: ' + soilName + '. ' + bandLabel + '. ' + bandMathNote(band.bandIdx));
+        } else {
+          var nrmd = normForBand(DTH_PILOT_HARD_B, DTH_PILOT_HARD_I, band.bandIdx);
+          add3('Drilling of pilot hole (7-5/8" to 9-7/8" bit) in ' + soilName + ' formation, ' + segLabel,
+               'm', bandQty, opRate(nrmd, machines),
+               'Drilling method: DTH. Formation: ' + soilName + ' (single pass, no reaming). ' + bandLabel + '. ' + bandMathNote(band.bandIdx));
+        }
       }
     }
   }
 
-  add3('Electrical logging of borehole after pilot hole drilling','m',depth,opRate(LOGGING,machines),'Same rate for all formations and depths');
-  add3('Tubewell design, water quality analysis and submission of report in three copies; sampling of every metre of drilled length into plastic bags and wooden box','job',1,{rate:10000,base:10000,L:{},M:{},X:{}},'Lump-sum item');
+  if(incLogging) add3('Electrical logging of borehole after pilot hole drilling','m',depth,opRate(LOGGING,machines),'Same rate for all formations and depths');
+  if(incDesign) add3('Tubewell design, water quality analysis and submission of report in three copies; sampling of every metre of drilled length into plastic bags and wooden box','job',1,{rate:10000,base:10000,L:{},M:{},X:{}},'Lump-sum item');
 
-  /* ---- REAMING — only for rotary segments ---- */
   for(var sir=0; sir<segments.length; sir++){
     var segR = segments[sir];
     if(segR.method !== 'rotary') continue;
     var bandsR = splitSegmentByNormBands(segR);
     var R1 = R1MAP[segR.soil] || R1MAP.medium;
     var R2 = R2MAP[segR.soil] || R2MAP.medium;
+    var soilNameR = soilLabel(segR.soil);
     for(var bir=0; bir<bandsR.length; bir++){
       var bR = bandsR[bir];
       var qR = bR.end - bR.start;
       if(qR <= 0) continue;
       var segLabelR = 'depth ' + nf(bR.start) + ' to ' + nf(bR.end) + ' m';
       var bandLabelR = '100-m norm band ' + (bR.bandIdx + 1);
-      var n1 = normForBand(R1[0], R1[1], bR.bandIdx);
-      add3('1st reaming (13-3/4" bit) in ' + segR.soil + ' formation, ' + segLabelR,
-           'm', qR, opRate(n1, machines),
-           'Applied only to the Rotary-drilled portion — ' + bandLabelR + '. ' + bandMathNote(bR.bandIdx));
+      if(incReam1){
+        var n1 = normForBand(R1[0], R1[1], bR.bandIdx);
+        add3('1st reaming (13-3/4" bit) in ' + soilNameR + ' formation, ' + segLabelR,
+             'm', qR, opRate(n1, machines),
+             'Applicable to the pilot-hole segment drilled by the rotary method — ' + bandLabelR + '. ' + bandMathNote(bR.bandIdx));
+      }
       if(r2){
         var n2 = normForBand(R2[0], R2[1], bR.bandIdx);
-        add3('2nd reaming (17-1/2" bit) in ' + segR.soil + ' formation, ' + segLabelR,
+        add3('2nd reaming (17-1/2" bit) in ' + soilNameR + ' formation, ' + segLabelR,
              'm', qR, opRate(n2, machines),
-             'Applied only to the Rotary-drilled portion — ' + bandLabelR + '. ' + bandMathNote(bR.bandIdx));
+             'Applicable to the pilot-hole segment drilled by the rotary method — ' + bandLabelR + '. ' + bandMathNote(bR.bandIdx));
       }
       if(r2 && r3){
         var n3 = normForBand(R2[0], R2[1], bR.bandIdx);
-        add3('3rd reaming (22-1/2" bit) in ' + segR.soil + ' formation, ' + segLabelR,
+        add3('3rd reaming (22-1/2" bit) in ' + soilNameR + ' formation, ' + segLabelR,
              'm', qR, opRate(n3, machines),
-             'Applied only to the Rotary-drilled portion — ' + bandLabelR + '. ' + bandMathNote(bR.bandIdx));
+             'Applicable to the pilot-hole segment drilled by the rotary method — ' + bandLabelR + '. ' + bandMathNote(bR.bandIdx));
       }
     }
   }
 
-  if(recond) add3('Reconditioning of borehole before lowering of pipe assembly of 200 mm and 250 mm dia.','m',depth,opRate(RECOND,machines),'Same rate for all depths');
-  add3('Lowering of pipe assembly of 200 and 250 mm dia. including all necessary cutting, welding and supply and packing of approved size pea gravel in a continuous operation','m',depth,opRate(LOWERING,machines),'Rate independent of depth');
+  if(incRecond) add3(buildReconditioningDescription(),'m',depth,opRate(RECOND,machines),'Same rate for all depths');
+  if(incLowering) add3(buildLoweringDescription(),'m',depth,opRate(LOWERING,machines),'Rate independent of depth');
   if(gravel) add3('Back washing, inner washing and gravel packing','m',depth,opRate(GRAVEL,machines),'Rate independent of depth');
   if(jet) add3('Water jetting of strainer','m',depth,opRate(JETTING,machines),'Rate independent of depth');
-  add3('Sealing of the borehole with cement grouting including supply and installation of 2 x 3 m long 65 mm dia. medium class GI pipe','5 m',1,opRate(SEALING,machines),'Normally applied for a 5-metre segment at the top');
-  if(devMode === 'ls'){
-    add3('Well development (Lump Sum)','L.S.',1,{rate:devLS, base:devLS, L:{}, M:{}, X:{}},'Lump-sum item — price entered directly, not computed from DoWR norms');
-  } else {
-    if(dev==='compressor' || dev==='both') add3('Well development by compressor machine (48 hours)','well',wells,opRate(DEV_COMP,machines),'Per well');
-    if(dev==='pump' || dev==='both') add3('Well development by pump','well',wells,opRate(DEV_PUMP,machines),'Per well');
+  if(incSealing) add3('Sealing of the borehole with cement grouting including supply and installation of 2 x 3 m long 65 mm dia. medium class GI pipe','5 m',1,opRate(SEALING,machines),'Normally applied for a 5-metre segment at the top');
+
+  if(incDevel){
+    if(devMode === 'ls'){
+      add3('Well development (Lump Sum)','L.S.',1,{rate:devLS, base:devLS, L:{}, M:{}, X:{}},'Lump-sum item — price entered directly, not computed from DoWR norms');
+    } else {
+      if(dev==='compressor' || dev==='both') add3('Well development by compressor machine (48 hours)','well',wells,opRate(DEV_COMP,machines),'Per well');
+      if(dev==='pump' || dev==='both') add3('Well development by pump','well',wells,opRate(DEV_PUMP,machines),'Per well');
+    }
   }
-  if(pumpTest==='time' || pumpTest==='both') add3('Time drawdown pump test (aquifer test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
-  if(pumpTest==='step' || pumpTest==='both') add3('Step drawdown pump test (well test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
-  add3('Recovery test','well',wells,opRate(RECOVERY,machines),'Per well');
+
+  if(incPumpTest){
+    if(pumpTest==='time' || pumpTest==='both') add3('Time drawdown pump test (aquifer test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
+    if(pumpTest==='step' || pumpTest==='both') add3('Step drawdown pump test (well test)','well',wells,opRate(PUMP_TEST,machines),'Per well');
+  }
+
+  if(incRecovery) add3('Recovery test','well',wells,opRate(RECOVERY,machines),'Per well');
 
   var tot1=0, tot2=0, tot3=0;
   for(var a=0;a<sec1.length;a++) tot1 += sec1[a].amount;
@@ -1113,7 +1554,25 @@ function buildBOQ(){
           formation: buildSoilSummary(segments),
           method: buildMethodSummary(segments),
           segments: segments,
-          r2:r2, r3:r3, strainerType:strainerType};
+          r2:r2, r3:r3,
+          reducers:reducers,
+          slottedUsed:slottedUsed,
+          itemInclusion: [
+            {no:'3.1', label:'Drilling of Pilot Hole', inc:incPilot, cfg:''},
+            {no:'3.2', label:'Electrical Logging of Borehole', inc:incLogging, cfg:''},
+            {no:'3.3', label:'Tubewell Design, Water Quality Analysis & Report', inc:incDesign, cfg:''},
+            {no:'3.4', label:'1st Reaming (13¾″)', inc:incReam1, cfg:''},
+            {no:'3.5', label:'2nd Reaming (17½″)', inc:r2, cfg:''},
+            {no:'3.6', label:'3rd Reaming (22½″)', inc:r3, cfg:''},
+            {no:'3.7', label:'Reconditioning of Borehole', inc:incRecond, cfg:''},
+            {no:'3.8', label:'Lowering of Pipe Assembly', inc:incLowering, cfg:''},
+            {no:'3.9', label:'Gravel Packing', inc:gravel, cfg:''},
+            {no:'3.10', label:'Water Jetting of Strainer', inc:jet, cfg:''},
+            {no:'3.11', label:'Sealing of Borehole', inc:incSealing, cfg:''},
+            {no:'3.12', label:'Well Development', inc:incDevel, cfg: incDevel ? (devMode==='ls' ? 'Lump Sum — Rs. '+nf2(devLS) : 'DoWR Norms — '+(dev==='both'?'Compressor + Pump':(dev==='pump'?'By pump':'By compressor'))) : ''},
+            {no:'3.13', label:'Pump Test', inc:incPumpTest, cfg: incPumpTest ? (pumpTest==='both'?'Step + Time drawdown':(pumpTest==='time'?'Time drawdown':'Step drawdown')) : ''},
+            {no:'3.14', label:'Recovery Test', inc:incRecovery, cfg:''}
+          ]};
 }
 
 /* ============ DOC HELPERS ============ */
@@ -1319,35 +1778,81 @@ function buildMachineReportHTML(m, mr, fuel, numberPrefix){
   return h;
 }
 
-/* ============ PIPE SPEC REPORT ============ */
+/* ============ PIPE SPEC REPORT (Detailed Report §6.1) ============ */
 function buildPipeSpecReportHTML(){
-  var anyWeight = false;
-  for(var i=0;i<PIPE_WEIGHT_IDS.length;i++) if(isPipeByWeight(PIPE_WEIGHT_IDS[i])) anyWeight = true;
-  if(!anyWeight) return '';
+  var usedKeys = getUsedPipePriceKeys();
+  if(!usedKeys.length) return '';
   var h = '';
   h += '<div class="sub-title">6.1 Computation of Pipe Prices by Weight</div>';
-  h += '<p class="para">The MS ERW casing pipes used in the well assembly are priced by weight rather than by a fixed rate per metre. The section weight per metre of a circular hollow section is computed from its outer diameter (OD), wall thickness (t) and the density of steel (&rho;) using the standard formula:</p>';
+  h += '<p class="para">Each pipe used in the well assembly is priced by weight (except where direct per-metre pricing is used). The section weight per metre of a circular hollow section is computed from its outer diameter (OD), wall thickness (t) and the density of steel (&rho;) using the standard formula:</p>';
   h += '<div class="ma-calc" style="margin-left:20px">';
   h += '<div class="ma-calc-line" style="font-size:12px">Weight per metre = <span class="frac"><span class="num">&pi; × (OD &minus; t) × t × &rho;</span><span class="den">10&sup6;</span></span> &nbsp; kg/m</div>';
   h += '<div class="ma-calc-line" style="font-size:11px;color:#555;padding-left:12px">(with OD and t in millimetres, and &rho; in kg/m&sup3;)</div>';
   h += '</div>';
-  h += '<p class="para">The price per metre is then obtained by multiplying the section weight by the prevailing rate per kilogram of MS pipe:</p>';
+  h += '<p class="para">The price per metre is then obtained by multiplying the section weight by the prevailing rate per kilogram of pipe. <b>The same per-metre rate applies to blind and slotted (strainer) pipes of the same material and diameter</b>; when a slotted pipe is used, a separate lump-sum slotting item of Rs ' + nf2(SLOTTING_LS_RATE) + ' is added under Section 2.</p>';
   h += '<div class="ma-calc" style="margin-left:20px">';
   h += '<div class="ma-calc-line" style="font-size:12px">Rate per metre = Weight per metre × Rate per kg</div>';
   h += '</div>';
-  h += '<table><thead><tr><th>Pipe</th><th class="amt-col">OD (mm)</th><th class="amt-col">t (mm)</th><th class="amt-col">&rho; (kg/m&sup3;)</th><th class="amt-col">Section weight (kg/m)</th><th class="amt-col">Rate (Rs./kg)</th><th class="amt-col">Rate (Rs./m)</th></tr></thead><tbody>';
-  for(var j=0;j<PIPE_WEIGHT_IDS.length;j++){
-    var id = PIPE_WEIGHT_IDS[j];
-    if(!isPipeByWeight(id)) continue;
-    var spec = state.pipeSpecs[id];
-    var mdef = null;
-    for(var k=0;k<MATERIAL_DEFS.length;k++) if(MATERIAL_DEFS[k].id===id){ mdef = MATERIAL_DEFS[k]; break; }
-    var wpm = getPipeWeightPerM(id);
-    var rpm = getPipeRatePerM(id);
-    h += '<tr><td>'+esc(mdef?mdef.name:id)+'</td><td class="amt-col">'+nf(spec.od)+'</td><td class="amt-col">'+nf(spec.thickness)+'</td><td class="amt-col">'+nf(spec.density)+'</td><td class="amt-col">'+nf2(wpm)+'</td><td class="amt-col">'+nf2(spec.kgRate)+'</td><td class="amt-col"><b>'+nf2(rpm)+'</b></td></tr>';
+  h += '<table><thead><tr><th>Pipe</th><th class="amt-col">OD (mm)</th><th class="amt-col">t (mm)</th><th class="amt-col">&rho; (kg/m&sup3;)</th><th class="amt-col">Section weight (kg/m)</th><th class="amt-col">Rate (Rs./kg)</th><th class="amt-col">Rate (Rs./m)</th><th class="amt-col">Transport (Rs./m)</th><th class="amt-col">Total at Site (Rs./m)</th></tr></thead><tbody>';
+  for(var i=0;i<usedKeys.length;i++){
+    var key = usedKeys[i];
+    var parts = key.split('_');
+    var mat = parts[0], dia = parseInt(parts[1], 10);
+    var spec = getPipeSpec(mat, dia);
+    if(!spec) continue;
+    var wpm = getPipeWeightPerM(mat, dia);
+    var rpm = getPipeRatePerM(mat, dia);
+    var transport = Number(spec.transport)||0;
+    var total = rpm + transport;
+    var title = 'NB ' + dia + ' mm ' + (mat === 'MS' ? 'MS ERW' : 'SS304') + ' Pipe (blind or slotted)';
+    if(spec.useKg){
+      h += '<tr><td>'+esc(title)+'</td><td class="amt-col">'+nf(spec.od)+'</td><td class="amt-col">'+nf(spec.thickness)+'</td><td class="amt-col">'+nf(spec.density)+'</td><td class="amt-col">'+nf2(wpm)+'</td><td class="amt-col">'+nf2(spec.kgRate)+'</td><td class="amt-col"><b>'+nf2(rpm)+'</b></td><td class="amt-col">'+nf2(transport)+'</td><td class="amt-col"><b>'+nf2(total)+'</b></td></tr>';
+    } else {
+      h += '<tr><td>'+esc(title)+' <i style="font-size:9px;color:#555">(direct rate)</i></td><td class="amt-col">—</td><td class="amt-col">—</td><td class="amt-col">—</td><td class="amt-col">—</td><td class="amt-col">—</td><td class="amt-col"><b>'+nf2(rpm)+'</b></td><td class="amt-col">'+nf2(transport)+'</td><td class="amt-col"><b>'+nf2(total)+'</b></td></tr>';
+    }
   }
   h += '</tbody></table>';
-  h += '<p class="para" style="font-size:11px;font-style:italic">The rate per metre computed above is used directly in the Bill of Quantity (Section 2 &mdash; Supply of Well Materials) and in the Abstract of Cost (Section 9). Transport cost per metre, if any, is added separately in the Material Analysis (Section 6).</p>';
+  h += '<p class="para" style="font-size:11px;font-style:italic">The rates per metre computed above are used directly in the Bill of Quantity (Section 2 &mdash; Supply of Well Materials) and in the Abstract of Cost (Section 9).</p>';
+  return h;
+}
+
+/* ============ SUPPLY (SECTION 2) RATE ANALYSIS ============ */
+function buildSupplyRateAnalysisHTML(item){
+  var h = '<div class="ra-block" id="detail-'+esc(item.no)+'">';
+  h += '<div class="ra-hdr">'+esc(item.no)+'. '+esc(item.desc)+'</div>';
+  h += '<div class="ra-meta"><b>Quantity:</b> '+nf(item.qty)+' '+esc(item.unit)+' &nbsp; | &nbsp; <b>Unit Rate:</b> Rs '+nf2(item.rate)+' &nbsp; | &nbsp; <b>Amount:</b> Rs '+nf2(item.amount)+'</div>';
+  if(item.pipeDesign){
+    var pd = item.pipeDesign;
+    var spec = getPipeSpec(pd.mat, pd.dia);
+    var wpm = getPipeWeightPerM(pd.mat, pd.dia);
+    var baseRate = getPipeRatePerM(pd.mat, pd.dia);
+    var transport = spec ? (Number(spec.transport)||0) : 0;
+    h += '<p class="para" style="font-size:11px">This is a pipe segment of nominal diameter <b>'+nf(pd.dia)+' mm</b>, material <b>'+esc(pd.mat)+'</b>, type <b>'+esc(pd.type)+'</b>, and length <b>'+nf(pd.length)+' m</b> per well. '+(spec && spec.useKg ? 'It is priced by weight: the section weight per metre is computed in Section 6.1, and the rate per metre is section weight × rate per kg.' : 'It is priced at a direct per-metre rate.')+' <b>The same per-metre rate applies to blind and slotted pipes of this material and diameter.</b></p>';
+    h += '<table class="ra-tbl">';
+    h += '<thead><tr><th style="width:50%">Resource</th><th style="width:12%">Unit</th><th style="width:12%">Coeff.</th><th style="width:13%">Rate (Rs.)</th><th style="width:13%">Amount (Rs.)</th></tr></thead><tbody>';
+    h += '<tr class="grp"><td colspan="5">Material Component</td></tr>';
+    if(spec && spec.useKg){
+      h += '<tr><td>NB '+nf(pd.dia)+' mm '+esc(pd.mat)+' pipe — Section weight</td><td class="unit">kg/m</td><td class="num">1.0000</td><td class="num">'+nf2(wpm)+'</td><td class="num">'+nf2(wpm)+'</td></tr>';
+      h += '<tr><td>Rate per kg (converted to per metre)</td><td class="unit">m</td><td class="num">1.0000</td><td class="num">'+nf2(baseRate)+'</td><td class="num">'+nf2(baseRate)+'</td></tr>';
+    } else {
+      h += '<tr><td>NB '+nf(pd.dia)+' mm '+esc(pd.mat)+' pipe (direct rate)</td><td class="unit">m</td><td class="num">1.0000</td><td class="num">'+nf2(baseRate)+'</td><td class="num">'+nf2(baseRate)+'</td></tr>';
+    }
+    if(transport > 0){
+      h += '<tr><td>Transport to site</td><td class="unit">m</td><td class="num">1.0000</td><td class="num">'+nf2(transport)+'</td><td class="num">'+nf2(transport)+'</td></tr>';
+    }
+    h += '<tr class="sub"><td colspan="4">Unit Rate (Rs./m)</td><td class="num">'+nf2(item.rate)+'</td></tr>';
+    h += '<tr class="final"><td colspan="4"><b>Amount for '+nf(item.qty)+' m</b></td><td class="num"><b>'+nf2(item.amount)+'</b></td></tr>';
+    h += '</tbody></table>';
+  } else {
+    h += '<p class="para" style="font-size:11px">This is a supply item priced per unit; the total amount is the unit rate multiplied by the quantity.</p>';
+    h += '<table class="ra-tbl">';
+    h += '<thead><tr><th style="width:50%">Resource</th><th style="width:12%">Unit</th><th style="width:12%">Coeff.</th><th style="width:13%">Rate (Rs.)</th><th style="width:13%">Amount (Rs.)</th></tr></thead><tbody>';
+    h += '<tr class="grp"><td colspan="5">Material Component</td></tr>';
+    h += '<tr><td>'+esc(item.desc)+'</td><td class="unit">'+esc(item.unit)+'</td><td class="num">1.0000</td><td class="num">'+nf2(item.rate)+'</td><td class="num">'+nf2(item.rate)+'</td></tr>';
+    h += '<tr class="final"><td colspan="4"><b>Amount for '+nf(item.qty)+' '+esc(item.unit)+'</b></td><td class="num"><b>'+nf2(item.amount)+'</b></td></tr>';
+    h += '</tbody></table>';
+  }
+  h += '</div>';
   return h;
 }
 
@@ -1482,7 +1987,7 @@ function renderDetailed(){
     h += '<li><b>Norms.</b> The coefficient tables of the DWSS Rate Analysis Norms (2073) have been strictly applied, including the depth-band convention whereby, for every additional 100 m of depth beyond the first, the increment shown in the corresponding row is added to the base coefficient set.</li>';
     h += '<li><b>Depth Segments.</b> The well is divided into one or more depth segments. Each segment has a specific soil type (Soft, Medium or Hard) and a specific drilling method (Rotary or DTH). The applicable coefficient set for each segment is chosen by (soil type) &times; (drilling method). For DTH segments, the DWSS Rate Analysis Norms (2073) provide only the hard-formation coefficient table &mdash; the same table is used regardless of soil selection, and no reaming operations are billed for DTH segments because DTH produces the final-diameter bore in a single pass.</li>';
     h += '<li><b>Labour Rates.</b> District labour rates for Fiscal Year '+esc(pfy)+' for Kaski District have been adopted and are listed in Section 5.</li>';
-    h += '<li><b>Material Rates.</b> Prevailing market rates of materials have been adopted, with transport cost added per unit where applicable, and are listed in Section 6. MS ERW casing pipes are priced by weight &mdash; see Section 6.1.</li>';
+    h += '<li><b>Material Rates.</b> Prevailing market rates of materials have been adopted, with transport cost added per unit where applicable, and are listed in Section 6. Pipe materials are priced by weight or at direct rates &mdash; see Section 6.1.</li>';
     h += '<li><b>Machinery Rates.</b> Machinery working and idle rates are derived from first principles. Each derivation is presented in Section 4.</li>';
     h += '<li><b>Contractor\'s Profit.</b> A profit margin of '+(val('in_profit',15)).toFixed(2)+'% on the base rate has been applied to each item.</li>';
     h += '<li><b>VAT.</b> Value Added Tax at '+val('in_vat',13).toFixed(2)+'% has been applied on the sub-total of the Abstract of Cost.</li>';
@@ -1500,14 +2005,76 @@ function renderDetailed(){
     h += '<tr><td>Formation (Overall)</td><td class="amt-col">'+esc(data.formation)+'</td></tr>';
     h += '<tr><td>Number of Wells</td><td class="amt-col">'+data.wells+'</td></tr>';
     h += '<tr><td>Final Borehole Diameter</td><td class="amt-col">'+(data.r3 && data.r2 ? '22-1/2 inch (550 mm), after 1st, 2nd and 3rd reaming' : (data.r2 ? '17-1/2 inch (450 mm), after 1st and 2nd reaming' : '13-3/4 inch (350 mm), after 1st reaming only'))+'</td></tr>';
-    h += '<tr><td>Strainer (Screen) Pipe Type</td><td class="amt-col">'+(data.strainerType==='ms' ? 'MS Slotted (supply at MS blind pipe rate + Rs 25,000 lump-sum slotting works)' : 'SS304 Continuous Slotted Pipe')+'</td></tr>';
     h += '</tbody></table>';
     h += '<div class="sub-title">2.3 Depth Segments — Soil Type and Drilling Method</div>';
     h += '<p class="para">The well has been analysed as the following depth segments. The applicable coefficient table of the DWSS Rate Analysis Norms (2073) is chosen per segment from the soil type and drilling method shown.</p>';
     h += '<table><thead><tr><th>#</th><th class="amt-col">From (m)</th><th class="amt-col">To (m)</th><th>Soil Type</th><th>Drilling Method</th><th class="amt-col">Length (m)</th></tr></thead><tbody>';
     for(var si=0; si<data.segments.length; si++){
       var seg = data.segments[si];
-      h += '<tr><td>'+(si+1)+'</td><td class="amt-col">'+nf(seg.start)+'</td><td class="amt-col">'+nf(seg.end)+'</td><td style="text-transform:capitalize">'+esc(seg.soil)+'</td><td>'+(seg.method === 'rotary' ? 'Rotary' : 'DTH')+'</td><td class="amt-col">'+nf(seg.end - seg.start)+'</td></tr>';
+      h += '<tr><td>'+(si+1)+'</td><td class="amt-col">'+nf(seg.start)+'</td><td class="amt-col">'+nf(seg.end)+'</td><td>'+esc(soilLabel(seg.soil))+'</td><td>'+(seg.method === 'rotary' ? 'Rotary' : 'DTH')+'</td><td class="amt-col">'+nf(seg.end - seg.start)+'</td></tr>';
+    }
+    h += '</tbody></table>';
+
+    h += '<div class="sub-title">2.3.1 Pipe Design &mdash; Diameters, Lengths &amp; Materials</div>';
+    h += '<p class="para">The pipe assembly lowered into the well is composed of the following sections. Each pipe segment is defined by its material (MS or SS), nominal diameter (NB 150 / 200 / 250), type (blind or slotted) and length per well. <b>Blind and slotted pipes of the same material and diameter share the same per-metre rate.</b> If any slotted pipe is used, a lump-sum slotting item of Rs ' + nf2(SLOTTING_LS_RATE) + ' is added under Section 2.</p>';
+    h += '<table><thead><tr><th>#</th><th class="amt-col">Diameter (mm)</th><th>Material</th><th>Type</th><th class="amt-col">Length per well (m)</th><th class="amt-col">Rate (Rs./m)</th><th class="amt-col">Amount per well (Rs.)</th></tr></thead><tbody>';
+    var pdList = state.pipeDesign || [];
+    var pdTotalLen = 0, pdTotalAmt = 0;
+    for(var pdi=0; pdi<pdList.length; pdi++){
+      var pr = pdList[pdi];
+      var prRate = getPipeTotalRatePerM(pr.mat, pr.dia);
+      var prAmt = prRate * (Number(pr.length)||0);
+      pdTotalLen += Number(pr.length)||0;
+      pdTotalAmt += prAmt;
+      h += '<tr><td>'+(pdi+1)+'</td><td class="amt-col">'+nf(pr.dia)+'</td><td>'+esc(pr.mat)+'</td><td>'+esc(pr.type.charAt(0).toUpperCase()+pr.type.slice(1))+'</td><td class="amt-col">'+nf(pr.length)+'</td><td class="amt-col">'+nf2(prRate)+'</td><td class="amt-col">'+nf2(prAmt)+'</td></tr>';
+    }
+    h += '<tr class="tot-row"><td colspan="4">Total</td><td class="amt-col">'+nf(pdTotalLen)+' m</td><td></td><td class="amt-col">'+nf2(pdTotalAmt)+'</td></tr>';
+    h += '</tbody></table>';
+
+    h += '<div class="sub-title">2.3.2 Derived Fittings &mdash; Reducers, Bottom Plug &amp; Centering Guides</div>';
+    h += '<p class="para">The following fittings are derived automatically from the pipe design in Section 2.3.1. Reducers appear only where the diameter changes between two adjacent pipe segments; the bottom plug matches the smallest diameter in the assembly; and centering guides appear only for diameters actually present.</p>';
+    h += '<table><thead><tr><th>#</th><th>Fitting</th><th style="width:8%">Unit</th><th class="amt-col" style="width:12%">Qty per well</th><th>Derivation</th></tr></thead><tbody>';
+    var derivedIds = getActiveFittingIds();
+    var dIdx = 1;
+    for(var dj=0; dj<derivedIds.length; dj++){
+      var did = derivedIds[dj];
+      var dm = null;
+      for(var dk=0; dk<MATERIAL_DEFS.length; dk++) if(MATERIAL_DEFS[dk].id===did){ dm = MATERIAL_DEFS[dk]; break; }
+      if(!dm) continue;
+      var dd, dq, dnote;
+      if(did === 'reducer'){
+        var rds = deriveReducers();
+        var rnames = [];
+        var totalQty = 0;
+        for(var rr=0; rr<rds.length; rr++){ rnames.push(formatReducerName(rds[rr].bigD, rds[rr].smallD)); totalQty += rds[rr].qty; }
+        dd = rnames.join('; ');
+        dq = totalQty;
+        dnote = 'One reducer per diameter transition in the pipe design (' + rds.length + ' unique size' + (rds.length>1?'s':'') + ', total transitions: ' + totalQty + ').';
+      } else if(did.indexOf('plug') === 0){
+        dd = dm.name;
+        dq = getWellQty(did);
+        dnote = 'Matched to the smallest diameter in the pipe assembly (' + getSmallestDiameter() + ' mm).';
+      } else if(did === 'plate'){
+        dd = dm.name;
+        dq = getWellQty(did);
+        dnote = 'Well-head surface plate — always provided.';
+      } else if(did.indexOf('guide') === 0){
+        dd = dm.name;
+        dq = getWellQty(did);
+        dnote = 'Provided because a ' + did.replace('guide','') + ' mm diameter is present in the pipe design.';
+      } else {
+        dd = dm.name; dq = getWellQty(did); dnote = '';
+      }
+      h += '<tr><td>'+(dIdx++)+'</td><td>'+esc(dd)+'</td><td class="unit-col">'+esc(dm.unit)+'</td><td class="amt-col">'+nf(dq)+'</td><td class="desc">'+esc(dnote)+'</td></tr>';
+    }
+    h += '</tbody></table>';
+
+    h += '<div class="sub-title">2.4 Section 3 Item Selection</div>';
+    h += '<p class="para">Each item of Section 3 (Execution of Works) below was explicitly switched <b>Included</b> or <b>Excluded</b> by the preparer on the Project, Depth &amp; Quantities tab. Excluded items do not appear in the Abstract of Cost, the BOQ or elsewhere in this report.</p>';
+    h += '<table><thead><tr><th style="width:8%">Item</th><th>Description</th><th style="width:14%">Status</th><th>Configuration</th></tr></thead><tbody>';
+    for(var ii=0; ii<data.itemInclusion.length; ii++){
+      var it5 = data.itemInclusion[ii];
+      h += '<tr><td>'+esc(it5.no)+'</td><td class="desc">'+esc(it5.label)+'</td><td style="text-align:center;font-weight:700">'+(it5.inc ? 'Included' : 'Excluded')+'</td><td class="desc">'+esc(it5.cfg||'—')+'</td></tr>';
     }
     h += '</tbody></table>';
     h += docSectionClose();
@@ -1564,15 +2131,13 @@ function renderDetailed(){
 
     h += docSectionOpen('Material Analysis', false);
     h += '<div class="sec-title">6. Material Analysis</div>';
-    h += '<p class="para">The rate at site for each material is the sum of its market rate and the transport cost per unit to the project site. For MS ERW casing pipes priced by weight, the market rate is itself derived from the section weight &mdash; see Section 6.1 below.</p>';
+    h += '<p class="para">The rate at site for each material is the sum of its market rate and the transport cost per unit to the project site. Pipe materials are analysed separately in Section 6.1 below.</p>';
     h += '<table><thead><tr><th style="width:6%">#</th><th>Material</th><th style="width:8%">Unit</th><th class="amt-col" style="width:14%">Market (Rs.)</th><th class="amt-col" style="width:14%">Transport (Rs.)</th><th class="amt-col" style="width:14%">Total at Site (Rs.)</th></tr></thead><tbody>';
     for(var m=0;m<MATERIAL_DEFS.length;m++){
       var md = MATERIAL_DEFS[m];
       var ms = state.material[md.id] || {rate:0, transport:0};
-      var mktRate = isPipeByWeight(md.id) ? getPipeRatePerM(md.id) : (Number(ms.rate)||0);
-      var tot = mktRate + (Number(ms.transport)||0);
-      var mktLabel = isPipeByWeight(md.id) ? nf2(mktRate) + ' <i style="font-size:9px;color:#555">(by wt.)</i>' : nf2(mktRate);
-      h += '<tr><td>'+(m+1)+'</td><td>'+esc(md.name)+'</td><td class="amt-col">'+esc(md.unit)+'</td><td class="amt-col">'+mktLabel+'</td><td class="amt-col">'+nf2(ms.transport)+'</td><td class="amt-col"><b>'+nf2(tot)+'</b></td></tr>';
+      var tot = getMaterialRate(md.id);
+      h += '<tr><td>'+(m+1)+'</td><td>'+esc(md.name)+'</td><td class="amt-col">'+esc(md.unit)+'</td><td class="amt-col">'+nf2(ms.rate)+'</td><td class="amt-col">'+nf2(ms.transport)+'</td><td class="amt-col"><b>'+nf2(tot)+'</b></td></tr>';
     }
     h += '</tbody></table>';
     h += buildPipeSpecReportHTML();
@@ -1590,12 +2155,17 @@ function renderDetailed(){
       h += '</div>';
     }
     h += '<div class="sub-title">7.2 Section 2 &mdash; Supply of Well Materials</div>';
+    h += '<p class="para">Pipe items are priced from the <b>Pipe Design</b> and the <b>Pipe Material Pricing</b> on the Rates tab; reducers, bottom plug and centering guides are auto-derived from the pipe design; and if a slotted pipe is used, a lump-sum slotting item is added.</p>';
     h += '<table><thead><tr><th>S.No.</th><th>Description</th><th>Unit</th><th class="amt-col">Quantity</th><th class="amt-col">Rate (Rs.)</th><th class="amt-col">Amount (Rs.)</th></tr></thead><tbody>';
     for(var b=0;b<data.sec2.length;b++){
       var it2 = data.sec2[b];
-      h += '<tr id="detail-'+esc(it2.no)+'"><td>'+esc(it2.no)+'</td><td>'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="amt-col">'+nf(it2.qty)+'</td><td class="amt-col">'+nf2(it2.rate)+'</td><td class="amt-col">'+nf2(it2.amount)+'</td></tr>';
+      h += '<tr><td>'+esc(it2.no)+'</td><td>'+esc(it2.desc)+'</td><td class="unit-col">'+esc(it2.unit)+'</td><td class="amt-col">'+nf(it2.qty)+'</td><td class="amt-col">'+nf2(it2.rate)+'</td><td class="amt-col">'+nf2(it2.amount)+'</td></tr>';
     }
     h += '</tbody></table>';
+    h += '<div class="sub-title" style="margin-top:18px">7.2.1 Item-wise Rate Build-up</div>';
+    for(var b2=0;b2<data.sec2.length;b2++){
+      h += buildSupplyRateAnalysisHTML(data.sec2[b2]);
+    }
     h += '<div class="sub-title">7.3 Section 3 &mdash; Execution of Works</div>';
     for(var c=0;c<data.sec3.length;c++){
       h += buildRateAnalysisHTML(data.sec3[c]);
@@ -1617,7 +2187,15 @@ function renderDetailed(){
     h += '<table><thead><tr><th>#</th><th class="amt-col">From (m)</th><th class="amt-col">To (m)</th><th>Soil Type</th><th>Method</th><th class="amt-col">Length (m)</th></tr></thead><tbody>';
     for(var sg=0; sg<data.segments.length; sg++){
       var s = data.segments[sg];
-      h += '<tr><td>'+(sg+1)+'</td><td class="amt-col">'+nf(s.start)+'</td><td class="amt-col">'+nf(s.end)+'</td><td style="text-transform:capitalize">'+esc(s.soil)+'</td><td>'+(s.method === 'rotary' ? 'Rotary' : 'DTH')+'</td><td class="amt-col">'+nf(s.end - s.start)+'</td></tr>';
+      h += '<tr><td>'+(sg+1)+'</td><td class="amt-col">'+nf(s.start)+'</td><td class="amt-col">'+nf(s.end)+'</td><td>'+esc(soilLabel(s.soil))+'</td><td>'+(s.method === 'rotary' ? 'Rotary' : 'DTH')+'</td><td class="amt-col">'+nf(s.end - s.start)+'</td></tr>';
+    }
+    h += '</tbody></table>';
+    h += '<div class="sub-title">8.2.1 Pipe Design &amp; Pricing</div>';
+    h += '<table><thead><tr><th>#</th><th class="amt-col">Diameter (mm)</th><th>Material</th><th>Type</th><th class="amt-col">Length per well (m)</th><th class="amt-col">Rate (Rs./m)</th></tr></thead><tbody>';
+    for(var pd2=0; pd2<pdList.length; pd2++){
+      var pr2 = pdList[pd2];
+      var pr2Rate = getPipeTotalRatePerM(pr2.mat, pr2.dia);
+      h += '<tr><td>'+(pd2+1)+'</td><td class="amt-col">'+nf(pr2.dia)+'</td><td>'+esc(pr2.mat)+'</td><td>'+esc(pr2.type.charAt(0).toUpperCase()+pr2.type.slice(1))+'</td><td class="amt-col">'+nf(pr2.length)+'</td><td class="amt-col">'+nf2(pr2Rate)+'</td></tr>';
     }
     h += '</tbody></table>';
     h += '<div class="sub-title">8.3 Assumed Machinery Working and Idle Rates</div>';
@@ -1640,10 +2218,8 @@ function renderDetailed(){
     for(var m2=0;m2<MATERIAL_DEFS.length;m2++){
       var md2 = MATERIAL_DEFS[m2];
       var ms2 = state.material[md2.id] || {rate:0, transport:0};
-      var mktRate2 = isPipeByWeight(md2.id) ? getPipeRatePerM(md2.id) : (Number(ms2.rate)||0);
-      var tot2 = mktRate2 + (Number(ms2.transport)||0);
-      var mktLabel2 = isPipeByWeight(md2.id) ? nf2(mktRate2) + ' <i style="font-size:9px;color:#555">(by wt.)</i>' : nf2(mktRate2);
-      h += '<tr><td>'+(m2+1)+'</td><td>'+esc(md2.name)+'</td><td class="amt-col">'+esc(md2.unit)+'</td><td class="amt-col">'+mktLabel2+'</td><td class="amt-col">'+nf2(ms2.transport)+'</td><td class="amt-col">'+nf2(tot2)+'</td></tr>';
+      var tot2 = getMaterialRate(md2.id);
+      h += '<tr><td>'+(m2+1)+'</td><td>'+esc(md2.name)+'</td><td class="amt-col">'+esc(md2.unit)+'</td><td class="amt-col">'+nf2(ms2.rate)+'</td><td class="amt-col">'+nf2(ms2.transport)+'</td><td class="amt-col">'+nf2(tot2)+'</td></tr>';
     }
     h += '</tbody></table>';
     h += docSectionClose();
@@ -1675,7 +2251,7 @@ function renderDetailed(){
     h += '<li><b>District Rate Schedule for Fiscal Year '+esc(pfy)+'</b> - Gandaki Province, Kaski District.</li>';
     h += '<li><b>Nepal Oil Corporation Fuel Price Circular</b> - prevailing prices for HSD, Mobil, Gear Oil, Hydraulic Oil, Brake Oil and Grease.</li>';
     h += '<li><b>Manufacturer Specification Sheets</b> - for machinery cost, life, working hours, overhaul and maintenance percentages, fuel consumption and spare part schedules.</li>';
-    h += '<li><b>Prevailing Market Rates</b> - for MS ERW casing pipe, SS304/MS slotted (strainer) pipe, GI pipe, cement, bentonite, barite, drill bits and other consumables.</li>';
+    h += '<li><b>Prevailing Market Rates</b> - for MS ERW casing pipe, SS304 slotted (strainer) pipe, GI pipe, cement, bentonite, barite, drill bits and other consumables.</li>';
     h += '<li><b>Site Borehole Design Schematic</b> - for design depth, well assembly, strainer position and gravel pack envelope.</li>';
     h += '</ol>';
     h += docSectionClose();
@@ -1716,16 +2292,8 @@ function renderDetailed(){
 /* ============ SYNC ============ */
 function syncMaterialTotals(){
   for(var i=0;i<MATERIAL_DEFS.length;i++){
-    var id = MATERIAL_DEFS[i].id, s = state.material[id]; if(!s) continue;
-    var computedRate;
-    if(isPipeByWeight(id)){
-      computedRate = getPipeRatePerM(id);
-      var rateCells = document.querySelectorAll('[data-matrate="'+cssEsc(id)+'"]');
-      for(var r=0;r<rateCells.length;r++) rateCells[r].textContent = nf2(computedRate);
-    } else {
-      computedRate = Number(s.rate)||0;
-    }
-    var tot = computedRate + (Number(s.transport)||0);
+    var id = MATERIAL_DEFS[i].id;
+    var tot = getMaterialRate(id);
     var cells = document.querySelectorAll('[data-mattotal="'+cssEsc(id)+'"]');
     for(var j=0;j<cells.length;j++) cells[j].textContent = nf2(tot);
   }
@@ -1739,7 +2307,7 @@ function syncLabourInputs(){
   }
 }
 
-/* ============ SEGMENT BUTTON HANDLERS ============ */
+/* ============ SEGMENT / PIPE DESIGN BUTTON HANDLERS ============ */
 function addSegment(){
   var segs = state.segments || [];
   var lastEnd = 0;
@@ -1789,21 +2357,29 @@ function updateDevModeVisibility(){
   if(normsWrap) normsWrap.classList.toggle('hidden', mode === 'ls');
   if(lsWrap) lsWrap.classList.toggle('hidden', mode !== 'ls');
 }
+function updateItemInclusionVisibility(){
+  var devConf = el('devel-config');
+  if(devConf) devConf.classList.toggle('hidden', radioVal('inc_devel','1') !== '1');
+  var ptConf = el('pumptest-config');
+  if(ptConf) ptConf.classList.toggle('hidden', radioVal('inc_pumptest','1') !== '1');
+}
 function recalc(opts){
   opts = opts || {};
   var skipMachineRebuild = !!opts.skipMachineRebuild;
-  var skipPipeSpecRebuild = !!opts.skipPipeSpecRebuild || skipMachineRebuild;
+  var skipPipePricingRebuild = !!opts.skipPipePricingRebuild;
   var skipDocs = !!opts.skipDocs;
   if(rafId) cancelAnimationFrame(rafId);
   rafId = requestAnimationFrame(function(){
     try{
       if(skipMachineRebuild){ updateMachineRateTags(); } else { renderMachines(); }
-      if(skipPipeSpecRebuild){ updatePipeSpecDisplays(); } else { renderPipeSpecs(); }
+      if(!skipPipePricingRebuild){ renderPipePricing(); } else { updatePipePricingDisplays(); }
       syncMaterialTotals();
+      updatePipeDesignRowCells();
       syncLabourInputs();
       renderWellQtyTable();
       updateSegmentSummary();
       updateDevModeVisibility();
+      updateItemInclusionVisibility();
       if(!skipDocs){
         if(heavyTimer) clearTimeout(heavyTimer);
         heavyTimer = setTimeout(function(){
@@ -1832,7 +2408,6 @@ function syncStateFromInput(e){
   var t = e.target; if(!t || !t.getAttribute) return false;
   var v = parseFloat(t.value)||0;
 
-  /* Segments */
   var segKey = t.getAttribute('data-seg');
   if(segKey){
     var parts = segKey.split(':');
@@ -1840,27 +2415,35 @@ function syncStateFromInput(e){
     var field = parts[1];
     if(!state.segments) state.segments = defaultSegments();
     if(state.segments[idx]){
-      if(field === 'start' || field === 'end'){
-        state.segments[idx][field] = v;
-      } else {
-        state.segments[idx][field] = t.value;
-      }
+      if(field === 'start' || field === 'end'){ state.segments[idx][field] = v; }
+      else { state.segments[idx][field] = t.value; }
     }
     return true;
   }
 
-  /* Pipe specs */
-  var pipeKey = t.getAttribute('data-pipe');
-  if(pipeKey){
-    var pp = pipeKey.split(':');
-    var pid = pp[0], pfield = pp[1];
-    if(!state.pipeSpecs) state.pipeSpecs = defaultPipeSpecs();
-    if(!state.pipeSpecs[pid]) state.pipeSpecs[pid] = {};
-    if(pfield === 'useKg'){
-      state.pipeSpecs[pid].useKg = !!t.checked;
-    } else {
-      state.pipeSpecs[pid][pfield] = parseFloat(t.value)||0;
+  var pdKey = t.getAttribute('data-pipedesign');
+  if(pdKey){
+    var pdp = pdKey.split(':');
+    var pidx = parseInt(pdp[0], 10), pfield = pdp[1];
+    if(!state.pipeDesign) state.pipeDesign = defaultPipeDesign();
+    if(state.pipeDesign[pidx]){
+      if(pfield === 'mat' || pfield === 'type') state.pipeDesign[pidx][pfield] = t.value;
+      else if(pfield === 'dia') state.pipeDesign[pidx].dia = parseInt(t.value, 10) || 200;
+      else state.pipeDesign[pidx][pfield] = parseFloat(t.value)||0;
     }
+    return true;
+  }
+
+  var psKey = t.getAttribute('data-pipespec');
+  if(psKey){
+    var psField = t.getAttribute('data-pipefield');
+    if(!state.pipeSpecs) state.pipeSpecs = defaultPipeSpecs();
+    if(!state.pipeSpecs[psKey]){
+      var pk = psKey.split('_');
+      state.pipeSpecs[psKey] = getDefaultPipeSpec(pk[0], parseInt(pk[1],10));
+    }
+    if(psField === 'useKg'){ state.pipeSpecs[psKey].useKg = !!t.checked; }
+    else { state.pipeSpecs[psKey][psField] = parseFloat(t.value)||0; }
     return true;
   }
 
@@ -1888,20 +2471,63 @@ function syncStateFromInput(e){
     return true;
   }
   var wqKey = t.getAttribute('data-wq'); if(wqKey){ if(!state.wellQty) state.wellQty = {}; state.wellQty[wqKey] = v; return true; }
+  if(t.getAttribute('data-save')) return true;
   return false;
 }
 
 /* ============ SAVE / LOAD / RESET ============ */
 function collectFormState(){
   var data = {}, els = document.querySelectorAll('[data-save]');
-  for(var i=0;i<els.length;i++) data[els[i].getAttribute('data-save')] = els[i].type==='checkbox' ? els[i].checked : els[i].value;
+  for(var i=0;i<els.length;i++){
+    var e = els[i], k = e.getAttribute('data-save');
+    if(e.type==='checkbox') data[k] = e.checked;
+    else if(e.type==='radio'){ if(e.checked) data[k] = e.value; }
+    else data[k] = e.value;
+  }
   return data;
 }
 function applyFormState(d){
   for(var k in d){
-    var e = document.querySelector('[data-save="'+cssEsc(k)+'"]');
-    if(e){ if(e.type==='checkbox') e.checked = d[k]; else e.value = d[k]; }
+    var els = document.querySelectorAll('[data-save="'+cssEsc(k)+'"]');
+    for(var i=0;i<els.length;i++){
+      var e = els[i];
+      if(e.type==='checkbox') e.checked = d[k];
+      else if(e.type==='radio') e.checked = (e.value === String(d[k]));
+      else e.value = d[k];
+    }
   }
+}
+function migrateOldState(st){
+  if(!st) return st;
+  /* Migrate pipeDesign from various old formats to {mat, type, dia, length} */
+  if(st.pipeDesign && st.pipeDesign.length){
+    for(var i=0;i<st.pipeDesign.length;i++){
+      var row = st.pipeDesign[i];
+      if(row.material && !row.mat){
+        var oldKey = row.material;
+        if(oldKey === 'pipe250'){ row.mat='MS'; row.type='blind'; row.dia=250; }
+        else if(oldKey === 'pipe200'){ row.mat='MS'; row.type='blind'; row.dia=200; }
+        else if(oldKey === 'pipe150'){ row.mat='MS'; row.type='blind'; row.dia=150; }
+        else if(oldKey === 'slot250'){ row.mat='SS'; row.type='slotted'; row.dia=250; }
+        else if(oldKey === 'slot200'){ row.mat='SS'; row.type='slotted'; row.dia=200; }
+        else if(oldKey === 'slot150'){ row.mat='SS'; row.type='slotted'; row.dia=150; }
+        else { row.mat='MS'; row.type='blind'; row.dia=200; }
+      }
+      if(row.diameter && !row.dia) row.dia = row.diameter;
+      delete row.material;
+      delete row.diameter;
+      delete row.key;
+      if(!row.mat) row.mat = 'MS';
+      if(!row.type) row.type = 'blind';
+      if(!row.dia) row.dia = 200;
+      if(!isFinite(Number(row.length))) row.length = 0;
+    }
+  }
+  /* Reset pipeSpecs to the new 6-combo catalogue (old formats incompatible) */
+  if(!st.pipeSpecs || !st.pipeSpecs['MS_200'] || st.pipeSpecs['MS_blind_200']){
+    st.pipeSpecs = defaultPipeSpecs();
+  }
+  return st;
 }
 function mergeStateDefaults(st){
   if(!st) return st;
@@ -1915,17 +2541,18 @@ function mergeStateDefaults(st){
   for(var i=0;i<MACHINE_DEFS.length;i++){
     if(!st.machines[MACHINE_DEFS[i].id]) st.machines[MACHINE_DEFS[i].id] = JSON.parse(JSON.stringify(MACHINE_DEFS[i]));
   }
-  for(var wqk in WELL_QTY_DEFAULTS) if(st.wellQty[wqk] === undefined) st.wellQty[wqk] = WELL_QTY_DEFAULTS[wqk];
-  if(!st.pipeSpecs){ st.pipeSpecs = defaultPipeSpecs(); }
-  else {
-    var psd = defaultPipeSpecs();
-    for(var pk in psd){
-      if(!st.pipeSpecs[pk]){ st.pipeSpecs[pk] = psd[pk]; }
-      else {
-        for(var f2 in psd[pk]) if(st.pipeSpecs[pk][f2] === undefined) st.pipeSpecs[pk][f2] = psd[pk][f2];
-      }
-    }
+  for(var j=0;j<LABOUR_DEFS.length;j++){
+    if(st.labour[LABOUR_DEFS[j].id] === undefined) st.labour[LABOUR_DEFS[j].id] = LABOUR_DEFS[j].rate;
   }
+  for(var k=0;k<MATERIAL_DEFS.length;k++){
+    if(!st.material[MATERIAL_DEFS[k].id]) st.material[MATERIAL_DEFS[k].id] = {rate:MATERIAL_DEFS[k].rate, transport:0};
+  }
+  for(var wqk in WELL_QTY_DEFAULTS) if(st.wellQty[wqk] === undefined) st.wellQty[wqk] = WELL_QTY_DEFAULTS[wqk];
+  st = migrateOldState(st);
+  var defaults = defaultPipeSpecs();
+  if(!st.pipeSpecs) st.pipeSpecs = defaults;
+  else for(var pk in defaults){ if(!st.pipeSpecs[pk]) st.pipeSpecs[pk] = defaults[pk]; }
+  if(!st.pipeDesign || !st.pipeDesign.length) st.pipeDesign = defaultPipeDesign();
   return st;
 }
 function saveState(){
@@ -1940,8 +2567,9 @@ function loadState(){
     var d = JSON.parse(raw);
     if(d.state) state = mergeStateDefaults(d.state);
     if(d.form) applyFormState(d.form);
-    renderFuel(); renderMachines(); renderLabour(); renderMaterial(); renderPipeSpecs();
-    renderSegments(); renderWellQtyTable();
+    renderFuel(); renderMachines(); renderLabour(); renderMaterial();
+    renderPipePricing();
+    renderSegments(); renderPipeDesign(); renderWellQtyTable();
     recalcNow();
     toast('Restored.');
   }catch(e){ toast('Load failed: '+e.message); }
@@ -2028,9 +2656,11 @@ function boot(){
       }
     }catch(e){ console.warn('Autosave restore failed:', e); }
 
-    renderFuel(); renderMachines(); renderLabour(); renderMaterial(); renderPipeSpecs();
-    renderSegments(); renderWellQtyTable();
+    renderFuel(); renderMachines(); renderLabour(); renderMaterial();
+    renderPipePricing();
+    renderSegments(); renderPipeDesign(); renderWellQtyTable();
     updateDevModeVisibility();
+    updateItemInclusionVisibility();
 
     var tabsNav = el('tabs');
     if(tabsNav){
@@ -2050,6 +2680,11 @@ function boot(){
         if(!isNaN(idx)) removeSegment(idx);
         return;
       }
+      if(t.getAttribute('data-remove-pipedesign') !== null && t.getAttribute('data-remove-pipedesign') !== undefined){
+        var pidx = parseInt(t.getAttribute('data-remove-pipedesign'), 10);
+        if(!isNaN(pidx)) removePipeDesignRow(pidx);
+        return;
+      }
       var jumpRow = ev.target.closest ? ev.target.closest('tr[data-jump]') : null;
       if(jumpRow){ jumpToDetail(jumpRow.getAttribute('data-jump')); return; }
       var jumpMach = ev.target.closest ? ev.target.closest('.jump-link[data-jump-mach]') : null;
@@ -2062,38 +2697,54 @@ function boot(){
     var bAuto = el('btn-autofill-guides');
     if(bAuto) bAuto.addEventListener('click', autoFillGuides);
 
-    /* Input handler */
+    var bAddPd = el('btn-add-pipedesign');
+    if(bAddPd) bAddPd.addEventListener('click', addPipeDesignRow);
+    var bRstPd = el('btn-reset-pipedesign');
+    if(bRstPd) bRstPd.addEventListener('click', function(){ if(confirm('Reset pipe design to default segments?')) resetPipeDesign(); });
+
     document.addEventListener('input', function(e){
       if(!e.target || !e.target.matches) return;
       if(!e.target.matches('input,select')) return;
       if(!syncStateFromInput(e)) return;
       var isSeg = !!(e.target.getAttribute && e.target.getAttribute('data-seg'));
+      var isPipeDesign = !!(e.target.getAttribute && e.target.getAttribute('data-pipedesign'));
+      var isPipeSpec = !!(e.target.getAttribute && e.target.getAttribute('data-pipespec'));
       var isMachineInput = !!(e.target.getAttribute && e.target.getAttribute('data-mach'));
-      var isPipeInput = !!(e.target.getAttribute && e.target.getAttribute('data-pipe'));
-      var isPipeCheckbox = isPipeInput && e.target.type === 'checkbox';
       if(isSeg){
         renderSegments();
         recalcNow();
         return;
       }
-      if(isPipeCheckbox){
-        recalcNow();
+      if(isPipeDesign){
+        updatePipeDesignRowCells();
+        renderWellQtyTable();
+        recalcDebounced(true);
         return;
       }
-      recalcDebounced(isMachineInput || isPipeInput);
+      if(isPipeSpec){
+        /* Re-render the pipe pricing cards so weight/rate displays refresh */
+        recalc({skipMachineRebuild: true, skipDocs: false});
+        return;
+      }
+      recalcDebounced(isMachineInput);
     });
 
     document.addEventListener('change', function(e){
       if(!e.target || !e.target.matches) return;
-      /* Guide spacing auto-fill */
       if(e.target.id === 'in_guide_spacing'){
         autoFillGuides();
         return;
       }
-      /* Pipe checkbox */
-      if(e.target.matches('input[type="checkbox"][data-pipe]')){
+      if(e.target.matches('input[type="checkbox"][data-pipespec]')){
         syncStateFromInput(e);
         recalcNow();
+        return;
+      }
+      if(e.target.matches('select[data-pipedesign]')){
+        syncStateFromInput(e);
+        updatePipeDesignRowCells();
+        renderWellQtyTable();
+        recalcDebounced(true);
         return;
       }
       if(!e.target.matches('select')) return;
